@@ -1,4 +1,4 @@
 # Introduction
 
-This is the yarrr repository.
+Yarrr is the most awesome space pirate mmorpg game ever made.
 
