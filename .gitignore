@@ -1,0 +1,9 @@
+src/yarrr
+
+*swp
+*.cmake
+Makefile
+CMakeFiles
+CMakeCache.txt
+build
+
