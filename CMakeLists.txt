@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(yarrr)
+project(yarrrclient)
 
 option(sanitize "Select sanitizer (address,memory,thread,...)" OFF)
 
@@ -8,6 +8,7 @@ if(UNIX)
 endif(UNIX)
 
 
+SET(deploy_directory ~/deploy)
 set(LIBS ${LIBS})
 
 if(UNIX)
@@ -46,5 +47,3 @@ endif(sanitize)
 
 add_subdirectory(src)
 
-## Install section
-install(DIRECTORY include DESTINATION .)

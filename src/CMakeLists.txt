@@ -1,8 +1,9 @@
 
 set(SOURCE_FILES
-    main.cpp
+  main.cpp
     )
 
-add_executable(yarrr ${SOURCE_FILES})
-target_link_libraries(yarrr ${LIBS})
+add_executable(yarrrclient ${SOURCE_FILES})
+target_link_libraries(yarrrclient yarrr ${LIBS})
+install(TARGETS yarrrclient DESTINATION ${deploy_directory}/bin)
 
