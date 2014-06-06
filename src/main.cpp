@@ -16,7 +16,7 @@ namespace
     std::cout << "connection lost" << std::endl;
   }
 
-  void data_available_on( yarrr::Socket& socket, char* message, size_t length )
+  void data_available_on( yarrr::Socket& socket, const char* message, size_t length )
   {
     std::cout << "data arrived: " << std::string( message, length ) << std::endl;
   }
