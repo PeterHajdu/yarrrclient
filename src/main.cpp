@@ -2,23 +2,23 @@
 #include <array>
 
 #include <yarrr/ship.hpp>
-#include <yarrr/socket_pool.hpp>
+#include <thenet/socket_pool.hpp>
 
 namespace
 {
-  void new_connection( yarrr::Socket& socket )
+  void new_connection( the::net::Socket& socket )
   {
     std::cout << "new connection established" << std::endl;
     const std::string helloMessage( "hello world" );
     socket.send( helloMessage.data(), helloMessage.size() );
   }
 
-  void lost_connection( yarrr::Socket& )
+  void lost_connection( the::net::Socket& )
   {
     std::cout << "connection lost" << std::endl;
   }
 
-  void data_available_on( yarrr::Socket& socket, const char* message, size_t length )
+  void data_available_on( the::net::Socket& socket, const char* message, size_t length )
   {
     std::cout << "data arrived: " << std::string( message, length ) << std::endl;
   }
@@ -26,7 +26,7 @@ namespace
 
 int main( int argc, char ** argv )
 {
-  yarrr::SocketPool pool(
+  the::net::SocketPool pool(
       new_connection,
       lost_connection,
       data_available_on );
