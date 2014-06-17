@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cmake CMakeLists.txt && LIBRARY_PATH=~/deploy/lib make
+cmake CMakeLists.txt && LIBRARY_PATH=~/deploy/lib:/usr/local/lib make
 

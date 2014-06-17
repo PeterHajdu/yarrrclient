@@ -5,6 +5,7 @@
 #include <yarrr/ship.hpp>
 #include <thenet/service.hpp>
 
+#include "sdl_engine.hpp"
 
 namespace
 {
@@ -69,6 +70,8 @@ int main( int argc, char ** argv )
 {
   ConnectionEstablisher establisher;
   Client& client( establisher.wait_for_connection() );
+
+  SdlEngine graphics_engine( 1024, 768 );
 
   while ( true )
   {
