@@ -66,21 +66,45 @@ namespace
 
 }
 
+class DrawableShip : public DrawableObject
+{
+  public:
+    DrawableShip( SdlEngine& graphics_engine )
+      : DrawableObject( graphics_engine )
+    {
+    }
+
+    void update_ship( the::net::Data data )
+    {
+      m_ship = yarrr::deserialize( std::string( begin( data ), end( data ) ) );
+    }
+
+    void draw() override
+    {
+      std::cout << "drawing ship " << yarrr::serialize( m_ship ) << std::endl;
+      m_graphical_engine.draw_ship( m_ship );
+    }
+
+    yarrr::Ship m_ship;
+};
+
 int main( int argc, char ** argv )
 {
   ConnectionEstablisher establisher;
   Client& client( establisher.wait_for_connection() );
-
   SdlEngine graphics_engine( 1024, 768 );
 
+  DrawableShip serenity( graphics_engine );
   while ( true )
   {
     the::net::Data message;
     while ( client.connection.receive( message ) )
     {
-      std::cout << "message from server " << std::string( &message[0], message.size() ) << std::endl;
+      serenity.update_ship( message );
     }
-    std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+
+    graphics_engine.update_screen();
+    std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
   }
 
   return 0;

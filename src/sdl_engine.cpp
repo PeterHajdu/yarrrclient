@@ -1,5 +1,7 @@
 #include "sdl_engine.hpp"
 
+#include <yarrr/ship.hpp>
+
 #include <cassert>
 #include <SDL2/SDL.h>
 
@@ -32,15 +34,17 @@ SdlEngine::~SdlEngine()
 
 
 void
-SdlEngine::updateScreen()
+SdlEngine::update_screen()
 {
-  drawBackground();
+  //draw_background();
+  draw_background();
+  draw_objects();
   SDL_UpdateWindowSurface( m_window );
 }
 
 
 void
-SdlEngine::drawRawRectangle(
+SdlEngine::draw_rectangle(
     uint32_t x,
     uint32_t y,
     int size, uint32_t colour )
@@ -56,11 +60,38 @@ SdlEngine::drawRawRectangle(
 
 
 void
-SdlEngine::drawBackground()
+SdlEngine::draw_ship( const yarrr::Ship& ship )
+{
+  draw_rectangle(
+      ship.coordinate.x - 800,
+      ship.coordinate.y - 800,
+      4, 0x00ff00 );
+}
+
+
+void
+SdlEngine::draw_objects()
+{
+  for ( auto& object : m_objects )
+  {
+    object->draw();
+  }
+}
+
+
+void
+SdlEngine::draw_background()
 {
   SDL_Rect rectangle =
   { static_cast<unsigned short>( 0 ), static_cast<unsigned short>( 0 ),
     static_cast<unsigned short>( m_x ), static_cast<unsigned short>( m_y ) };
   SDL_FillRect( m_screen, &rectangle, 0x000000 );
+}
+
+
+void
+SdlEngine::register_object( DrawableObject& object )
+{
+  m_objects.push_back( &object );
 }
 
