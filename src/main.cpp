@@ -74,9 +74,9 @@ class DrawableShip : public DrawableObject
     {
     }
 
-    void update_ship( the::net::Data data )
+    void update_ship( const yarrr::Ship& ship )
     {
-      m_ship = yarrr::deserialize( std::string( begin( data ), end( data ) ) );
+      m_ship = ship;
     }
 
     void draw() override
@@ -94,13 +94,23 @@ int main( int argc, char ** argv )
   Client& client( establisher.wait_for_connection() );
   SdlEngine graphics_engine( 1024, 768 );
 
-  DrawableShip serenity( graphics_engine );
+  typedef std::unordered_map< int, std::unique_ptr< DrawableShip > > ShipContainer;
+  ShipContainer ships;
   while ( true )
   {
     the::net::Data message;
     while ( client.connection.receive( message ) )
     {
-      serenity.update_ship( message );
+      yarrr::Ship ship( yarrr::deserialize( std::string( begin( message ), end( message ) ) ) );
+      ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
+      if ( drawable_ship == ships.end() )
+      {
+        ships.emplace( std::make_pair(
+              ship.id,
+              std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
+      }
+
+      ships[ ship.id ]->update_ship( ship );
     }
 
     graphics_engine.update_screen();

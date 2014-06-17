@@ -2,6 +2,7 @@
 
 #include <yarrr/ship.hpp>
 
+#include <cmath>
 #include <cassert>
 #include <SDL2/SDL.h>
 
@@ -36,7 +37,6 @@ SdlEngine::~SdlEngine()
 void
 SdlEngine::update_screen()
 {
-  //draw_background();
   draw_background();
   draw_objects();
   SDL_UpdateWindowSurface( m_window );
@@ -44,7 +44,7 @@ SdlEngine::update_screen()
 
 
 void
-SdlEngine::draw_rectangle(
+SdlEngine::draw_point(
     uint32_t x,
     uint32_t y,
     int size, uint32_t colour )
@@ -62,10 +62,21 @@ SdlEngine::draw_rectangle(
 void
 SdlEngine::draw_ship( const yarrr::Ship& ship )
 {
-  draw_rectangle(
-      ship.coordinate.x - 800,
-      ship.coordinate.y - 800,
-      4, 0x00ff00 );
+  uint32_t x( ship.coordinate.x - 800 );
+  uint32_t y( ship.coordinate.y - 800 );
+
+  int32_t head_x( cos( ship.angle * 3.14 / 180 ) * 20 );
+  int32_t head_y( sin( ship.angle * 3.14 / 180 ) * 20 );
+
+  draw_point( x, y, 4, 0xaaaa00 );
+  draw_point( x + head_x, y + head_y, 4, 0x00ff00 );
+  draw_point( x - head_x, y - head_y, 4, 0xff0000 );
+
+  int32_t perp_x( head_y );
+  int32_t perp_y( -1 * head_x );
+
+  draw_point( x - head_x * 0.5 + perp_x * 0.5, y - head_y * 0.5 + perp_y * 0.5, 4, 0xff0000 );
+  draw_point( x - head_x * 0.5 - perp_x * 0.5, y - head_y * 0.5 - perp_y * 0.5, 4, 0xff0000 );
 }
 
 

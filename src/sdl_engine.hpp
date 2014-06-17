@@ -22,7 +22,7 @@ class SdlEngine
 
     void draw_ship( const yarrr::Ship& ship );
 
-    void draw_rectangle(
+    void draw_point(
         uint32_t x,
         uint32_t y,
         int size, uint32_t colour );
