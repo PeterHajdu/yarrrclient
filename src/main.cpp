@@ -5,6 +5,9 @@
 #include <yarrr/ship.hpp>
 #include <thenet/service.hpp>
 
+#include <thetime/frequency_stabilizer.hpp>
+#include <thetime/clock.hpp>
+
 #include "sdl_engine.hpp"
 
 namespace
@@ -96,6 +99,9 @@ int main( int argc, char ** argv )
 
   typedef std::unordered_map< int, std::unique_ptr< DrawableShip > > ShipContainer;
   ShipContainer ships;
+
+  the::time::Clock clock;
+  the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
   while ( true )
   {
     the::net::Data message;
@@ -114,7 +120,7 @@ int main( int argc, char ** argv )
     }
 
     graphics_engine.update_screen();
-    std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+    frequency_stabilizer.stabilize();
   }
 
   return 0;
