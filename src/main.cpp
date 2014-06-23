@@ -83,6 +83,16 @@ class DrawableShip : public DrawableObject
       m_ship = ship;
     }
 
+    void advance_time_to( const the::time::Clock::Time& timestamp )
+    {
+      if ( m_ship.timestamp >= timestamp )
+      {
+        return;
+      }
+
+      yarrr::advance_time_to( timestamp, m_ship );
+    }
+
     void draw() override
     {
       std::cout << "drawing ship " << yarrr::serialize( m_ship ) << std::endl;
@@ -107,6 +117,7 @@ int main( int argc, char ** argv )
   bool running( true );
   while ( running )
   {
+    the::time::Clock::Time now( clock.now() );
     SDL_Event event;
     while ( SDL_PollEvent( &event ) )
     {
@@ -128,7 +139,13 @@ int main( int argc, char ** argv )
               std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
       }
 
+      ship.timestamp = now;
       ships[ ship.id ]->update_ship( ship );
+    }
+
+    for ( auto& ship : ships )
+    {
+      ship.second->advance_time_to( now );
     }
 
     graphics_engine.update_screen();
