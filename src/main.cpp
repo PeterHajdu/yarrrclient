@@ -9,6 +9,7 @@
 #include <thetime/clock.hpp>
 
 #include "sdl_engine.hpp"
+#include <SDL2/SDL.h>
 
 namespace
 {
@@ -102,8 +103,19 @@ int main( int argc, char ** argv )
 
   the::time::Clock clock;
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
-  while ( true )
+
+  bool running( true );
+  while ( running )
   {
+    SDL_Event event;
+    while ( SDL_PollEvent( &event ) )
+    {
+      if ( event.type == SDL_QUIT )
+      {
+        running = false;
+      }
+    }
+
     the::net::Data message;
     while ( client.connection.receive( message ) )
     {
