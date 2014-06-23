@@ -7,7 +7,7 @@ struct SDL_Window;
 
 namespace yarrr
 {
-  struct Ship;
+  struct Object;
 }
 
 class DrawableObject;
@@ -20,7 +20,7 @@ class SdlEngine
     SdlEngine( const SdlEngine& ) = delete;
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
-    void draw_ship( const yarrr::Ship& ship );
+    void draw_ship( const yarrr::Object& ship );
 
     void draw_point(
         uint32_t x,

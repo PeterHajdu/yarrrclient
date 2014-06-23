@@ -2,7 +2,7 @@
 #include <thread>
 #include <memory>
 
-#include <yarrr/ship.hpp>
+#include <yarrr/object.hpp>
 #include <thenet/service.hpp>
 
 #include <thetime/frequency_stabilizer.hpp>
@@ -78,7 +78,7 @@ class DrawableShip : public DrawableObject
     {
     }
 
-    void update_ship( const yarrr::Ship& ship )
+    void update_ship( const yarrr::Object& ship )
     {
       m_ship = ship;
     }
@@ -89,7 +89,7 @@ class DrawableShip : public DrawableObject
       m_graphical_engine.draw_ship( m_ship );
     }
 
-    yarrr::Ship m_ship;
+    yarrr::Object m_ship;
 };
 
 int main( int argc, char ** argv )
@@ -119,7 +119,7 @@ int main( int argc, char ** argv )
     the::net::Data message;
     while ( client.connection.receive( message ) )
     {
-      yarrr::Ship ship( yarrr::deserialize( std::string( begin( message ), end( message ) ) ) );
+      yarrr::Object ship( yarrr::deserialize( std::string( begin( message ), end( message ) ) ) );
       ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
       if ( drawable_ship == ships.end() )
       {

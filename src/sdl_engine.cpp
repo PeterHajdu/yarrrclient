@@ -1,6 +1,6 @@
 #include "sdl_engine.hpp"
 
-#include <yarrr/ship.hpp>
+#include <yarrr/object.hpp>
 
 #include <cmath>
 #include <cassert>
@@ -60,7 +60,7 @@ SdlEngine::draw_point(
 
 
 void
-SdlEngine::draw_ship( const yarrr::Ship& ship )
+SdlEngine::draw_ship( const yarrr::Object& ship )
 {
   uint32_t x( 300 + ship.coordinate.x / 3 );
   uint32_t y( 300 + ship.coordinate.y / 3 );
