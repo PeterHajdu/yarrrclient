@@ -56,8 +56,6 @@ namespace
       {
         std::lock_guard< std::mutex > connection_guard( m_client_mutex );
         std::cout << "new connection established" << std::endl;
-        const std::string helloMessage( "hello world" );
-        connection.send( the::net::Data( begin( helloMessage ), end( helloMessage ) ) );
         m_client.reset( new Client( connection ) );
       }
 
@@ -133,6 +131,15 @@ int main( int argc, char ** argv )
       if ( event.type == SDL_QUIT )
       {
         running = false;
+      }
+      else if ( event.type == SDL_KEYDOWN )
+      {
+         switch( event.key.keysym.sym )
+         {
+           case SDLK_UP: client.connection.send( the::net::Data( 1, 1 ) ); break;
+           case SDLK_LEFT: client.connection.send( the::net::Data( 1, 2 ) ); break;
+           case SDLK_RIGHT: client.connection.send( the::net::Data( 1, 3 ) ); break;
+         }
       }
     }
 
