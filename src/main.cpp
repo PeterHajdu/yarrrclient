@@ -84,6 +84,7 @@ class DrawableShip : public DrawableObject
 
     void update_ship( const yarrr::Object& ship )
     {
+      std::cout << "updating" << std::endl;
       m_ship = ship;
     }
 
@@ -94,6 +95,7 @@ class DrawableShip : public DrawableObject
         return;
       }
 
+      std::cout << "approximating" << std::endl;
       yarrr::advance_time_to( timestamp, m_ship );
     }
 
@@ -111,7 +113,7 @@ int main( int argc, char ** argv )
   ConnectionEstablisher establisher( the::net::Address(
         argc > 1 ?
         argv[1] :
-        "localhost:2000") );
+        "localhost:2001") );
   Client& client( establisher.wait_for_connection() );
   SdlEngine graphics_engine( 1024, 768 );
 
