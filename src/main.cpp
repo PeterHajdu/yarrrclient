@@ -1,9 +1,12 @@
 #include <iostream>
 #include <thread>
 #include <memory>
+#include <vector>
+#include <string>
 
 #include <yarrr/object.hpp>
 #include <thenet/service.hpp>
+#include <thenet/address.hpp>
 
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
@@ -27,12 +30,13 @@ namespace
   class ConnectionEstablisher
   {
     public:
-      ConnectionEstablisher()
+      ConnectionEstablisher( const the::net::Address& address )
         : m_network_service(
           std::bind( &ConnectionEstablisher::new_connection, this, std::placeholders::_1 ),
           std::bind( &ConnectionEstablisher::lost_connection, this, std::placeholders::_1 ) )
       {
-        m_network_service.connect_to( "localhost", 2000 );
+        std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
+        m_network_service.connect_to( address );
         m_network_service.start();
       }
 
@@ -104,7 +108,10 @@ class DrawableShip : public DrawableObject
 
 int main( int argc, char ** argv )
 {
-  ConnectionEstablisher establisher;
+  ConnectionEstablisher establisher( the::net::Address(
+        argc > 1 ?
+        argv[1] :
+        "localhost:2000") );
   Client& client( establisher.wait_for_connection() );
   SdlEngine graphics_engine( 1024, 768 );
 
