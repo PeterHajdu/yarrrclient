@@ -106,7 +106,6 @@ class DrawableShip : public DrawableObject
 
     void update_ship( const yarrr::Object& ship )
     {
-      std::cout << "updating" << std::endl;
       m_ship = ship;
     }
 
@@ -117,13 +116,11 @@ class DrawableShip : public DrawableObject
         return;
       }
 
-      std::cout << "approximating" << std::endl;
       yarrr::advance_time_to( timestamp, m_ship );
     }
 
     void draw() override
     {
-      std::cout << "drawing ship " << yarrr::serialize( m_ship ) << std::endl;
       m_graphical_engine.draw_ship( m_ship );
     }
 
@@ -151,6 +148,7 @@ int main( int argc, char ** argv )
   while ( running )
   {
     the::time::Clock::Time now( clock.now() );
+    std::cout << "time: " << now << std::endl;
     SDL_Event event;
     while ( SDL_PollEvent( &event ) )
     {
