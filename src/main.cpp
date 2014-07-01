@@ -186,7 +186,6 @@ int main( int argc, char ** argv )
               std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
       }
 
-      ship.timestamp = now;
       ships[ ship.id ]->update_ship( ship );
     }
 
