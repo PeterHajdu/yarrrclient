@@ -160,13 +160,27 @@ int main( int argc, char ** argv )
       }
       else if ( event.type == SDL_KEYDOWN )
       {
-         switch( event.key.keysym.sym )
-         {
-           case SDLK_q: running = false; break;
-           case SDLK_UP: client.connection.send( the::net::Data( 1, 1 ) ); break;
-           case SDLK_LEFT: client.connection.send( the::net::Data( 1, 2 ) ); break;
-           case SDLK_RIGHT: client.connection.send( the::net::Data( 1, 3 ) ); break;
-         }
+        const char * now_pointer( reinterpret_cast<const char*>(&now) );
+        the::net::Data command{ 2, 0 };
+        command.insert(
+            end( command ),
+            now_pointer, now_pointer + sizeof( now ) );
+        switch( event.key.keysym.sym )
+        {
+          case SDLK_q: running = false; break;
+          case SDLK_UP:
+                       command[1] = 1;
+                       client.connection.send( std::move( command ) );
+                       break;
+          case SDLK_LEFT:
+                       command[1] = 2;
+                       client.connection.send( std::move( command ) );
+                       break;
+          case SDLK_RIGHT:
+                       command[1] = 3;
+                       client.connection.send( std::move( command ) );
+                       break;
+        }
       }
     }
 

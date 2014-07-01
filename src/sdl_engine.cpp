@@ -62,11 +62,11 @@ SdlEngine::draw_point(
 void
 SdlEngine::draw_ship( const yarrr::Object& ship )
 {
-  uint32_t x( 300 + ship.coordinate.x );
-  uint32_t y( 300 + ship.coordinate.y );
+  uint32_t x( 300 + ship.coordinate.x / 4 );
+  uint32_t y( 300 + ship.coordinate.y / 4 );
 
-  int32_t head_x( cos( ship.angle * 3.14 / 180 ) * 20 );
-  int32_t head_y( sin( ship.angle * 3.14 / 180 ) * 20 );
+  int32_t head_x( cos( ship.angle * 3.14 / 180.0 / 4.0 ) * 20.0 );
+  int32_t head_y( sin( ship.angle * 3.14 / 180.0 / 4.0 ) * 20.0 );
 
   draw_point( x, y, 4, 0xaaaa00 );
   draw_point( x + head_x, y + head_y, 4, 0x00ff00 );
