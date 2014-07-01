@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <map>
 
 #include <yarrr/object.hpp>
 #include <yarrr/clock_synchronizer.hpp>
@@ -126,6 +127,36 @@ class DrawableShip : public DrawableObject
       m_graphical_engine.draw_ship( m_ship );
     }
 
+    void command( char cmd, const the::time::Time timestamp )
+    {
+      yarrr::travel_in_time_to( timestamp, m_ship );
+      switch( cmd )
+      {
+        case 1: thruster(); break;
+        case 2: ccw(); break;
+        case 3: cw(); break;
+      }
+    }
+
+  private:
+    void thruster()
+    {
+      const yarrr::Coordinate heading{
+        static_cast< int64_t >( 40.0 * cos( m_ship.angle * 3.14 / 180.0 / 4.0 ) ),
+        static_cast< int64_t >( 40.0 * sin( m_ship.angle * 3.14 / 180.0 / 4.0 ) ) };
+      m_ship.velocity += heading;
+    }
+
+    void ccw()
+    {
+      m_ship.vangle -= 100;
+    }
+
+    void cw()
+    {
+      m_ship.vangle += 100;
+    }
+
     yarrr::Object m_ship;
 };
 
@@ -141,7 +172,7 @@ int main( int argc, char ** argv )
   Client& client( establisher.wait_for_connection() );
   SdlEngine graphics_engine( 1024, 768 );
 
-  typedef std::unordered_map< int, std::unique_ptr< DrawableShip > > ShipContainer;
+  typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
   ShipContainer ships;
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
@@ -160,27 +191,32 @@ int main( int argc, char ** argv )
       }
       else if ( event.type == SDL_KEYDOWN )
       {
+        char cmd( 0 );
+        switch( event.key.keysym.sym )
+        {
+          case SDLK_q:
+            running = false;
+            break;
+          case SDLK_UP:
+            cmd = 1;
+            break;
+          case SDLK_LEFT:
+            cmd = 2;
+            break;
+          case SDLK_RIGHT:
+            cmd = 3;
+            break;
+        }
+
         const char * now_pointer( reinterpret_cast<const char*>(&now) );
-        the::net::Data command{ 2, 0 };
+        the::net::Data command{ 2, cmd };
         command.insert(
             end( command ),
             now_pointer, now_pointer + sizeof( now ) );
-        switch( event.key.keysym.sym )
-        {
-          case SDLK_q: running = false; break;
-          case SDLK_UP:
-                       command[1] = 1;
-                       client.connection.send( std::move( command ) );
-                       break;
-          case SDLK_LEFT:
-                       command[1] = 2;
-                       client.connection.send( std::move( command ) );
-                       break;
-          case SDLK_RIGHT:
-                       command[1] = 3;
-                       client.connection.send( std::move( command ) );
-                       break;
-        }
+
+        client.connection.send( std::move( command ) );
+        std::cout << "ships: " << ships.size() << std::endl;
+        begin( ships )->second->command( cmd, now );
       }
     }
 
