@@ -107,29 +107,29 @@ class DrawableShip : public DrawableObject
 
     void update_ship( const yarrr::Object& ship )
     {
-      std::cout << "network state: " << ship;
-      m_ship = ship;
+      m_network_ship = ship;
     }
 
     void travel_in_time_to( const the::time::Clock::Time& timestamp )
     {
-      if ( m_ship.timestamp >= timestamp )
-      {
-        return;
-      }
-
-      yarrr::travel_in_time_to( timestamp, m_ship );
-      std::cout << "approximated state: " << m_ship;
+      yarrr::travel_in_time_to( timestamp, m_local_ship );
+      yarrr::travel_in_time_to( timestamp, m_network_ship );
+      m_local_ship.coordinate = ( m_network_ship.coordinate + m_local_ship.coordinate ) * 0.5;
+      m_local_ship.velocity = ( m_network_ship.velocity + m_local_ship.velocity ) * 0.5;
+      m_local_ship.angle = ( m_network_ship.angle + m_local_ship.angle ) * 0.5;
+      m_local_ship.vangle = ( m_network_ship.vangle + m_local_ship.vangle ) * 0.5;
+      std::cout << "network state: " << m_network_ship;
+      std::cout << "local state: " << m_local_ship;
     }
 
     void draw() override
     {
-      m_graphical_engine.draw_ship( m_ship );
+      m_graphical_engine.draw_ship( m_local_ship );
     }
 
     void command( char cmd, const the::time::Time timestamp )
     {
-      yarrr::travel_in_time_to( timestamp, m_ship );
+      yarrr::travel_in_time_to( timestamp, m_local_ship );
       switch( cmd )
       {
         case 1: thruster(); break;
@@ -142,22 +142,23 @@ class DrawableShip : public DrawableObject
     void thruster()
     {
       const yarrr::Coordinate heading{
-        static_cast< int64_t >( 40.0 * cos( m_ship.angle * 3.14 / 180.0 / 4.0 ) ),
-        static_cast< int64_t >( 40.0 * sin( m_ship.angle * 3.14 / 180.0 / 4.0 ) ) };
-      m_ship.velocity += heading;
+        static_cast< int64_t >( 40.0 * cos( m_local_ship.angle * 3.14 / 180.0 / 4.0 ) ),
+        static_cast< int64_t >( 40.0 * sin( m_local_ship.angle * 3.14 / 180.0 / 4.0 ) ) };
+      m_local_ship.velocity += heading;
     }
 
     void ccw()
     {
-      m_ship.vangle -= 100;
+      m_local_ship.vangle -= 100;
     }
 
     void cw()
     {
-      m_ship.vangle += 100;
+      m_local_ship.vangle += 100;
     }
 
-    yarrr::Object m_ship;
+    yarrr::Object m_local_ship;
+    yarrr::Object m_network_ship;
 };
 
 int main( int argc, char ** argv )
