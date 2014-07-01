@@ -106,17 +106,19 @@ class DrawableShip : public DrawableObject
 
     void update_ship( const yarrr::Object& ship )
     {
+      std::cout << "network state: " << ship;
       m_ship = ship;
     }
 
-    void advance_time_to( const the::time::Clock::Time& timestamp )
+    void travel_in_time_to( const the::time::Clock::Time& timestamp )
     {
       if ( m_ship.timestamp >= timestamp )
       {
         return;
       }
 
-      yarrr::advance_time_to( timestamp, m_ship );
+      yarrr::travel_in_time_to( timestamp, m_ship );
+      std::cout << "approximated state: " << m_ship;
     }
 
     void draw() override
@@ -191,7 +193,7 @@ int main( int argc, char ** argv )
 
     for ( auto& ship : ships )
     {
-      ship.second->advance_time_to( now );
+      ship.second->travel_in_time_to( now );
     }
 
     graphics_engine.update_screen();
