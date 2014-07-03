@@ -257,7 +257,7 @@ int main( int argc, char ** argv )
     the::net::Data message;
     while ( client.connection.receive( message ) )
     {
-      yarrr::Event::Pointer event( event_factory.create( *reinterpret_cast<const the::ctci::Id*>( &message[0] ) ) );
+      yarrr::Event::Pointer event( event_factory.create( yarrr::extract<the::ctci::Id>( &message[0] ) ) );
       if ( !event )
       {
         continue;
