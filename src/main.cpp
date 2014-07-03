@@ -173,6 +173,10 @@ class DrawableShip : public DrawableObject
 
 int main( int argc, char ** argv )
 {
+  typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
+  ShipContainer ships;
+  SdlEngine graphics_engine( 1024, 768 );
+
   EventFactory event_factory;
   the::ctci::ExactCreator< yarrr::Event, yarrr::LoginResponse > login_response_creator;
   event_factory.register_creator( yarrr::LoginResponse::ctci, login_response_creator );
@@ -188,9 +192,18 @@ int main( int argc, char ** argv )
       } );
 
   event_dispatcher.register_listener<yarrr::ObjectStateUpdate>( yarrr::ObjectStateUpdate::ctci,
-      []( const yarrr::ObjectStateUpdate& )
+      [ &graphics_engine, &ships ]( const yarrr::ObjectStateUpdate& object_state_update )
       {
-        std::cout << "object state update arrived" << std::endl;
+        const yarrr::Object& ship( object_state_update.object() );
+        ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
+        if ( drawable_ship == ships.end() )
+        {
+          ships.emplace( std::make_pair(
+                ship.id,
+                std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
+        }
+
+        ships[ ship.id ]->update_ship( ship );
       } );
 
   the::time::Clock clock;
@@ -201,10 +214,7 @@ int main( int argc, char ** argv )
         argv[1] :
         "localhost:2001") );
   Client& client( establisher.wait_for_connection() );
-  SdlEngine graphics_engine( 1024, 768 );
 
-  typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
-  ShipContainer ships;
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
@@ -262,18 +272,6 @@ int main( int argc, char ** argv )
 
       event->deserialize( message );
       event_dispatcher.dispatch( event->polymorphic_ctci(), *event );
-      /*
-      yarrr::Object ship( yarrr::deserialize( std::string( begin( message ), end( message ) ) ) );
-      ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
-      if ( drawable_ship == ships.end() )
-      {
-        ships.emplace( std::make_pair(
-              ship.id,
-              std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
-      }
-
-      ships[ ship.id ]->update_ship( ship );
-      */
     }
 
     for ( auto& ship : ships )
