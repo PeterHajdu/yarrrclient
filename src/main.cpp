@@ -249,14 +249,7 @@ int main( int argc, char ** argv )
             break;
         }
 
-        const char * now_pointer( reinterpret_cast<const char*>(&now) );
-        the::net::Data command{ 2, cmd };
-        command.insert(
-            end( command ),
-            now_pointer, now_pointer + sizeof( now ) );
-
-        client.connection.send( std::move( command ) );
-        std::cout << "ships: " << ships.size() << std::endl;
+        client.connection.send( yarrr::Command( cmd, now ).serialize() );
         begin( ships )->second->command( cmd, now );
       }
     }
