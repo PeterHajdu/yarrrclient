@@ -7,7 +7,7 @@ struct SDL_Window;
 
 namespace yarrr
 {
-  struct Object;
+  class Object;
 }
 
 class DrawableObject;

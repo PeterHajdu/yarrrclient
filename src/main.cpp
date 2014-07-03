@@ -7,17 +7,27 @@
 
 #include <yarrr/object.hpp>
 #include <yarrr/clock_synchronizer.hpp>
+#include <yarrr/event.hpp>
+#include <yarrr/login.hpp>
+#include <yarrr/command.hpp>
+#include <yarrr/object_state_update.hpp>
+
 #include <thenet/service.hpp>
 #include <thenet/address.hpp>
 
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
 
+#include <thectci/factory.hpp>
+#include <thectci/dispatcher.hpp>
+
 #include "sdl_engine.hpp"
 #include <SDL2/SDL.h>
 
 namespace
 {
+  typedef the::ctci::Factory< yarrr::Event > EventFactory;
+
   class Client
   {
     public:
@@ -163,6 +173,26 @@ class DrawableShip : public DrawableObject
 
 int main( int argc, char ** argv )
 {
+  EventFactory event_factory;
+  the::ctci::ExactCreator< yarrr::Event, yarrr::LoginResponse > login_response_creator;
+  event_factory.register_creator( yarrr::LoginResponse::ctci, login_response_creator );
+
+  the::ctci::ExactCreator< yarrr::Event, yarrr::ObjectStateUpdate > object_state_creator;
+  event_factory.register_creator( yarrr::ObjectStateUpdate::ctci, object_state_creator );
+
+  the::ctci::Dispatcher event_dispatcher;
+  event_dispatcher.register_listener<yarrr::LoginResponse>( yarrr::LoginResponse::ctci,
+      []( const yarrr::LoginResponse& )
+      {
+        std::cout << "login response arrived" << std::endl;
+      } );
+
+  event_dispatcher.register_listener<yarrr::ObjectStateUpdate>( yarrr::ObjectStateUpdate::ctci,
+      []( const yarrr::ObjectStateUpdate& )
+      {
+        std::cout << "object state update arrived" << std::endl;
+      } );
+
   the::time::Clock clock;
   ConnectionEstablisher establisher(
       clock,
@@ -224,12 +254,15 @@ int main( int argc, char ** argv )
     the::net::Data message;
     while ( client.connection.receive( message ) )
     {
-      if ( message[ 0 ] == yarrr::clock_sync::protocol_id )
+      yarrr::Event::Pointer event( event_factory.create( *reinterpret_cast<const the::ctci::Id*>( &message[0] ) ) );
+      if ( !event )
       {
-        std::cout << "time sync message" << std::endl;
         continue;
       }
 
+      event->deserialize( message );
+      event_dispatcher.dispatch( event->polymorphic_ctci(), *event );
+      /*
       yarrr::Object ship( yarrr::deserialize( std::string( begin( message ), end( message ) ) ) );
       ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
       if ( drawable_ship == ships.end() )
@@ -240,6 +273,7 @@ int main( int argc, char ** argv )
       }
 
       ships[ ship.id ]->update_ship( ship );
+      */
     }
 
     for ( auto& ship : ships )
