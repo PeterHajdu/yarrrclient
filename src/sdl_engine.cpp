@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cassert>
 #include <SDL2/SDL.h>
+#include <iostream>
 
 SdlEngine::SdlEngine( int32_t x, int32_t y )
   : m_window( nullptr )
@@ -39,10 +40,26 @@ void
 SdlEngine::update_screen()
 {
   draw_background();
+  draw_grid();
   draw_objects();
   SDL_UpdateWindowSurface( m_window );
 }
 
+void
+SdlEngine::draw_grid()
+{
+  yarrr::Coordinate diff{ static_cast<int64_t>( m_x * 0.5 ), static_cast<int64_t>( m_y * 0.5 ) };
+  yarrr::Coordinate top_left( ( m_center - diff ) * 0.01 * 100 );
+  size_t num_x( m_x / 100 );
+  size_t num_y( m_y / 100 );
+  for ( size_t i( 0 ); i < num_x; ++i )
+  {
+    for ( size_t j( 0 ); j < num_y; ++j )
+    {
+      draw_point( top_left.x + i * 100, top_left.y + j * 100, 2, 0xaaaaaa );
+    }
+  }
+}
 
 void
 SdlEngine::draw_point(
