@@ -10,6 +10,7 @@
 #include <yarrr/event.hpp>
 #include <yarrr/login.hpp>
 #include <yarrr/command.hpp>
+#include <yarrr/ship_control.hpp>
 #include <yarrr/object_state_update.hpp>
 
 #include <thenet/service.hpp>
@@ -114,7 +115,13 @@ class DrawableShip : public DrawableObject
   public:
     DrawableShip( SdlEngine& graphics_engine )
       : DrawableObject( graphics_engine )
+      , m_local_ship_control( m_local_ship )
     {
+    }
+
+    void handle_command( const yarrr::Command& command )
+    {
+      m_local_ship_control.handle_command( command );
     }
 
     void update_ship( const yarrr::Object& ship )
@@ -139,38 +146,11 @@ class DrawableShip : public DrawableObject
       m_graphical_engine.draw_ship( m_local_ship );
     }
 
-    void command( char cmd, const the::time::Time timestamp )
-    {
-      yarrr::travel_in_time_to( timestamp, m_local_ship );
-      switch( cmd )
-      {
-        case 1: thruster(); break;
-        case 2: ccw(); break;
-        case 3: cw(); break;
-      }
-    }
-
   private:
-    void thruster()
-    {
-      const yarrr::Coordinate heading{
-        static_cast< int64_t >( 40.0 * cos( m_local_ship.angle * 3.14 / 180.0 / 4.0 ) ),
-        static_cast< int64_t >( 40.0 * sin( m_local_ship.angle * 3.14 / 180.0 / 4.0 ) ) };
-      m_local_ship.velocity += heading;
-    }
-
-    void ccw()
-    {
-      m_local_ship.vangle -= 100;
-    }
-
-    void cw()
-    {
-      m_local_ship.vangle += 100;
-    }
 
     yarrr::Object m_local_ship;
     yarrr::Object m_network_ship;
+    yarrr::ShipControl m_local_ship_control;
 };
 
 int main( int argc, char ** argv )
@@ -252,8 +232,9 @@ int main( int argc, char ** argv )
             break;
         }
 
-        client.connection.send( yarrr::Command( cmd, now ).serialize() );
-        begin( ships )->second->command( cmd, now );
+        yarrr::Command command( cmd, now );
+        begin( ships )->second->handle_command( command );
+        client.connection.send( command.serialize() );
       }
     }
 
