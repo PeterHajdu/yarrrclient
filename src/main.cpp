@@ -64,6 +64,8 @@ namespace
           std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
         }
 
+        m_client->connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
+
         while ( !m_clock_synchronizer->clock_offset() )
         {
           std::cout << "waiting for clock synchronization..." << std::endl;
@@ -188,6 +190,7 @@ int main( int argc, char ** argv )
   event_dispatcher.register_listener<yarrr::LoginResponse>(
       []( const yarrr::LoginResponse& )
       {
+        //todo: save object id
         std::cout << "login response arrived" << std::endl;
       } );
 
