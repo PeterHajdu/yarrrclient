@@ -185,13 +185,13 @@ int main( int argc, char ** argv )
   event_factory.register_creator( yarrr::ObjectStateUpdate::ctci, object_state_creator );
 
   the::ctci::Dispatcher event_dispatcher;
-  event_dispatcher.register_listener<yarrr::LoginResponse>( yarrr::LoginResponse::ctci,
+  event_dispatcher.register_listener<yarrr::LoginResponse>(
       []( const yarrr::LoginResponse& )
       {
         std::cout << "login response arrived" << std::endl;
       } );
 
-  event_dispatcher.register_listener<yarrr::ObjectStateUpdate>( yarrr::ObjectStateUpdate::ctci,
+  event_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
       [ &graphics_engine, &ships ]( const yarrr::ObjectStateUpdate& object_state_update )
       {
         const yarrr::Object& ship( object_state_update.object() );
@@ -264,7 +264,7 @@ int main( int argc, char ** argv )
       }
 
       event->deserialize( message );
-      event_dispatcher.dispatch( event->polymorphic_ctci(), *event );
+      event_dispatcher.polymorphic_dispatch( *event );
     }
 
     for ( auto& ship : ships )
