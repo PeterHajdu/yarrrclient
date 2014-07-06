@@ -33,6 +33,8 @@ class SdlEngine
     void register_object( DrawableObject& object );
 
   private:
+    bool is_on_screen( int32_t x, int32_t y ) const;
+
     void draw_objects();
     void draw_background();
 

@@ -69,15 +69,28 @@ SdlEngine::focus_to( const yarrr::Coordinate& center )
   m_center = center;
 }
 
+bool
+SdlEngine::is_on_screen( int32_t x, int32_t y ) const
+{
+  return
+    abs( m_center.x - x ) < m_x / 2 &&
+    abs( m_center.y - y ) < m_y / 2;
+}
 
 void
 SdlEngine::draw_ship( const yarrr::Object& ship )
 {
-  int32_t x( ship.coordinate.x );
-  int32_t y( ship.coordinate.y );
+  const int32_t x( ship.coordinate.x );
+  const int32_t y( ship.coordinate.y );
 
   int32_t head_x( cos( ship.angle * 3.14 / 180.0 / 4.0 ) * 20.0 );
   int32_t head_y( sin( ship.angle * 3.14 / 180.0 / 4.0 ) * 20.0 );
+
+  if ( !is_on_screen( x, y ) )
+  {
+    draw_point( m_center.x + ( x - m_center.x ) / 10.0 , m_center.y + ( y - m_center.y ) / 10.0 , 4, 0xffffff );
+    return;
+  }
 
   draw_point( x, y, 4, 0xaaaa00 );
   draw_point( x + head_x, y + head_y, 4, 0x00ff00 );
