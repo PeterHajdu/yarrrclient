@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <yarrr/types.hpp>
 
 struct SDL_Surface;
 struct SDL_Window;
@@ -14,17 +15,18 @@ class DrawableObject;
 class SdlEngine
 {
   public:
-    SdlEngine( uint32_t x, uint32_t y );
+    SdlEngine( int32_t x, int32_t y );
     ~SdlEngine();
 
     SdlEngine( const SdlEngine& ) = delete;
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
+    void focus_to( const yarrr::Coordinate& center );
     void draw_ship( const yarrr::Object& ship );
 
     void draw_point(
-        uint32_t x,
-        uint32_t y,
+        int32_t x,
+        int32_t y,
         int size, uint32_t colour );
 
     void update_screen();
@@ -37,10 +39,12 @@ class SdlEngine
     SDL_Window* m_window;
     SDL_Surface* m_screen;
 
-    const uint32_t m_x;
-    const uint32_t m_y;
+    const int32_t m_x;
+    const int32_t m_y;
 
     std::vector< DrawableObject* > m_objects;
+
+    yarrr::Coordinate m_center;
 };
 
 class DrawableObject

@@ -6,11 +6,12 @@
 #include <cassert>
 #include <SDL2/SDL.h>
 
-SdlEngine::SdlEngine( uint32_t x, uint32_t y )
+SdlEngine::SdlEngine( int32_t x, int32_t y )
   : m_window( nullptr )
   , m_screen( nullptr )
   , m_x( x )
   , m_y( y )
+  , m_center{ 400, 400 }
 {
   assert(
       SDL_Init( SDL_INIT_VIDEO ) == 0 &&
@@ -45,13 +46,16 @@ SdlEngine::update_screen()
 
 void
 SdlEngine::draw_point(
-    uint32_t x,
-    uint32_t y,
+    int32_t x,
+    int32_t y,
     int size, uint32_t colour )
 {
+  const int32_t new_x( x - m_center.x - size / 2 + m_x / 2 );
+  const int32_t new_y( y - m_center.y - size / 2 + m_y / 2 );
+
   SDL_Rect rectangle = {
-    static_cast<Sint16>( x - size / 2 ),
-    static_cast<Sint16>( y - size / 2 ),
+    static_cast<Sint16>( new_x ),
+    static_cast<Sint16>( new_y ),
     static_cast<Uint16>( size ),
     static_cast<Uint16>( size ) };
 
@@ -60,10 +64,17 @@ SdlEngine::draw_point(
 
 
 void
+SdlEngine::focus_to( const yarrr::Coordinate& center )
+{
+  m_center = center;
+}
+
+
+void
 SdlEngine::draw_ship( const yarrr::Object& ship )
 {
-  uint32_t x( 300 + ship.coordinate.x / 4 );
-  uint32_t y( 300 + ship.coordinate.y / 4 );
+  int32_t x( ship.coordinate.x );
+  int32_t y( ship.coordinate.y );
 
   int32_t head_x( cos( ship.angle * 3.14 / 180.0 / 4.0 ) * 20.0 );
   int32_t head_y( sin( ship.angle * 3.14 / 180.0 / 4.0 ) * 20.0 );

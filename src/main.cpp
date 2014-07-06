@@ -187,6 +187,11 @@ class DrawableShip : public DrawableObject
     {
     }
 
+    void in_focus()
+    {
+      m_graphical_engine.focus_to( m_local_ship.coordinate );
+    }
+
     void handle_command( const yarrr::Command& command )
     {
       m_local_ship_control.handle_command( command );
@@ -211,6 +216,7 @@ class DrawableShip : public DrawableObject
 
     void draw() override
     {
+      std::cout << m_local_ship << std::endl;
       m_graphical_engine.draw_ship( m_local_ship );
     }
 
@@ -306,6 +312,7 @@ int main( int argc, char ** argv )
       ship.second->travel_in_time_to( now );
     }
 
+    my_ship.in_focus();
     graphics_engine.update_screen();
     frequency_stabilizer.stabilize();
   }
