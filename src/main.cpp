@@ -222,13 +222,13 @@ int main( int argc, char ** argv )
             running = false;
             break;
           case SDLK_UP:
-            cmd = 1;
+            cmd = yarrr::Command::thruster;
             break;
           case SDLK_LEFT:
-            cmd = 2;
+            cmd = yarrr::Command::ccw;
             break;
           case SDLK_RIGHT:
-            cmd = 3;
+            cmd = yarrr::Command::cw;
             break;
         }
 
