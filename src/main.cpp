@@ -156,6 +156,7 @@ namespace
       void lost_connection( the::net::Connection& )
       {
         std::cout << "connection lost" << std::endl;
+        exit( 1 );
       }
 
     private:
