@@ -12,6 +12,7 @@
 #include <yarrr/command.hpp>
 #include <yarrr/ship_control.hpp>
 #include <yarrr/object_state_update.hpp>
+#include <yarrr/event_factory.hpp>
 
 #include <thenet/service.hpp>
 #include <thenet/address.hpp>
@@ -19,7 +20,6 @@
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
 
-#include <thectci/factory.hpp>
 #include <thectci/dispatcher.hpp>
 
 #include "sdl_engine.hpp"
@@ -27,11 +27,6 @@
 
 namespace
 {
-  typedef the::ctci::Factory< yarrr::Event > EventFactory;
-  EventFactory event_factory;
-  the::ctci::ExactCreator< yarrr::Event, yarrr::LoginResponse > login_response_creator;
-  the::ctci::ExactCreator< yarrr::Event, yarrr::ObjectStateUpdate > object_state_creator;
-
   class Client
   {
     public:
@@ -54,13 +49,11 @@ namespace
         the::net::Data message;
         while ( m_connection.receive( message ) )
         {
-          yarrr::Event::Pointer event( event_factory.create( yarrr::extract<the::ctci::Id>( &message[0] ) ) );
+          yarrr::Event::Pointer event( yarrr::EventFactory::create( message ) );
           if ( !event )
           {
             continue;
           }
-
-          event->deserialize( message );
           m_dispatcher.polymorphic_dispatch( *event );
         }
       }
@@ -233,9 +226,6 @@ int main( int argc, char ** argv )
   ShipContainer ships;
 
   SdlEngine graphics_engine( 1024, 768 );
-
-  event_factory.register_creator( yarrr::LoginResponse::ctci, login_response_creator );
-  event_factory.register_creator( yarrr::ObjectStateUpdate::ctci, object_state_creator );
 
   the::ctci::Dispatcher event_dispatcher;
 
