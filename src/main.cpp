@@ -13,6 +13,7 @@
 #include <yarrr/ship_control.hpp>
 #include <yarrr/object_state_update.hpp>
 #include <yarrr/event_factory.hpp>
+#include <yarrr/delete_object.hpp>
 
 #include <thenet/service.hpp>
 #include <thenet/address.hpp>
@@ -241,6 +242,12 @@ int main( int argc, char ** argv )
 
         ships[ ship.id ]->update_ship( ship );
       } );
+
+  event_dispatcher.register_listener<yarrr::DeleteObject>(
+      [&ships]( const yarrr::DeleteObject& delete_object )
+      {
+        ships.erase( delete_object.object_id() );
+      });
 
   the::time::Clock clock;
   ConnectionEstablisher establisher(

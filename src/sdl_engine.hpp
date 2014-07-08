@@ -26,6 +26,7 @@ class SdlEngine
 
     void update_screen();
     void register_object( DrawableObject& object );
+    void delete_object( const DrawableObject& object );
 
   private:
     void draw_point(
@@ -63,6 +64,11 @@ class DrawableObject
       : m_graphical_engine( graphical_engine )
     {
       m_graphical_engine.register_object( *this );
+    }
+
+    virtual ~DrawableObject()
+    {
+      m_graphical_engine.delete_object( *this );
     }
 
     virtual void draw() = 0;

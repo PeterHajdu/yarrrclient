@@ -163,3 +163,12 @@ SdlEngine::register_object( DrawableObject& object )
   m_objects.push_back( &object );
 }
 
+
+void
+SdlEngine::delete_object( const DrawableObject& object )
+{
+  m_objects.erase(
+      std::remove( std::begin( m_objects ), std::end( m_objects ), &object )
+      , std::end( m_objects ) );
+}
+
