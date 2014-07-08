@@ -6,6 +6,7 @@
 #include <cassert>
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <algorithm>
 
 SdlEngine::SdlEngine( int16_t x, int16_t y )
   : m_window( nullptr )
