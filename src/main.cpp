@@ -210,7 +210,6 @@ class DrawableShip : public DrawableObject
 
     void draw() override
     {
-      std::cout << m_local_ship << std::endl;
       m_graphical_engine.draw_ship( m_local_ship );
     }
 
@@ -263,7 +262,6 @@ int main( int argc, char ** argv )
   while ( running )
   {
     the::time::Clock::Time now( clock.now() );
-    std::cout << "time: " << now << std::endl;
     SDL_Event event;
     while ( SDL_PollEvent( &event ) )
     {
