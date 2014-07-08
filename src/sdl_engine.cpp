@@ -50,9 +50,9 @@ SdlEngine::draw_grid()
 {
   const yarrr::Coordinate top_left( ( m_center_in_metres - m_center_of_screen ) * 0.01 * 100 );
   const yarrr::Vector< int64_t > number_of_dots( m_screen_resolution * 0.01 );
-  for ( size_t i( 0 ); i <= number_of_dots.x; ++i )
+  for ( ssize_t i( 0 ); i <= number_of_dots.x; ++i )
   {
-    for ( size_t j( 0 ); j <= number_of_dots.y; ++j )
+    for ( ssize_t j( 0 ); j <= number_of_dots.y; ++j )
     {
       const yarrr::Coordinate grid_point( top_left + yarrr::Coordinate( i * 100, j * 100 ) );
       draw_scaled_point( yarrr::metres_to_huplons( grid_point ), 2, 0xaaaaaa );
