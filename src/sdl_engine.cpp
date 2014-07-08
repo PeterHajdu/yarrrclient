@@ -7,12 +7,12 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
-SdlEngine::SdlEngine( int32_t x, int32_t y )
+SdlEngine::SdlEngine( int16_t x, int16_t y )
   : m_window( nullptr )
   , m_screen( nullptr )
-  , m_x( x )
-  , m_y( y )
-  , m_center{ 400, 400 }
+  , m_screen_resolution( x, y )
+  , m_center_of_screen( x / 2, y / 2 )
+  , m_center_in_metres( m_screen_resolution * 0.5 )
 {
   assert(
       SDL_Init( SDL_INIT_VIDEO ) == 0 &&
@@ -48,31 +48,40 @@ SdlEngine::update_screen()
 void
 SdlEngine::draw_grid()
 {
-  yarrr::Coordinate diff{ static_cast<int64_t>( m_x * 0.5 ), static_cast<int64_t>( m_y * 0.5 ) };
-  yarrr::Coordinate top_left( ( m_center - diff ) * 0.01 * 100 );
-  size_t num_x( m_x / 100 );
-  size_t num_y( m_y / 100 );
-  for ( size_t i( 0 ); i < num_x; ++i )
+  const yarrr::Coordinate top_left( ( m_center_in_metres - m_center_of_screen ) * 0.01 * 100 );
+  const yarrr::Vector< int64_t > number_of_dots( m_screen_resolution * 0.01 );
+  for ( size_t i( 0 ); i <= number_of_dots.x; ++i )
   {
-    for ( size_t j( 0 ); j < num_y; ++j )
+    for ( size_t j( 0 ); j <= number_of_dots.y; ++j )
     {
-      draw_point( top_left.x + i * 100, top_left.y + j * 100, 2, 0xaaaaaa );
+      const yarrr::Coordinate grid_point( top_left + yarrr::Coordinate( i * 100, j * 100 ) );
+      draw_scaled_point( yarrr::metres_to_huplons( grid_point ), 2, 0xaaaaaa );
     }
   }
 }
 
+
+void
+SdlEngine::draw_scaled_point(
+    const yarrr::Coordinate& coordinate,
+    int size,
+    uint32_t colour )
+{
+  const yarrr::Coordinate scaled( scale_coordinate( coordinate ) );
+  //todo: scale size as well
+  draw_point( scaled.x, scaled.y, size, colour );
+}
+
+
 void
 SdlEngine::draw_point(
-    int32_t x,
-    int32_t y,
+    int16_t x,
+    int16_t y,
     int size, uint32_t colour )
 {
-  const int32_t new_x( x - m_center.x - size / 2 + m_x / 2 );
-  const int32_t new_y( y - m_center.y - size / 2 + m_y / 2 );
-
   SDL_Rect rectangle = {
-    static_cast<Sint16>( new_x ),
-    static_cast<Sint16>( new_y ),
+    static_cast<Sint16>( x ),
+    static_cast<Sint16>( y ),
     static_cast<Uint16>( size ),
     static_cast<Uint16>( size ) };
 
@@ -83,41 +92,46 @@ SdlEngine::draw_point(
 void
 SdlEngine::focus_to( const yarrr::Coordinate& center )
 {
-  m_center = center;
+   m_center_in_metres = yarrr::huplons_to_metres( center );
+}
+
+yarrr::Coordinate
+SdlEngine::scale_coordinate( const yarrr::Coordinate& coordinate ) const
+{
+  return yarrr::huplons_to_metres( coordinate ) - m_center_in_metres + m_center_of_screen;
 }
 
 bool
-SdlEngine::is_on_screen( int32_t x, int32_t y ) const
+SdlEngine::is_on_screen( const yarrr::Coordinate& coordinate ) const
 {
+  const yarrr::Coordinate scaled( scale_coordinate( coordinate ) );
   return
-    abs( m_center.x - x ) < m_x / 2 &&
-    abs( m_center.y - y ) < m_y / 2;
+    abs( scaled.x - m_center_of_screen.x ) < m_center_of_screen.x &&
+    abs( scaled.y - m_center_of_screen.y ) < m_center_of_screen.y;
 }
 
 void
 SdlEngine::draw_ship( const yarrr::Object& ship )
 {
-  const int32_t x( ship.coordinate.x );
-  const int32_t y( ship.coordinate.y );
+  const yarrr::Coordinate heading(
+      cos( ship.angle * 3.14 / 180.0 / 4.0 ) * 60.0,
+      sin( ship.angle * 3.14 / 180.0 / 4.0 ) * 60.0 );
 
-  int32_t head_x( cos( ship.angle * 3.14 / 180.0 / 4.0 ) * 20.0 );
-  int32_t head_y( sin( ship.angle * 3.14 / 180.0 / 4.0 ) * 20.0 );
-
-  if ( !is_on_screen( x, y ) )
+  const yarrr::Coordinate perpendicular( heading.y, heading.x * -1 );
+  if ( !is_on_screen( ship.coordinate ) )
   {
-    draw_point( m_center.x + ( x - m_center.x ) / 10.0 , m_center.y + ( y - m_center.y ) / 10.0 , 4, 0xffffff );
+    const yarrr::Coordinate diff(
+        ( yarrr::huplons_to_metres( ship.coordinate ) - m_center_in_metres ) * 0.01 +
+          m_center_of_screen );
+    draw_point( diff.x, diff.y, 4, 0xffffff );
     return;
   }
 
-  draw_point( x, y, 4, 0xaaaa00 );
-  draw_point( x + head_x, y + head_y, 4, 0x00ff00 );
-  draw_point( x - head_x, y - head_y, 4, 0xff0000 );
-
-  int32_t perp_x( head_y );
-  int32_t perp_y( -1 * head_x );
-
-  draw_point( x - head_x * 0.5 + perp_x * 0.5, y - head_y * 0.5 + perp_y * 0.5, 4, 0xff0000 );
-  draw_point( x - head_x * 0.5 - perp_x * 0.5, y - head_y * 0.5 - perp_y * 0.5, 4, 0xff0000 );
+  draw_scaled_point( ship.coordinate, 4, 0xaaaa00 );
+  draw_scaled_point( ship.coordinate + heading, 4, 0x00ff00 );
+  draw_scaled_point( ship.coordinate - heading, 4, 0xff0000 );
+  draw_scaled_point( ship.coordinate - heading * 0.5 + perpendicular, 4, 0xff0000 );
+  draw_scaled_point( ship.coordinate - heading * 0.5 - perpendicular, 4, 0xff0000 );
 }
 
 
@@ -134,9 +148,11 @@ SdlEngine::draw_objects()
 void
 SdlEngine::draw_background()
 {
-  SDL_Rect rectangle =
-  { static_cast<unsigned short>( 0 ), static_cast<unsigned short>( 0 ),
-    static_cast<unsigned short>( m_x ), static_cast<unsigned short>( m_y ) };
+  SDL_Rect rectangle{
+    static_cast<unsigned short>( 0 ),
+    static_cast<unsigned short>( 0 ),
+    static_cast<unsigned short>( m_screen_resolution.x ),
+    static_cast<unsigned short>( m_screen_resolution.y ) };
   SDL_FillRect( m_screen, &rectangle, 0x000000 );
 }
 

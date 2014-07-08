@@ -15,7 +15,7 @@ class DrawableObject;
 class SdlEngine
 {
   public:
-    SdlEngine( int32_t x, int32_t y );
+    SdlEngine( int16_t x, int16_t y );
     ~SdlEngine();
 
     SdlEngine( const SdlEngine& ) = delete;
@@ -24,16 +24,23 @@ class SdlEngine
     void focus_to( const yarrr::Coordinate& center );
     void draw_ship( const yarrr::Object& ship );
 
-    void draw_point(
-        int32_t x,
-        int32_t y,
-        int size, uint32_t colour );
-
     void update_screen();
     void register_object( DrawableObject& object );
 
   private:
-    bool is_on_screen( int32_t x, int32_t y ) const;
+    void draw_point(
+        int16_t x,
+        int16_t y,
+        int size, uint32_t colour );
+
+    void draw_scaled_point(
+        const yarrr::Coordinate&,
+        int size,
+        uint32_t colour );
+
+    yarrr::Coordinate scale_coordinate( const yarrr::Coordinate& ) const;
+
+    bool is_on_screen( const yarrr::Coordinate& ) const;
 
     void draw_objects();
     void draw_grid();
@@ -42,12 +49,11 @@ class SdlEngine
     SDL_Window* m_window;
     SDL_Surface* m_screen;
 
-    const int32_t m_x;
-    const int32_t m_y;
-
+    const yarrr::Coordinate m_screen_resolution;
+    const yarrr::Coordinate m_center_of_screen;
     std::vector< DrawableObject* > m_objects;
 
-    yarrr::Coordinate m_center;
+    yarrr::Coordinate m_center_in_metres;
 };
 
 class DrawableObject
