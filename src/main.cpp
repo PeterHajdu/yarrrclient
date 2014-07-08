@@ -204,8 +204,6 @@ class DrawableShip : public DrawableObject
       m_local_ship.velocity = ( m_network_ship.velocity + m_local_ship.velocity ) * 0.5;
       m_local_ship.angle = ( m_network_ship.angle + m_local_ship.angle ) * 0.5;
       m_local_ship.vangle = ( m_network_ship.vangle + m_local_ship.vangle ) * 0.5;
-      std::cout << "network state: " << m_network_ship;
-      std::cout << "local state: " << m_local_ship;
     }
 
     void draw() override

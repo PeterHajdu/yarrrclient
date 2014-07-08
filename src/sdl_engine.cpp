@@ -117,7 +117,6 @@ SdlEngine::draw_ship( const yarrr::Object& ship )
       cos( ship.angle * 3.14 / 180.0 / 4.0 ) * 60.0,
       sin( ship.angle * 3.14 / 180.0 / 4.0 ) * 60.0 );
 
-  const yarrr::Coordinate perpendicular( heading.y, heading.x * -1 );
   if ( !is_on_screen( ship.coordinate ) )
   {
     const yarrr::Coordinate diff(
@@ -127,11 +126,12 @@ SdlEngine::draw_ship( const yarrr::Object& ship )
     return;
   }
 
+  const yarrr::Coordinate perpendicular( yarrr::perpendicular( heading ) );
   draw_scaled_point( ship.coordinate, 4, 0xaaaa00 );
   draw_scaled_point( ship.coordinate + heading, 4, 0x00ff00 );
   draw_scaled_point( ship.coordinate - heading, 4, 0xff0000 );
-  draw_scaled_point( ship.coordinate - heading * 0.5 + perpendicular, 4, 0xff0000 );
-  draw_scaled_point( ship.coordinate - heading * 0.5 - perpendicular, 4, 0xff0000 );
+  draw_scaled_point( ship.coordinate - heading * 0.5 + perpendicular * 0.5, 4, 0xff0000 );
+  draw_scaled_point( ship.coordinate - heading * 0.5 - perpendicular * 0.5, 4, 0xff0000 );
 }
 
 
