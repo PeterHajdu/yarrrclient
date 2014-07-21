@@ -224,7 +224,7 @@ int main( int argc, char ** argv )
   typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
   ShipContainer ships;
 
-  SdlEngine graphics_engine( 1024, 768 );
+  SdlEngine graphics_engine( 800, 600 );
 
   the::ctci::Dispatcher event_dispatcher;
 
