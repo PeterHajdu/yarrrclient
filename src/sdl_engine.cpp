@@ -1,6 +1,6 @@
 #include "sdl_engine.hpp"
 
-#include <yarrr/object.hpp>
+#include <yarrr/physical_parameters.hpp>
 
 #include <cmath>
 #include <cassert>
@@ -112,7 +112,7 @@ SdlEngine::is_on_screen( const yarrr::Coordinate& coordinate ) const
 }
 
 void
-SdlEngine::draw_ship( const yarrr::Object& ship )
+SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 {
   const yarrr::Coordinate heading(
       cos( ship.angle * 3.14 / 180.0 / 4.0 ) * 60.0,

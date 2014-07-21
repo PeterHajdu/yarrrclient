@@ -8,7 +8,7 @@ struct SDL_Window;
 
 namespace yarrr
 {
-  class Object;
+  class PhysicalParameters;
 }
 
 class DrawableObject;
@@ -22,7 +22,7 @@ class SdlEngine
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
     void focus_to( const yarrr::Coordinate& center );
-    void draw_ship( const yarrr::Object& ship );
+    void draw_ship( const yarrr::PhysicalParameters& ship );
 
     void update_screen();
     void register_object( DrawableObject& object );

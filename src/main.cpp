@@ -81,7 +81,7 @@ namespace
 
       void handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update )
       {
-        const yarrr::Object& ship( object_state_update.object() );
+        const yarrr::PhysicalParameters& ship( object_state_update.physical_parameters() );
         if ( ship.id == ship_id )
         {
           m_logged_in = true;
@@ -94,7 +94,7 @@ namespace
       bool m_logged_in;
 
     public:
-      yarrr::Object::Id ship_id;
+      yarrr::PhysicalParameters::Id ship_id;
   };
 
 
@@ -192,7 +192,7 @@ class DrawableShip : public DrawableObject
       m_local_ship_control.handle_command( command );
     }
 
-    void update_ship( const yarrr::Object& ship )
+    void update_ship( const yarrr::PhysicalParameters& ship )
     {
       m_network_ship = ship;
     }
@@ -214,8 +214,8 @@ class DrawableShip : public DrawableObject
 
   private:
 
-    yarrr::Object m_local_ship;
-    yarrr::Object m_network_ship;
+    yarrr::PhysicalParameters m_local_ship;
+    yarrr::PhysicalParameters m_network_ship;
     yarrr::ShipControl m_local_ship_control;
 };
 
@@ -231,7 +231,7 @@ int main( int argc, char ** argv )
   event_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
       [ &graphics_engine, &ships ]( const yarrr::ObjectStateUpdate& object_state_update )
       {
-        const yarrr::Object& ship( object_state_update.object() );
+        const yarrr::PhysicalParameters& ship( object_state_update.physical_parameters() );
         ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
         if ( drawable_ship == ships.end() )
         {
