@@ -75,11 +75,86 @@ namespace
       yarrr::ShipControl m_local_ship_control;
   };
 
-  typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
-  ShipContainer ships;
   SdlEngine graphics_engine( 800, 600 );
 
   typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
+
+  class World
+  {
+    public:
+      World(
+          ConnectionWrapper& connection_wrapper,
+          yarrr::PhysicalParameters::Id ship_id )
+        : m_ship_id( ship_id )
+        , m_my_ship( nullptr )
+      {
+        m_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
+            std::bind( &World::handle_object_state_update, this, std::placeholders::_1 ) );
+        m_dispatcher.register_listener<yarrr::DeleteObject>(
+            std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
+        connection_wrapper.register_dispatcher( m_dispatcher );
+      }
+
+      void in_focus()
+      {
+        if ( !m_my_ship )
+        {
+          return;
+        }
+
+        m_my_ship->in_focus();
+      }
+
+      void handle_command( const yarrr::Command& command )
+      {
+        if ( !m_my_ship )
+        {
+          return;
+        }
+
+        m_my_ship->handle_command( command );
+      }
+
+      void update_to( the::time::Time timestamp )
+      {
+        for ( auto& ship : m_ships )
+        {
+          ship.second->travel_in_time_to( timestamp );
+        }
+      }
+
+      void handle_delete_object( const yarrr::DeleteObject& delete_object )
+      {
+        m_ships.erase( delete_object.object_id() );
+      }
+
+      void handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update )
+      {
+        const yarrr::PhysicalParameters& ship( object_state_update.physical_parameters() );
+        ShipContainer::iterator drawable_ship( m_ships.find( ship.id ) );
+        if ( drawable_ship == m_ships.end() )
+        {
+          m_ships.emplace( std::make_pair(
+                ship.id,
+                std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
+        }
+
+        if ( ship.id == m_ship_id )
+        {
+          //todo: remove lookup duplication
+          m_my_ship = m_ships[ ship.id ].get();
+        }
+
+        m_ships[ ship.id ]->update_ship( ship );
+      }
+
+    private:
+      typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
+      ShipContainer m_ships;
+      the::ctci::Dispatcher m_dispatcher;
+      yarrr::PhysicalParameters::Id m_ship_id;
+      DrawableShip* m_my_ship;
+  };
 
   class LoginHandler
   {
@@ -91,28 +166,7 @@ namespace
       {
         m_dispatcher.register_listener< yarrr::LoginResponse >(
             std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
-        m_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
-            std::bind( &LoginHandler::handle_object_state_update, this, std::placeholders::_1 ) );
         m_connection_wrapper.register_dispatcher( m_dispatcher );
-      }
-
-      void handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update )
-      {
-        const yarrr::PhysicalParameters& ship( object_state_update.physical_parameters() );
-        ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
-        if ( drawable_ship == ships.end() )
-        {
-          ships.emplace( std::make_pair(
-                ship.id,
-                std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
-        }
-
-        ships[ ship.id ]->update_ship( ship );
-      }
-
-      void handle_delete_object( const yarrr::DeleteObject& delete_object )
-      {
-        ships.erase( delete_object.object_id() );
       }
 
       void handle_incoming_messages()
@@ -234,7 +288,7 @@ int main( int argc, char ** argv )
   LoginHandler login_handler( network_connection );
   login_handler.log_in();
 
-  DrawableShip& my_ship( *ships.find( login_handler.user_id() )->second );
+  World world( network_connection, login_handler.user_id() );
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
@@ -270,19 +324,16 @@ int main( int argc, char ** argv )
         }
 
         yarrr::Command command( cmd, now );
-        my_ship.handle_command( command );
+        world.handle_command( command );
         network_connection.connection.send( command.serialize() );
       }
     }
 
     network_connection.process_incoming_messages();
 
-    for ( auto& ship : ships )
-    {
-      ship.second->travel_in_time_to( now );
-    }
+    world.update_to( now );
+    world.in_focus();
 
-    my_ship.in_focus();
     graphics_engine.update_screen();
     frequency_stabilizer.stabilize();
   }
