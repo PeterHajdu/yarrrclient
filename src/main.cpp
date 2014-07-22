@@ -83,8 +83,8 @@ namespace
   class Client
   {
     public:
-      Client( the::net::Connection& connection )
-        : m_connection_wrapper( connection )
+      Client( ConnectionWrapper& connection_wrapper )
+        : m_connection_wrapper( connection_wrapper )
         , m_logged_in( false )
         , ship_id( 0 )
       {
@@ -146,7 +146,7 @@ namespace
 
 
     private:
-      ConnectionWrapper m_connection_wrapper;
+      ConnectionWrapper& m_connection_wrapper;
       the::ctci::Dispatcher m_dispatcher;
       bool m_logged_in;
 
@@ -173,9 +173,9 @@ namespace
       }
 
 
-      Client& wait_for_connection()
+      ConnectionWrapper& wait_for_connection()
       {
-        while ( !m_client )
+        while ( !m_connection_wrapper )
         {
           std::cout << "connecting..." << std::endl;
           std::lock_guard< std::mutex > connection_guard( m_client_mutex );
@@ -191,7 +191,7 @@ namespace
         std::cout << "clock offset: " << m_clock_synchronizer->clock_offset() << std::endl;
         m_clock_synchronizer->synchronize_local_clock();
 
-        return *m_client;
+        return *m_connection_wrapper;
       }
 
       void new_connection( the::net::Connection& connection )
@@ -205,7 +205,7 @@ namespace
 
         std::lock_guard< std::mutex > connection_guard( m_client_mutex );
         std::cout << "new connection established" << std::endl;
-        m_client.reset( new Client( connection ) );
+        m_connection_wrapper.reset( new ConnectionWrapper( connection ) );
       }
 
       void lost_connection( the::net::Connection& )
@@ -216,7 +216,7 @@ namespace
 
     private:
       the::net::Service m_network_service;
-      std::unique_ptr< Client > m_client;
+      std::unique_ptr< ConnectionWrapper > m_connection_wrapper;
       std::mutex m_client_mutex;
       the::time::Clock& m_clock;
       typedef yarrr::clock_sync::Client< the::time::Clock, the::net::Connection > ClockSync;
@@ -237,7 +237,8 @@ int main( int argc, char ** argv )
         argv[1] :
         "localhost:2001") );
 
-  Client& client( establisher.wait_for_connection() );
+  ConnectionWrapper& network_connection( establisher.wait_for_connection() );
+  Client client( network_connection );
   client.log_in();
   DrawableShip& my_ship( *ships.find( client.ship_id )->second );
 
@@ -246,6 +247,7 @@ int main( int argc, char ** argv )
   bool running( true );
   while ( running )
   {
+    network_connection.process_incoming_messages();
     the::time::Clock::Time now( clock.now() );
     SDL_Event event;
     while ( SDL_PollEvent( &event ) )
@@ -279,7 +281,7 @@ int main( int argc, char ** argv )
       }
     }
 
-    client.handle_incoming_messages();
+    network_connection.process_incoming_messages();
 
     for ( auto& ship : ships )
     {
