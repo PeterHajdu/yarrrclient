@@ -82,10 +82,8 @@ namespace
   class World
   {
     public:
-      World(
-          ConnectionWrapper& connection_wrapper,
-          yarrr::PhysicalParameters::Id ship_id )
-        : m_ship_id( ship_id )
+      World( ConnectionWrapper& connection_wrapper )
+        : m_my_ship_id( 0 )
         , m_my_ship( nullptr )
       {
         m_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
@@ -103,6 +101,11 @@ namespace
         }
 
         m_my_ship->in_focus();
+      }
+
+      void set_ship_id( yarrr::PhysicalParameters::Id id )
+      {
+        m_my_ship_id = id;
       }
 
       void handle_command( const yarrr::Command& command )
@@ -140,7 +143,7 @@ namespace
                   std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) ).first;
         }
 
-        if ( ship.id == m_ship_id )
+        if ( ship.id == m_my_ship_id )
         {
           m_my_ship = drawable_ship->second.get();
         }
@@ -152,7 +155,7 @@ namespace
       typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
       ShipContainer m_ships;
       the::ctci::Dispatcher m_dispatcher;
-      yarrr::PhysicalParameters::Id m_ship_id;
+      yarrr::PhysicalParameters::Id m_my_ship_id;
       DrawableShip* m_my_ship;
   };
 
@@ -169,19 +172,9 @@ namespace
         m_connection_wrapper.register_dispatcher( m_dispatcher );
       }
 
-      void handle_incoming_messages()
-      {
-        m_connection_wrapper.process_incoming_messages();
-      }
-
       void log_in()
       {
         m_connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
-        while ( !m_logged_in )
-        {
-          handle_incoming_messages();
-          std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
-        }
       }
 
       void handle_login_response( const yarrr::LoginResponse& response )
@@ -288,13 +281,19 @@ int main( int argc, char ** argv )
   LoginHandler login_handler( network_connection );
   login_handler.log_in();
 
-  World world( network_connection, login_handler.user_id() );
+  World world( network_connection );
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
   bool running( true );
   while ( running )
   {
+    //todo: use something like a global event system
+    if ( login_handler.user_id() != 0 )
+    {
+      world.set_ship_id( login_handler.user_id() );
+    }
+
     network_connection.process_incoming_messages();
     the::time::Clock::Time now( clock.now() );
     SDL_Event event;
