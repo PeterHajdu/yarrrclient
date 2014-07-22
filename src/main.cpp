@@ -134,18 +134,18 @@ namespace
         ShipContainer::iterator drawable_ship( m_ships.find( ship.id ) );
         if ( drawable_ship == m_ships.end() )
         {
-          m_ships.emplace( std::make_pair(
-                ship.id,
-                std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
+          drawable_ship =
+            m_ships.emplace( std::make_pair(
+                  ship.id,
+                  std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) ).first;
         }
 
         if ( ship.id == m_ship_id )
         {
-          //todo: remove lookup duplication
-          m_my_ship = m_ships[ ship.id ].get();
+          m_my_ship = drawable_ship->second.get();
         }
 
-        m_ships[ ship.id ]->update_ship( ship );
+        drawable_ship->second->update_ship( ship );
       }
 
     private:
