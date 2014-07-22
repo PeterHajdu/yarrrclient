@@ -296,6 +296,57 @@ namespace
 }
 
 
+class KeyboardHandler
+{
+  public:
+    KeyboardHandler(
+        bool& running,
+        World& world,
+        NetworkService& network_service )
+      : m_running( running )
+      , m_world( world )
+      , m_network_service( network_service )
+    {
+    }
+
+    void send_command( yarrr::Command::Type cmd, the::time::Time& timestamp )
+    {
+      yarrr::Command command( cmd, timestamp );
+      m_world.handle_command( command );
+      m_network_service.send( command.serialize() );
+    }
+
+    void check_keyboard( the::time::Time& now )
+    {
+      SDL_PumpEvents();
+      const unsigned char *keystates = SDL_GetKeyboardState( nullptr );
+      if (keystates[SDL_SCANCODE_RIGHT])
+      {
+        send_command( yarrr::Command::cw, now );
+      }
+
+      if (keystates[SDL_SCANCODE_LEFT])
+      {
+        send_command( yarrr::Command::ccw, now );
+      }
+
+      if (keystates[SDL_SCANCODE_UP])
+      {
+        send_command( yarrr::Command::thruster, now );
+      }
+
+      if (keystates[SDL_SCANCODE_Q])
+      {
+        m_running = false;
+      }
+    }
+
+  private:
+    bool& m_running;
+    World& m_world;
+    NetworkService& m_network_service;
+};
+
 int main( int argc, char ** argv )
 {
   the::time::Clock clock;
@@ -313,41 +364,12 @@ int main( int argc, char ** argv )
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
   bool running( true );
+  KeyboardHandler keyboard_handler( running, world, network_service );
   while ( running )
   {
     the::time::Clock::Time now( clock.now() );
-    SDL_Event event;
-    while ( SDL_PollEvent( &event ) )
-    {
-      if ( event.type == SDL_QUIT )
-      {
-        running = false;
-      }
-      else if ( event.type == SDL_KEYDOWN )
-      {
-        char cmd( 0 );
-        switch( event.key.keysym.sym )
-        {
-          case SDLK_q:
-            running = false;
-            break;
-          case SDLK_UP:
-            cmd = yarrr::Command::thruster;
-            break;
-          case SDLK_LEFT:
-            cmd = yarrr::Command::ccw;
-            break;
-          case SDLK_RIGHT:
-            cmd = yarrr::Command::cw;
-            break;
-        }
 
-        yarrr::Command command( cmd, now );
-        world.handle_command( command );
-        network_service.send( command.serialize() );
-      }
-    }
-
+    keyboard_handler.check_keyboard( now );
     network_service.process_incoming_messages();
 
     world.update_to( now );
