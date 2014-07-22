@@ -29,6 +29,19 @@
 
 namespace
 {
+  the::ctci::Dispatcher local_event_dispatcher;
+  class LoggedIn
+  {
+    public:
+      add_ctci( "logged_id" );
+      LoggedIn( yarrr::PhysicalParameters::Id user_id )
+        : user_id( user_id )
+      {
+      }
+
+      const yarrr::PhysicalParameters::Id user_id;
+  };
+
   class DrawableShip : public DrawableObject
   {
     public:
@@ -91,6 +104,14 @@ namespace
         m_dispatcher.register_listener<yarrr::DeleteObject>(
             std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
         connection_wrapper.register_dispatcher( m_dispatcher );
+
+        local_event_dispatcher.register_listener< LoggedIn >(
+            std::bind( &World::handle_login, this, std::placeholders::_1 ) );
+      }
+
+      void handle_login( const LoggedIn& login )
+      {
+        m_my_ship_id = login.user_id;
       }
 
       void in_focus()
@@ -164,8 +185,6 @@ namespace
     public:
       LoginHandler( ConnectionWrapper& connection_wrapper )
         : m_connection_wrapper( connection_wrapper )
-        , m_logged_in( false )
-        , m_user_id( 0 )
       {
         m_dispatcher.register_listener< yarrr::LoginResponse >(
             std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
@@ -179,20 +198,12 @@ namespace
 
       void handle_login_response( const yarrr::LoginResponse& response )
       {
-        m_user_id = response.object_id();
-        m_logged_in = true;
-      }
-
-      yarrr::PhysicalParameters::Id user_id() const
-      {
-        return m_user_id;
+        local_event_dispatcher.dispatch( LoggedIn( response.object_id() ) );
       }
 
     private:
       ConnectionWrapper& m_connection_wrapper;
       the::ctci::Dispatcher m_dispatcher;
-      bool m_logged_in;
-      yarrr::PhysicalParameters::Id m_user_id;
   };
 
 
@@ -288,12 +299,6 @@ int main( int argc, char ** argv )
   bool running( true );
   while ( running )
   {
-    //todo: use something like a global event system
-    if ( login_handler.user_id() != 0 )
-    {
-      world.set_ship_id( login_handler.user_id() );
-    }
-
     network_connection.process_incoming_messages();
     the::time::Clock::Time now( clock.now() );
     SDL_Event event;
