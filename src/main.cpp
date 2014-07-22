@@ -230,58 +230,53 @@ namespace
   };
 
 
-  class ConnectionEstablisher
+  class NetworkService
   {
     public:
-      ConnectionEstablisher(
+      NetworkService(
           the::time::Clock& clock,
           const the::net::Address& address )
         : m_network_service(
-          std::bind( &ConnectionEstablisher::new_connection, this, std::placeholders::_1 ),
-          std::bind( &ConnectionEstablisher::lost_connection, this, std::placeholders::_1 ) )
+          std::bind( &NetworkService::new_connection, this, std::placeholders::_1 ),
+          std::bind( &NetworkService::lost_connection, this, std::placeholders::_1 ) )
         , m_clock( clock )
-        , m_clock_synchronizer( nullptr )
       {
         std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
         m_network_service.connect_to( address );
         m_network_service.start();
       }
 
-
-      ConnectionWrapper& wait_for_connection()
+      void send( yarrr::Data&& data )
       {
-        while ( !m_connection_wrapper )
+        //todo: somehow these locks should be avoided
+        std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
+        if ( !m_connection_wrapper )
         {
-          std::cout << "connecting..." << std::endl;
-          std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
-          std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+          return;
         }
 
-        while ( !m_clock_synchronizer->clock_offset() )
-        {
-          std::cout << "waiting for clock synchronization..." << std::endl;
-          std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
-        }
-        std::cout << "network latency: " << m_clock_synchronizer->network_latency() << std::endl;
-        std::cout << "clock offset: " << m_clock_synchronizer->clock_offset() << std::endl;
-        m_clock_synchronizer->synchronize_local_clock();
+        m_connection_wrapper->connection.send( std::move( data ) );
+      }
 
-        local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
-        return *m_connection_wrapper;
+      void process_incoming_messages()
+      {
+        std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
+        if ( !m_connection_wrapper )
+        {
+          return;
+        }
+
+        m_connection_wrapper->process_incoming_messages();
       }
 
       void new_connection( the::net::Connection& connection )
       {
-        std::unique_ptr< ClockSync > clock_synchronizer(
-            new yarrr::clock_sync::Client< the::time::Clock, the::net::Connection >(
-              m_clock,
-              connection ) );
-        m_clock_synchronizer = clock_synchronizer.get();
-        connection.register_task( std::move( clock_synchronizer ) );
+        connection.register_task( std::unique_ptr< ClockSync >( new ClockSync( m_clock, connection ) ) );
 
         std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
         std::cout << "new connection established" << std::endl;
         m_connection_wrapper.reset( new ConnectionWrapper( connection ) );
+        local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
       }
 
       void lost_connection( the::net::Connection& )
@@ -296,8 +291,6 @@ namespace
       std::mutex m_connection_mutex;
       the::time::Clock& m_clock;
       typedef yarrr::clock_sync::Client< the::time::Clock, the::net::Connection > ClockSync;
-      typedef ClockSync* ClockSyncPointer;
-      ClockSyncPointer m_clock_synchronizer;
   };
 
 }
@@ -306,23 +299,22 @@ namespace
 int main( int argc, char ** argv )
 {
   the::time::Clock clock;
+
   LoginHandler login_handler;
   World world;
 
-  ConnectionEstablisher establisher(
+  NetworkService network_service(
       clock,
       the::net::Address(
         argc > 1 ?
         argv[1] :
         "localhost:2001") );
 
-  ConnectionWrapper& network_connection( establisher.wait_for_connection() );
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
   bool running( true );
   while ( running )
   {
-    network_connection.process_incoming_messages();
     the::time::Clock::Time now( clock.now() );
     SDL_Event event;
     while ( SDL_PollEvent( &event ) )
@@ -352,11 +344,11 @@ int main( int argc, char ** argv )
 
         yarrr::Command command( cmd, now );
         world.handle_command( command );
-        network_connection.connection.send( command.serialize() );
+        network_service.send( command.serialize() );
       }
     }
 
-    network_connection.process_incoming_messages();
+    network_service.process_incoming_messages();
 
     world.update_to( now );
     world.in_focus();
