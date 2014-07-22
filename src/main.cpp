@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 
+#include <yarrr/connection_wrapper.hpp>
 #include <yarrr/object.hpp>
 #include <yarrr/clock_synchronizer.hpp>
 #include <yarrr/event.hpp>
@@ -28,14 +29,62 @@
 
 namespace
 {
+  class DrawableShip : public DrawableObject
+  {
+    public:
+      DrawableShip( SdlEngine& graphics_engine )
+        : DrawableObject( graphics_engine )
+        , m_local_ship_control( m_local_ship )
+      {
+      }
+
+      void in_focus()
+      {
+        m_graphical_engine.focus_to( m_local_ship.coordinate );
+      }
+
+      void handle_command( const yarrr::Command& command )
+      {
+        m_local_ship_control.handle_command( command );
+      }
+
+      void update_ship( const yarrr::PhysicalParameters& ship )
+      {
+        m_network_ship = ship;
+      }
+
+      void travel_in_time_to( const the::time::Clock::Time& timestamp )
+      {
+        yarrr::travel_in_time_to( timestamp, m_local_ship );
+        yarrr::travel_in_time_to( timestamp, m_network_ship );
+        m_local_ship.coordinate = ( m_network_ship.coordinate + m_local_ship.coordinate ) * 0.5;
+        m_local_ship.velocity = ( m_network_ship.velocity + m_local_ship.velocity ) * 0.5;
+        m_local_ship.angle = ( m_network_ship.angle + m_local_ship.angle ) * 0.5;
+        m_local_ship.vangle = ( m_network_ship.vangle + m_local_ship.vangle ) * 0.5;
+      }
+
+      void draw() override
+      {
+        m_graphical_engine.draw_ship( m_local_ship );
+      }
+
+    private:
+
+      yarrr::PhysicalParameters m_local_ship;
+      yarrr::PhysicalParameters m_network_ship;
+      yarrr::ShipControl m_local_ship_control;
+  };
+
+  typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
+  ShipContainer ships;
+  SdlEngine graphics_engine( 800, 600 );
+
+  typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
   class Client
   {
     public:
-      Client(
-          the::net::Connection& connection,
-          the::ctci::Dispatcher& dispatcher )
-        : m_connection( connection )
-        , m_dispatcher( dispatcher )
+      Client( the::net::Connection& connection )
+        : m_connection_wrapper( connection )
         , m_logged_in( false )
         , ship_id( 0 )
       {
@@ -43,30 +92,46 @@ namespace
             std::bind( &Client::handle_login_response, this, std::placeholders::_1 ) );
         m_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
             std::bind( &Client::handle_object_state_update, this, std::placeholders::_1 ) );
+        m_connection_wrapper.register_dispatcher( m_dispatcher );
+      }
+
+      void handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update )
+      {
+        const yarrr::PhysicalParameters& ship( object_state_update.physical_parameters() );
+        ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
+        if ( drawable_ship == ships.end() )
+        {
+          ships.emplace( std::make_pair(
+                ship.id,
+                std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
+        }
+
+        if ( ship.id == ship_id )
+        {
+          m_logged_in = true;
+        }
+
+        ships[ ship.id ]->update_ship( ship );
+      }
+
+      void handle_delete_object( const yarrr::DeleteObject& delete_object )
+      {
+        ships.erase( delete_object.object_id() );
       }
 
       void handle_incoming_messages()
       {
-        the::net::Data message;
-        while ( m_connection.receive( message ) )
-        {
-          yarrr::Event::Pointer event( yarrr::EventFactory::create( message ) );
-          if ( !event )
-          {
-            continue;
-          }
-          m_dispatcher.polymorphic_dispatch( *event );
-        }
+        m_connection_wrapper.process_incoming_messages();
       }
 
       void send( yarrr::Data&& data )
       {
-        m_connection.send( std::move( data ) );
+        m_connection_wrapper.connection.send( std::move( data ) );
       }
 
       void log_in()
       {
-        m_connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
+        m_connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
         while ( !m_logged_in )
         {
           handle_incoming_messages();
@@ -79,18 +144,10 @@ namespace
         ship_id = response.object_id();
       }
 
-      void handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update )
-      {
-        const yarrr::PhysicalParameters& ship( object_state_update.physical_parameters() );
-        if ( ship.id == ship_id )
-        {
-          m_logged_in = true;
-        }
-      }
 
     private:
-      the::net::Connection& m_connection;
-      the::ctci::Dispatcher& m_dispatcher;
+      ConnectionWrapper m_connection_wrapper;
+      the::ctci::Dispatcher m_dispatcher;
       bool m_logged_in;
 
     public:
@@ -103,15 +160,12 @@ namespace
     public:
       ConnectionEstablisher(
           the::time::Clock& clock,
-          const the::net::Address& address,
-          the::ctci::Dispatcher& dispatcher )
-
+          const the::net::Address& address )
         : m_network_service(
           std::bind( &ConnectionEstablisher::new_connection, this, std::placeholders::_1 ),
           std::bind( &ConnectionEstablisher::lost_connection, this, std::placeholders::_1 ) )
         , m_clock( clock )
         , m_clock_synchronizer( nullptr )
-        , m_dispatcher( dispatcher )
       {
         std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
         m_network_service.connect_to( address );
@@ -151,7 +205,7 @@ namespace
 
         std::lock_guard< std::mutex > connection_guard( m_client_mutex );
         std::cout << "new connection established" << std::endl;
-        m_client.reset( new Client( connection, m_dispatcher ) );
+        m_client.reset( new Client( connection ) );
       }
 
       void lost_connection( the::net::Connection& )
@@ -168,95 +222,21 @@ namespace
       typedef yarrr::clock_sync::Client< the::time::Clock, the::net::Connection > ClockSync;
       typedef ClockSync* ClockSyncPointer;
       ClockSyncPointer m_clock_synchronizer;
-      the::ctci::Dispatcher& m_dispatcher;
   };
 
 }
 
-class DrawableShip : public DrawableObject
-{
-  public:
-    DrawableShip( SdlEngine& graphics_engine )
-      : DrawableObject( graphics_engine )
-      , m_local_ship_control( m_local_ship )
-    {
-    }
-
-    void in_focus()
-    {
-      m_graphical_engine.focus_to( m_local_ship.coordinate );
-    }
-
-    void handle_command( const yarrr::Command& command )
-    {
-      m_local_ship_control.handle_command( command );
-    }
-
-    void update_ship( const yarrr::PhysicalParameters& ship )
-    {
-      m_network_ship = ship;
-    }
-
-    void travel_in_time_to( const the::time::Clock::Time& timestamp )
-    {
-      yarrr::travel_in_time_to( timestamp, m_local_ship );
-      yarrr::travel_in_time_to( timestamp, m_network_ship );
-      m_local_ship.coordinate = ( m_network_ship.coordinate + m_local_ship.coordinate ) * 0.5;
-      m_local_ship.velocity = ( m_network_ship.velocity + m_local_ship.velocity ) * 0.5;
-      m_local_ship.angle = ( m_network_ship.angle + m_local_ship.angle ) * 0.5;
-      m_local_ship.vangle = ( m_network_ship.vangle + m_local_ship.vangle ) * 0.5;
-    }
-
-    void draw() override
-    {
-      m_graphical_engine.draw_ship( m_local_ship );
-    }
-
-  private:
-
-    yarrr::PhysicalParameters m_local_ship;
-    yarrr::PhysicalParameters m_network_ship;
-    yarrr::ShipControl m_local_ship_control;
-};
 
 int main( int argc, char ** argv )
 {
-  typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
-  ShipContainer ships;
-
-  SdlEngine graphics_engine( 800, 600 );
-
-  the::ctci::Dispatcher event_dispatcher;
-
-  event_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
-      [ &graphics_engine, &ships ]( const yarrr::ObjectStateUpdate& object_state_update )
-      {
-        const yarrr::PhysicalParameters& ship( object_state_update.physical_parameters() );
-        ShipContainer::iterator drawable_ship( ships.find( ship.id ) );
-        if ( drawable_ship == ships.end() )
-        {
-          ships.emplace( std::make_pair(
-                ship.id,
-                std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
-        }
-
-        ships[ ship.id ]->update_ship( ship );
-      } );
-
-  event_dispatcher.register_listener<yarrr::DeleteObject>(
-      [&ships]( const yarrr::DeleteObject& delete_object )
-      {
-        ships.erase( delete_object.object_id() );
-      });
-
   the::time::Clock clock;
   ConnectionEstablisher establisher(
       clock,
       the::net::Address(
         argc > 1 ?
         argv[1] :
-        "localhost:2001"),
-      event_dispatcher );
+        "localhost:2001") );
+
   Client& client( establisher.wait_for_connection() );
   client.log_in();
   DrawableShip& my_ship( *ships.find( client.ship_id )->second );
