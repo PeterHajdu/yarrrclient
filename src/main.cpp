@@ -29,6 +29,8 @@
 
 namespace
 {
+  typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
+
   the::ctci::Dispatcher local_event_dispatcher;
   class LoggedIn
   {
@@ -40,6 +42,18 @@ namespace
       }
 
       const yarrr::PhysicalParameters::Id user_id;
+  };
+
+  class ConnectionEstablished
+  {
+    public:
+      add_ctci( "connection_established" );
+      ConnectionEstablished( ConnectionWrapper& connection_wrapper )
+        : connection_wrapper( connection_wrapper )
+      {
+      }
+
+      ConnectionWrapper& connection_wrapper;
   };
 
   class DrawableShip : public DrawableObject
@@ -90,12 +104,10 @@ namespace
 
   SdlEngine graphics_engine( 800, 600 );
 
-  typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
-
   class World
   {
     public:
-      World( ConnectionWrapper& connection_wrapper )
+      World()
         : m_my_ship_id( 0 )
         , m_my_ship( nullptr )
       {
@@ -103,10 +115,16 @@ namespace
             std::bind( &World::handle_object_state_update, this, std::placeholders::_1 ) );
         m_dispatcher.register_listener<yarrr::DeleteObject>(
             std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
-        connection_wrapper.register_dispatcher( m_dispatcher );
 
         local_event_dispatcher.register_listener< LoggedIn >(
             std::bind( &World::handle_login, this, std::placeholders::_1 ) );
+        local_event_dispatcher.register_listener<ConnectionEstablished>(
+            std::bind( &World::handle_connection_established, this, std::placeholders::_1 ) );
+      }
+
+      void handle_connection_established( const ConnectionEstablished& connection_established )
+      {
+        connection_established.connection_wrapper.register_dispatcher( m_dispatcher );
       }
 
       void handle_login( const LoggedIn& login )
@@ -183,17 +201,23 @@ namespace
   class LoginHandler
   {
     public:
-      LoginHandler( ConnectionWrapper& connection_wrapper )
-        : m_connection_wrapper( connection_wrapper )
+      LoginHandler()
       {
         m_dispatcher.register_listener< yarrr::LoginResponse >(
             std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
-        m_connection_wrapper.register_dispatcher( m_dispatcher );
+        local_event_dispatcher.register_listener<ConnectionEstablished>(
+            std::bind( &LoginHandler::handle_connection_established, this, std::placeholders::_1 ) );
       }
 
-      void log_in()
+      void handle_connection_established( const ConnectionEstablished& connection_established )
       {
-        m_connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
+        connection_established.connection_wrapper.register_dispatcher( m_dispatcher );
+        log_in( connection_established.connection_wrapper );
+      }
+
+      void log_in( ConnectionWrapper& connection_wrapper )
+      {
+        connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
       }
 
       void handle_login_response( const yarrr::LoginResponse& response )
@@ -202,7 +226,6 @@ namespace
       }
 
     private:
-      ConnectionWrapper& m_connection_wrapper;
       the::ctci::Dispatcher m_dispatcher;
   };
 
@@ -243,6 +266,7 @@ namespace
         std::cout << "clock offset: " << m_clock_synchronizer->clock_offset() << std::endl;
         m_clock_synchronizer->synchronize_local_clock();
 
+        local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
         return *m_connection_wrapper;
       }
 
@@ -282,18 +306,17 @@ namespace
 int main( int argc, char ** argv )
 {
   the::time::Clock clock;
+  LoginHandler login_handler;
+  World world;
+
   ConnectionEstablisher establisher(
       clock,
       the::net::Address(
         argc > 1 ?
         argv[1] :
         "localhost:2001") );
+
   ConnectionWrapper& network_connection( establisher.wait_for_connection() );
-  LoginHandler login_handler( network_connection );
-  login_handler.log_in();
-
-  World world( network_connection );
-
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
   bool running( true );
