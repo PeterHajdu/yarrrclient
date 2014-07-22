@@ -80,18 +80,19 @@ namespace
   SdlEngine graphics_engine( 800, 600 );
 
   typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
-  class Client
+
+  class LoginHandler
   {
     public:
-      Client( ConnectionWrapper& connection_wrapper )
+      LoginHandler( ConnectionWrapper& connection_wrapper )
         : m_connection_wrapper( connection_wrapper )
         , m_logged_in( false )
-        , ship_id( 0 )
+        , m_user_id( 0 )
       {
         m_dispatcher.register_listener< yarrr::LoginResponse >(
-            std::bind( &Client::handle_login_response, this, std::placeholders::_1 ) );
+            std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
         m_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
-            std::bind( &Client::handle_object_state_update, this, std::placeholders::_1 ) );
+            std::bind( &LoginHandler::handle_object_state_update, this, std::placeholders::_1 ) );
         m_connection_wrapper.register_dispatcher( m_dispatcher );
       }
 
@@ -104,11 +105,6 @@ namespace
           ships.emplace( std::make_pair(
                 ship.id,
                 std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) );
-        }
-
-        if ( ship.id == ship_id )
-        {
-          m_logged_in = true;
         }
 
         ships[ ship.id ]->update_ship( ship );
@@ -124,11 +120,6 @@ namespace
         m_connection_wrapper.process_incoming_messages();
       }
 
-      void send( yarrr::Data&& data )
-      {
-        m_connection_wrapper.connection.send( std::move( data ) );
-      }
-
       void log_in()
       {
         m_connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
@@ -141,17 +132,20 @@ namespace
 
       void handle_login_response( const yarrr::LoginResponse& response )
       {
-        ship_id = response.object_id();
+        m_user_id = response.object_id();
+        m_logged_in = true;
       }
 
+      yarrr::PhysicalParameters::Id user_id() const
+      {
+        return m_user_id;
+      }
 
     private:
       ConnectionWrapper& m_connection_wrapper;
       the::ctci::Dispatcher m_dispatcher;
       bool m_logged_in;
-
-    public:
-      yarrr::PhysicalParameters::Id ship_id;
+      yarrr::PhysicalParameters::Id m_user_id;
   };
 
 
@@ -178,7 +172,7 @@ namespace
         while ( !m_connection_wrapper )
         {
           std::cout << "connecting..." << std::endl;
-          std::lock_guard< std::mutex > connection_guard( m_client_mutex );
+          std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
           std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
         }
 
@@ -203,7 +197,7 @@ namespace
         m_clock_synchronizer = clock_synchronizer.get();
         connection.register_task( std::move( clock_synchronizer ) );
 
-        std::lock_guard< std::mutex > connection_guard( m_client_mutex );
+        std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
         std::cout << "new connection established" << std::endl;
         m_connection_wrapper.reset( new ConnectionWrapper( connection ) );
       }
@@ -217,7 +211,7 @@ namespace
     private:
       the::net::Service m_network_service;
       std::unique_ptr< ConnectionWrapper > m_connection_wrapper;
-      std::mutex m_client_mutex;
+      std::mutex m_connection_mutex;
       the::time::Clock& m_clock;
       typedef yarrr::clock_sync::Client< the::time::Clock, the::net::Connection > ClockSync;
       typedef ClockSync* ClockSyncPointer;
@@ -236,11 +230,11 @@ int main( int argc, char ** argv )
         argc > 1 ?
         argv[1] :
         "localhost:2001") );
-
   ConnectionWrapper& network_connection( establisher.wait_for_connection() );
-  Client client( network_connection );
-  client.log_in();
-  DrawableShip& my_ship( *ships.find( client.ship_id )->second );
+  LoginHandler login_handler( network_connection );
+  login_handler.log_in();
+
+  DrawableShip& my_ship( *ships.find( login_handler.user_id() )->second );
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
@@ -277,7 +271,7 @@ int main( int argc, char ** argv )
 
         yarrr::Command command( cmd, now );
         my_ship.handle_command( command );
-        client.send( command.serialize() );
+        network_connection.connection.send( command.serialize() );
       }
     }
 
