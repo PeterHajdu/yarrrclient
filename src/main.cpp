@@ -84,6 +84,7 @@ namespace
       {
         yarrr::travel_in_time_to( timestamp, m_local_ship );
         yarrr::travel_in_time_to( timestamp, m_network_ship );
+        //todo: extract physical state average to separate function with a ratio parameter
         m_local_ship.coordinate = ( m_network_ship.coordinate + m_local_ship.coordinate ) * 0.5;
         m_local_ship.velocity = ( m_network_ship.velocity + m_local_ship.velocity ) * 0.5;
         m_local_ship.angle = ( m_network_ship.angle + m_local_ship.angle ) * 0.5;
@@ -140,11 +141,6 @@ namespace
         }
 
         m_my_ship->in_focus();
-      }
-
-      void set_ship_id( yarrr::PhysicalParameters::Id id )
-      {
-        m_my_ship_id = id;
       }
 
       void handle_command( const yarrr::Command& command )
