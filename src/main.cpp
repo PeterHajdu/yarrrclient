@@ -23,6 +23,7 @@
 #include <thetime/clock.hpp>
 
 #include <thectci/dispatcher.hpp>
+#include <thectci/multiplexer.hpp>
 
 #include "sdl_engine.hpp"
 #include <SDL2/SDL.h>
@@ -121,6 +122,8 @@ namespace
             std::bind( &World::handle_login, this, std::placeholders::_1 ) );
         local_event_dispatcher.register_listener<ConnectionEstablished>(
             std::bind( &World::handle_connection_established, this, std::placeholders::_1 ) );
+        local_event_dispatcher.register_listener<yarrr::Command>(
+            std::bind( &World::handle_command, this, std::placeholders::_1 ) );
       }
 
       void handle_connection_established( const ConnectionEstablished& connection_established )
@@ -240,11 +243,25 @@ namespace
         std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
         m_network_service.connect_to( address );
         m_network_service.start();
+
+        local_event_dispatcher.register_listener<yarrr::Command>(
+            std::bind( &NetworkService::handle_command, this, std::placeholders::_1 ) );
+      }
+
+      void handle_command( const yarrr::Command& command )
+      {
+        //todo: somehow these locks should be avoided
+        std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
+        if ( !m_connection_wrapper )
+        {
+          return;
+        }
+
+        m_connection_wrapper->connection.send( command.serialize() );
       }
 
       void send( yarrr::Data&& data )
       {
-        //todo: somehow these locks should be avoided
         std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
         if ( !m_connection_wrapper )
         {
@@ -292,24 +309,18 @@ namespace
 }
 
 
-class KeyboardHandler
+class KeyboardHandler : public the::ctci::Multiplexer
 {
   public:
-    KeyboardHandler(
-        bool& running,
-        World& world,
-        NetworkService& network_service )
+    KeyboardHandler( bool& running )
       : m_running( running )
-      , m_world( world )
-      , m_network_service( network_service )
     {
     }
 
     void send_command( yarrr::Command::Type cmd, the::time::Time& timestamp )
     {
       yarrr::Command command( cmd, timestamp );
-      m_world.handle_command( command );
-      m_network_service.send( command.serialize() );
+      dispatch( command );
     }
 
     void check_keyboard( the::time::Time& now )
@@ -339,8 +350,6 @@ class KeyboardHandler
 
   private:
     bool& m_running;
-    World& m_world;
-    NetworkService& m_network_service;
 };
 
 int main( int argc, char ** argv )
@@ -360,7 +369,9 @@ int main( int argc, char ** argv )
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
   bool running( true );
-  KeyboardHandler keyboard_handler( running, world, network_service );
+  KeyboardHandler keyboard_handler( running );
+  keyboard_handler.register_dispatcher( local_event_dispatcher );
+
   while ( running )
   {
     the::time::Clock::Time now( clock.now() );
