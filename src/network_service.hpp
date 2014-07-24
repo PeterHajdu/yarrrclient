@@ -46,6 +46,7 @@ class LoginHandler
     void handle_login_response( const yarrr::LoginResponse& response );
   private:
     the::ctci::Dispatcher m_dispatcher;
+    the::ctci::Dispatcher& m_local_event_dispatcher;
 };
 
 namespace yarrr
@@ -73,5 +74,7 @@ class NetworkService
     LoginHandler m_login_handler;
 
     the::net::Address m_server_address;
+
+    the::ctci::Dispatcher& m_local_event_dispatcher;
 };
 

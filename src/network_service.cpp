@@ -1,12 +1,11 @@
 #include "network_service.hpp"
+#include "local_event_dispatcher.hpp"
 #include <thenet/address.hpp>
 #include <thectci/dispatcher.hpp>
 #include <yarrr/command.hpp>
 #include <yarrr/login.hpp>
 //todo: replace with decent log framework
 #include <iostream>
-
-extern the::ctci::Dispatcher local_event_dispatcher;
 
 NetworkService::NetworkService(
     the::time::Clock& clock,
@@ -16,12 +15,13 @@ NetworkService::NetworkService(
       std::bind( &NetworkService::lost_connection, this, std::placeholders::_1 ) )
   , m_clock( clock )
   , m_server_address( address )
+  , m_local_event_dispatcher( the::ctci::ServiceRegistry::service< LocalEventDispatcher >().dispatcher )
 {
   std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
   m_network_service.connect_to( address );
   m_network_service.start();
 
-  local_event_dispatcher.register_listener<yarrr::Command>(
+  m_local_event_dispatcher.register_listener<yarrr::Command>(
       std::bind( &NetworkService::handle_command, this, std::placeholders::_1 ) );
 }
 
@@ -65,7 +65,7 @@ NetworkService::new_connection( the::net::Connection& connection )
   std::cout << "new connection established" << std::endl;
   m_connection_wrapper.reset( new ConnectionWrapper( connection ) );
   //todo: move to main thread
-  local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
+  m_local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
 }
 
 void
@@ -77,10 +77,11 @@ NetworkService::lost_connection( the::net::Connection& )
 
 
 LoginHandler::LoginHandler()
+  : m_local_event_dispatcher( the::ctci::ServiceRegistry::service< LocalEventDispatcher >().dispatcher )
 {
   m_dispatcher.register_listener< yarrr::LoginResponse >(
       std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
-  local_event_dispatcher.register_listener<ConnectionEstablished>(
+  m_local_event_dispatcher.register_listener<ConnectionEstablished>(
       std::bind( &LoginHandler::handle_connection_established, this, std::placeholders::_1 ) );
 }
 
@@ -94,6 +95,6 @@ LoginHandler::handle_connection_established( const ConnectionEstablished& connec
 void
 LoginHandler::handle_login_response( const yarrr::LoginResponse& response )
 {
-  local_event_dispatcher.dispatch( LoggedIn( response.object_id() ) );
+  m_local_event_dispatcher.dispatch( LoggedIn( response.object_id() ) );
 }
 

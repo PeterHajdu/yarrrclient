@@ -1,6 +1,7 @@
 #include "network_service.hpp"
 #include "sdl_engine.hpp"
 #include "keyboard_handler.hpp"
+#include "local_event_dispatcher.hpp"
 
 #include <iostream>
 #include <thread>
@@ -19,9 +20,6 @@
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
 #include <thectci/dispatcher.hpp>
-
-
-the::ctci::Dispatcher local_event_dispatcher;
 
 namespace
 {
@@ -89,6 +87,8 @@ namespace
         m_dispatcher.register_listener<yarrr::DeleteObject>(
             std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
 
+        the::ctci::Dispatcher& local_event_dispatcher(
+            the::ctci::ServiceRegistry::service< LocalEventDispatcher >().dispatcher );
         local_event_dispatcher.register_listener< LoggedIn >(
             std::bind( &World::handle_login, this, std::placeholders::_1 ) );
         local_event_dispatcher.register_listener<ConnectionEstablished>(
@@ -192,7 +192,7 @@ int main( int argc, char ** argv )
 
   bool running( true );
   KeyboardHandler keyboard_handler( running );
-  keyboard_handler.register_dispatcher( local_event_dispatcher );
+  keyboard_handler.register_dispatcher( the::ctci::ServiceRegistry::service<LocalEventDispatcher>().dispatcher );
 
   while ( running )
   {
