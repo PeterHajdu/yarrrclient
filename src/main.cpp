@@ -1,6 +1,6 @@
 #include "network_service.hpp"
 #include "sdl_engine.hpp"
-#include <SDL2/SDL.h>
+#include "keyboard_handler.hpp"
 
 #include <iostream>
 #include <thread>
@@ -19,7 +19,6 @@
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
 #include <thectci/dispatcher.hpp>
-#include <thectci/multiplexer.hpp>
 
 
 the::ctci::Dispatcher local_event_dispatcher;
@@ -175,49 +174,6 @@ namespace
 
 }
 
-
-class KeyboardHandler : public the::ctci::Multiplexer
-{
-  public:
-    KeyboardHandler( bool& running )
-      : m_running( running )
-    {
-    }
-
-    void send_command( yarrr::Command::Type cmd, the::time::Time& timestamp )
-    {
-      yarrr::Command command( cmd, timestamp );
-      dispatch( command );
-    }
-
-    void check_keyboard( the::time::Time& now )
-    {
-      SDL_PumpEvents();
-      const unsigned char *keystates = SDL_GetKeyboardState( nullptr );
-      if (keystates[SDL_SCANCODE_RIGHT])
-      {
-        send_command( yarrr::Command::cw, now );
-      }
-
-      if (keystates[SDL_SCANCODE_LEFT])
-      {
-        send_command( yarrr::Command::ccw, now );
-      }
-
-      if (keystates[SDL_SCANCODE_UP])
-      {
-        send_command( yarrr::Command::thruster, now );
-      }
-
-      if (keystates[SDL_SCANCODE_Q])
-      {
-        m_running = false;
-      }
-    }
-
-  private:
-    bool& m_running;
-};
 
 int main( int argc, char ** argv )
 {
