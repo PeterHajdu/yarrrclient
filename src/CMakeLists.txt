@@ -5,6 +5,7 @@ set(SOURCE_FILES
   network_service.cpp
   keyboard_handler.cpp
   local_event_dispatcher.cpp
+  world.cpp
     )
 
 add_executable(yarrrclient ${SOURCE_FILES})

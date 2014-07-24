@@ -8,6 +8,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include <thectci/service_registry.hpp>
+
 SdlEngine::SdlEngine( int16_t x, int16_t y )
   : m_window( nullptr )
   , m_screen( nullptr )
@@ -171,5 +173,10 @@ SdlEngine::delete_object( const DrawableObject& object )
   m_objects.erase(
       std::remove( std::begin( m_objects ), std::end( m_objects ), &object )
       , std::end( m_objects ) );
+}
+
+namespace
+{
+  the::ctci::AutoServiceRegister< SdlEngine, SdlEngine > auto_sdl_engine_register( 800, 600 );
 }
 

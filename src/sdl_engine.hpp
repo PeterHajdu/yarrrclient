@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <yarrr/types.hpp>
+#include <thectci/id.hpp>
 
 struct SDL_Surface;
 struct SDL_Window;
@@ -15,6 +16,7 @@ class DrawableObject;
 class SdlEngine
 {
   public:
+    add_ctci( "sdl_engine" );
     SdlEngine( int16_t x, int16_t y );
     ~SdlEngine();
 
