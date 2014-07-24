@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 
+#include <yarrr/basic_behaviors.hpp>
 #include <yarrr/connection_wrapper.hpp>
 #include <yarrr/object.hpp>
 #include <yarrr/clock_synchronizer.hpp>
@@ -57,54 +58,56 @@ namespace
       ConnectionWrapper& connection_wrapper;
   };
 
-  class DrawableShip : public DrawableObject
+  class FocusOnObject { public: add_ctci( "focus_on_object" ) };
+
+  class GraphicalBehavior :
+    public yarrr::ObjectBehavior,
+    public DrawableObject
   {
     public:
-      DrawableShip( SdlEngine& graphics_engine )
+      GraphicalBehavior( SdlEngine& graphics_engine )
         : DrawableObject( graphics_engine )
-        , m_local_ship_control( m_local_ship )
+        , m_local_physical_behavior( nullptr )
+        , m_graphical_engine( graphics_engine )
       {
       }
 
-      void in_focus()
+      void register_to( the::ctci::Dispatcher& dispatcher, the::ctci::ComponentRegistry& registry )
       {
-        m_graphical_engine.focus_to( m_local_ship.coordinate );
+        m_local_physical_behavior = &registry.component< yarrr::LocalPhysicalBehavior >();
+        dispatcher.register_listener< FocusOnObject >( std::bind(
+              &GraphicalBehavior::handle_focus_on_object, this, std::placeholders::_1 ) );
       }
 
-      void handle_command( const yarrr::Command& command )
+      void handle_focus_on_object( const FocusOnObject& )
       {
-        m_local_ship_control.handle_command( command );
+        assert( m_local_physical_behavior );
+        m_graphical_engine.focus_to( m_local_physical_behavior->physical_parameters.coordinate );
       }
 
-      void update_ship( const yarrr::PhysicalParameters& ship )
+      virtual void draw() override
       {
-        m_network_ship = ship;
-      }
-
-      void travel_in_time_to( const the::time::Clock::Time& timestamp )
-      {
-        yarrr::travel_in_time_to( timestamp, m_local_ship );
-        yarrr::travel_in_time_to( timestamp, m_network_ship );
-        //todo: extract physical state average to separate function with a ratio parameter
-        m_local_ship.coordinate = ( m_network_ship.coordinate + m_local_ship.coordinate ) * 0.5;
-        m_local_ship.velocity = ( m_network_ship.velocity + m_local_ship.velocity ) * 0.5;
-        m_local_ship.angle = ( m_network_ship.angle + m_local_ship.angle ) * 0.5;
-        m_local_ship.vangle = ( m_network_ship.vangle + m_local_ship.vangle ) * 0.5;
-      }
-
-      void draw() override
-      {
-        m_graphical_engine.draw_ship( m_local_ship );
+        assert( m_local_physical_behavior );
+        m_graphical_engine.draw_ship( m_local_physical_behavior->physical_parameters );
       }
 
     private:
-
-      yarrr::PhysicalParameters m_local_ship;
-      yarrr::PhysicalParameters m_network_ship;
-      yarrr::ShipControl m_local_ship_control;
+      yarrr::LocalPhysicalBehavior* m_local_physical_behavior;
+      SdlEngine& m_graphical_engine;
   };
 
   SdlEngine graphics_engine( 800, 600 );
+
+  yarrr::Object::Pointer create_basic_ship()
+  {
+    yarrr::Object::Pointer ship( new yarrr::Object() );
+    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new yarrr::LocalPhysicalBehavior() ) );
+    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new yarrr::SimplePhysicsUpdater() ) );
+    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new yarrr::NetworkSynchronizer() ) );
+    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new yarrr::Engine() ) );
+    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new GraphicalBehavior( graphics_engine ) ) );
+    return ship;
+  }
 
   class World
   {
@@ -143,7 +146,7 @@ namespace
           return;
         }
 
-        m_my_ship->in_focus();
+        m_my_ship->dispatch( FocusOnObject() );
       }
 
       void handle_command( const yarrr::Command& command )
@@ -153,48 +156,50 @@ namespace
           return;
         }
 
-        m_my_ship->handle_command( command );
+        m_my_ship->dispatch( command );
       }
 
-      void update_to( the::time::Time timestamp )
+      template < typename Event >
+      void broadcast( const Event& event )
       {
-        for ( auto& ship : m_ships )
+        for ( auto& object : m_objects )
         {
-          ship.second->travel_in_time_to( timestamp );
+          object.second->dispatch( event );
         }
       }
 
       void handle_delete_object( const yarrr::DeleteObject& delete_object )
       {
-        m_ships.erase( delete_object.object_id() );
+        m_objects.erase( delete_object.object_id() );
       }
 
       void handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update )
       {
-        const yarrr::PhysicalParameters& ship( object_state_update.physical_parameters() );
-        ShipContainer::iterator drawable_ship( m_ships.find( ship.id ) );
-        if ( drawable_ship == m_ships.end() )
+        const yarrr::PhysicalParameters& physical_parameters( object_state_update.physical_parameters() );
+
+        ObjectContainer::iterator object( m_objects.find( physical_parameters.id ) );
+        if ( object == m_objects.end() )
         {
-          drawable_ship =
-            m_ships.emplace( std::make_pair(
-                  ship.id,
-                  std::unique_ptr< DrawableShip >( new DrawableShip( graphics_engine ) ) ) ).first;
+          object =
+            m_objects.emplace( std::make_pair(
+                  physical_parameters.id,
+                  create_basic_ship() ) ).first;
         }
 
-        if ( ship.id == m_my_ship_id )
+        if ( physical_parameters.id == m_my_ship_id )
         {
-          m_my_ship = drawable_ship->second.get();
+          m_my_ship = object->second.get();
         }
 
-        drawable_ship->second->update_ship( ship );
+        object->second->dispatch( object_state_update );
       }
 
     private:
-      typedef std::map< int, std::unique_ptr< DrawableShip > > ShipContainer;
-      ShipContainer m_ships;
+      typedef std::unordered_map< int, yarrr::Object::Pointer > ObjectContainer;
+      ObjectContainer m_objects;
       the::ctci::Dispatcher m_dispatcher;
       yarrr::PhysicalParameters::Id m_my_ship_id;
-      DrawableShip* m_my_ship;
+      yarrr::Object* m_my_ship;
   };
 
   class LoginHandler
@@ -379,8 +384,9 @@ int main( int argc, char ** argv )
     keyboard_handler.check_keyboard( now );
     network_service.process_incoming_messages();
 
-    world.update_to( now );
+    world.broadcast( yarrr::TimerUpdate( now ) );
     world.in_focus();
+    world.broadcast( yarrr::TimerUpdate( now ) );
 
     graphics_engine.update_screen();
     frequency_stabilizer.stabilize();
