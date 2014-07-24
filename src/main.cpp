@@ -203,7 +203,6 @@ int main( int argc, char ** argv )
 
     world.broadcast( yarrr::TimerUpdate( now ) );
     world.in_focus();
-    world.broadcast( yarrr::TimerUpdate( now ) );
 
     graphics_engine.update_screen();
     frequency_stabilizer.stabilize();
