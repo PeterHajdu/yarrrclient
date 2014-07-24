@@ -1,6 +1,7 @@
 #pragma once
 #include <thectci/id.hpp>
 #include <thenet/service.hpp>
+#include <thenet/address.hpp>
 #include <yarrr/physical_parameters.hpp>
 #include <yarrr/connection_wrapper.hpp>
 #include <yarrr/clock_synchronizer.hpp>
@@ -42,7 +43,6 @@ class LoginHandler
   public:
     LoginHandler();
     void handle_connection_established( const ConnectionEstablished& connection_established );
-    void log_in( ConnectionWrapper& connection_wrapper );
     void handle_login_response( const yarrr::LoginResponse& response );
   private:
     the::ctci::Dispatcher m_dispatcher;
@@ -71,5 +71,7 @@ class NetworkService
     the::time::Clock& m_clock;
     typedef yarrr::clock_sync::Client< the::time::Clock, the::net::Connection > ClockSync;
     LoginHandler m_login_handler;
+
+    the::net::Address m_server_address;
 };
 

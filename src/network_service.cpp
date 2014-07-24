@@ -15,6 +15,7 @@ NetworkService::NetworkService(
       std::bind( &NetworkService::new_connection, this, std::placeholders::_1 ),
       std::bind( &NetworkService::lost_connection, this, std::placeholders::_1 ) )
   , m_clock( clock )
+  , m_server_address( address )
 {
   std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
   m_network_service.connect_to( address );
@@ -63,6 +64,7 @@ NetworkService::new_connection( the::net::Connection& connection )
   std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
   std::cout << "new connection established" << std::endl;
   m_connection_wrapper.reset( new ConnectionWrapper( connection ) );
+  //todo: move to main thread
   local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
 }
 
@@ -71,7 +73,6 @@ NetworkService::lost_connection( the::net::Connection& )
 {
   std::cout << "connection lost" << std::endl;
   //todo: try to reconnect
-  exit( 1 );
 }
 
 
@@ -87,13 +88,7 @@ void
 LoginHandler::handle_connection_established( const ConnectionEstablished& connection_established )
 {
   connection_established.connection_wrapper.register_dispatcher( m_dispatcher );
-  log_in( connection_established.connection_wrapper );
-}
-
-void
-LoginHandler::log_in( ConnectionWrapper& connection_wrapper )
-{
-  connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
+  connection_established.connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
 }
 
 void
