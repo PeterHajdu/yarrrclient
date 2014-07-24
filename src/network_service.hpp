@@ -57,13 +57,14 @@ class NetworkService
 {
   public:
     NetworkService( the::time::Clock& clock, const the::net::Address& address );
+    void process_incoming_messages();
+
+  private:
     void handle_command( const yarrr::Command& command );
     void send( yarrr::Data&& data );
-    void process_incoming_messages();
     void new_connection( the::net::Connection& connection );
     void lost_connection( the::net::Connection& );
 
-  private:
     the::net::Service m_network_service;
     std::unique_ptr< ConnectionWrapper > m_connection_wrapper;
     std::mutex m_connection_mutex;

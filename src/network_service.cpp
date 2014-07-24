@@ -27,19 +27,13 @@ NetworkService::NetworkService(
 void
 NetworkService::handle_command( const yarrr::Command& command )
 {
-  //todo: somehow these locks should be avoided
-  std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
-  if ( !m_connection_wrapper )
-  {
-    return;
-  }
-
-  m_connection_wrapper->connection.send( command.serialize() );
+  send( command.serialize() );
 }
 
 void
 NetworkService::send( yarrr::Data&& data )
 {
+  //todo: somehow these locks should be avoided
   std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
   if ( !m_connection_wrapper )
   {
