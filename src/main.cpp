@@ -1,3 +1,7 @@
+#include "network_service.hpp"
+#include "sdl_engine.hpp"
+#include <SDL2/SDL.h>
+
 #include <iostream>
 #include <thread>
 #include <memory>
@@ -6,57 +10,22 @@
 #include <map>
 
 #include <yarrr/basic_behaviors.hpp>
-#include <yarrr/connection_wrapper.hpp>
 #include <yarrr/object.hpp>
-#include <yarrr/clock_synchronizer.hpp>
-#include <yarrr/event.hpp>
-#include <yarrr/login.hpp>
 #include <yarrr/command.hpp>
-#include <yarrr/ship_control.hpp>
 #include <yarrr/object_state_update.hpp>
-#include <yarrr/event_factory.hpp>
 #include <yarrr/delete_object.hpp>
 
-#include <thenet/service.hpp>
 #include <thenet/address.hpp>
-
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
-
 #include <thectci/dispatcher.hpp>
 #include <thectci/multiplexer.hpp>
 
-#include "sdl_engine.hpp"
-#include <SDL2/SDL.h>
+
+the::ctci::Dispatcher local_event_dispatcher;
 
 namespace
 {
-  typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
-
-  the::ctci::Dispatcher local_event_dispatcher;
-  class LoggedIn
-  {
-    public:
-      add_ctci( "logged_id" );
-      LoggedIn( yarrr::PhysicalParameters::Id user_id )
-        : user_id( user_id )
-      {
-      }
-
-      const yarrr::PhysicalParameters::Id user_id;
-  };
-
-  class ConnectionEstablished
-  {
-    public:
-      add_ctci( "connection_established" );
-      ConnectionEstablished( ConnectionWrapper& connection_wrapper )
-        : connection_wrapper( connection_wrapper )
-      {
-      }
-
-      ConnectionWrapper& connection_wrapper;
-  };
 
   class FocusOnObject { public: add_ctci( "focus_on_object" ) };
 
@@ -202,114 +171,7 @@ namespace
       yarrr::Object* m_my_ship;
   };
 
-  class LoginHandler
-  {
-    public:
-      LoginHandler()
-      {
-        m_dispatcher.register_listener< yarrr::LoginResponse >(
-            std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
-        local_event_dispatcher.register_listener<ConnectionEstablished>(
-            std::bind( &LoginHandler::handle_connection_established, this, std::placeholders::_1 ) );
-      }
 
-      void handle_connection_established( const ConnectionEstablished& connection_established )
-      {
-        connection_established.connection_wrapper.register_dispatcher( m_dispatcher );
-        log_in( connection_established.connection_wrapper );
-      }
-
-      void log_in( ConnectionWrapper& connection_wrapper )
-      {
-        connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
-      }
-
-      void handle_login_response( const yarrr::LoginResponse& response )
-      {
-        local_event_dispatcher.dispatch( LoggedIn( response.object_id() ) );
-      }
-
-    private:
-      the::ctci::Dispatcher m_dispatcher;
-  };
-
-
-  class NetworkService
-  {
-    public:
-      NetworkService(
-          the::time::Clock& clock,
-          const the::net::Address& address )
-        : m_network_service(
-          std::bind( &NetworkService::new_connection, this, std::placeholders::_1 ),
-          std::bind( &NetworkService::lost_connection, this, std::placeholders::_1 ) )
-        , m_clock( clock )
-      {
-        std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
-        m_network_service.connect_to( address );
-        m_network_service.start();
-
-        local_event_dispatcher.register_listener<yarrr::Command>(
-            std::bind( &NetworkService::handle_command, this, std::placeholders::_1 ) );
-      }
-
-      void handle_command( const yarrr::Command& command )
-      {
-        //todo: somehow these locks should be avoided
-        std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
-        if ( !m_connection_wrapper )
-        {
-          return;
-        }
-
-        m_connection_wrapper->connection.send( command.serialize() );
-      }
-
-      void send( yarrr::Data&& data )
-      {
-        std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
-        if ( !m_connection_wrapper )
-        {
-          return;
-        }
-
-        m_connection_wrapper->connection.send( std::move( data ) );
-      }
-
-      void process_incoming_messages()
-      {
-        std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
-        if ( !m_connection_wrapper )
-        {
-          return;
-        }
-
-        m_connection_wrapper->process_incoming_messages();
-      }
-
-      void new_connection( the::net::Connection& connection )
-      {
-        connection.register_task( std::unique_ptr< ClockSync >( new ClockSync( m_clock, connection ) ) );
-
-        std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
-        std::cout << "new connection established" << std::endl;
-        m_connection_wrapper.reset( new ConnectionWrapper( connection ) );
-        local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
-      }
-
-      void lost_connection( the::net::Connection& )
-      {
-        std::cout << "connection lost" << std::endl;
-        exit( 1 );
-      }
-
-    private:
-      the::net::Service m_network_service;
-      std::unique_ptr< ConnectionWrapper > m_connection_wrapper;
-      std::mutex m_connection_mutex;
-      the::time::Clock& m_clock;
-      typedef yarrr::clock_sync::Client< the::time::Clock, the::net::Connection > ClockSync;
-  };
 
 }
 
@@ -361,7 +223,6 @@ int main( int argc, char ** argv )
 {
   the::time::Clock clock;
 
-  LoginHandler login_handler;
   World world;
 
   NetworkService network_service(

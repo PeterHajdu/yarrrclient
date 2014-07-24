@@ -2,6 +2,7 @@
 set(SOURCE_FILES
   main.cpp
   sdl_engine.cpp
+  network_service.cpp
     )
 
 add_executable(yarrrclient ${SOURCE_FILES})
