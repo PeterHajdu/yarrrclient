@@ -5,12 +5,22 @@
 #include <thectci/id.hpp>
 
 struct SDL_Surface;
+struct SDL_Renderer;
 struct SDL_Window;
 
 namespace yarrr
 {
   class PhysicalParameters;
 }
+
+class Colour
+{
+  public:
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+    uint16_t alpha;
+};
 
 class SdlEngine : public yarrr::GraphicalEngine
 {
@@ -31,12 +41,12 @@ class SdlEngine : public yarrr::GraphicalEngine
     void draw_point(
         int16_t x,
         int16_t y,
-        int size, uint32_t colour );
+        int size, const Colour& );
 
     void draw_scaled_point(
         const yarrr::Coordinate&,
         int size,
-        uint32_t colour );
+        const Colour& );
 
     yarrr::Coordinate scale_coordinate( const yarrr::Coordinate& ) const;
 
@@ -46,11 +56,16 @@ class SdlEngine : public yarrr::GraphicalEngine
     void draw_background();
 
     SDL_Window* m_window;
-    SDL_Surface* m_screen;
+    SDL_Renderer* m_renderer;
 
     const yarrr::Coordinate m_screen_resolution;
     const yarrr::Coordinate m_center_of_screen;
 
     yarrr::Coordinate m_center_in_metres;
+
+    const Colour white{ 255, 255, 255, 255 };
+    const Colour red{ 255, 0, 0, 255 };
+    const Colour green{ 0, 255, 0, 255 };
+    const Colour strange{ 255, 255, 0, 255 };
 };
 

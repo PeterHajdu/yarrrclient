@@ -12,7 +12,6 @@
 
 SdlEngine::SdlEngine( int16_t x, int16_t y )
   : m_window( nullptr )
-  , m_screen( nullptr )
   , m_screen_resolution( x, y )
   , m_center_of_screen( x / 2, y / 2 )
   , m_center_in_metres( m_screen_resolution * 0.5 )
@@ -27,13 +26,17 @@ SdlEngine::SdlEngine( int16_t x, int16_t y )
       x, y,
       SDL_WINDOW_SHOWN );
   assert( m_window );
-  m_screen = SDL_GetWindowSurface( m_window );
-  assert( m_screen );
+  m_renderer = SDL_CreateRenderer(
+      m_window,
+      -1,
+      SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+  assert( m_renderer );
 }
 
 
 SdlEngine::~SdlEngine()
 {
+  SDL_DestroyRenderer( m_renderer );
   SDL_DestroyWindow( m_window );
   SDL_Quit();
 }
@@ -45,7 +48,7 @@ SdlEngine::update_screen()
   draw_background();
   draw_grid();
   draw_objects();
-  SDL_UpdateWindowSurface( m_window );
+  SDL_RenderPresent( m_renderer );
 }
 
 void
@@ -58,7 +61,7 @@ SdlEngine::draw_grid()
     for ( ssize_t j( 0 ); j <= number_of_dots.y; ++j )
     {
       const yarrr::Coordinate grid_point( top_left + yarrr::Coordinate( i * 100, j * 100 ) );
-      draw_scaled_point( yarrr::metres_to_huplons( grid_point ), 2, 0xaaaaaa );
+      draw_scaled_point( yarrr::metres_to_huplons( grid_point ), 2, white );
     }
   }
 }
@@ -68,7 +71,7 @@ void
 SdlEngine::draw_scaled_point(
     const yarrr::Coordinate& coordinate,
     int size,
-    uint32_t colour )
+    const Colour& colour )
 {
   const yarrr::Coordinate scaled( scale_coordinate( coordinate ) );
   //todo: scale size as well
@@ -80,15 +83,16 @@ void
 SdlEngine::draw_point(
     int16_t x,
     int16_t y,
-    int size, uint32_t colour )
+    int size, const Colour& colour )
 {
+  SDL_SetRenderDrawColor( m_renderer, colour.red, colour.green, colour.blue, colour.alpha );
   SDL_Rect rectangle = {
     static_cast<Sint16>( x ),
     static_cast<Sint16>( y ),
     static_cast<Uint16>( size ),
     static_cast<Uint16>( size ) };
 
-  SDL_FillRect( m_screen, &rectangle, colour );
+  SDL_RenderFillRect( m_renderer, &rectangle );
 }
 
 
@@ -125,28 +129,24 @@ SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
     const yarrr::Coordinate diff(
         ( yarrr::huplons_to_metres( ship.coordinate ) - m_center_in_metres ) * 0.01 +
           m_center_of_screen );
-    draw_point( diff.x, diff.y, 4, 0xffffff );
+    draw_point( diff.x, diff.y, 4, white );
     return;
   }
 
   const yarrr::Coordinate perpendicular( yarrr::perpendicular( heading ) );
-  draw_scaled_point( ship.coordinate, 4, 0xaaaa00 );
-  draw_scaled_point( ship.coordinate + heading, 4, 0x00ff00 );
-  draw_scaled_point( ship.coordinate - heading, 4, 0xff0000 );
-  draw_scaled_point( ship.coordinate - heading * 0.5 + perpendicular * 0.5, 4, 0xff0000 );
-  draw_scaled_point( ship.coordinate - heading * 0.5 - perpendicular * 0.5, 4, 0xff0000 );
+  draw_scaled_point( ship.coordinate, 4, strange );
+  draw_scaled_point( ship.coordinate + heading, 4, green );
+  draw_scaled_point( ship.coordinate - heading, 4, red );
+  draw_scaled_point( ship.coordinate - heading * 0.5 + perpendicular * 0.5, 4, red );
+  draw_scaled_point( ship.coordinate - heading * 0.5 - perpendicular * 0.5, 4, red );
 }
 
 
 void
 SdlEngine::draw_background()
 {
-  SDL_Rect rectangle{
-    static_cast<unsigned short>( 0 ),
-    static_cast<unsigned short>( 0 ),
-    static_cast<unsigned short>( m_screen_resolution.x ),
-    static_cast<unsigned short>( m_screen_resolution.y ) };
-  SDL_FillRect( m_screen, &rectangle, 0x000000 );
+  SDL_SetRenderDrawColor( m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
+  SDL_RenderClear( m_renderer );
 }
 
 namespace
