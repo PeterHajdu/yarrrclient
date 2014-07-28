@@ -21,15 +21,6 @@ class TtfInitializer
     ~TtfInitializer();
 };
 
-class Colour
-{
-  public:
-    uint16_t red;
-    uint16_t green;
-    uint16_t blue;
-    uint16_t alpha;
-};
-
 class Font
 {
   public:
@@ -51,7 +42,7 @@ class SdlEngine : public yarrr::GraphicalEngine
 
     virtual void focus_to( const yarrr::Coordinate& center ) override;
     virtual void draw_ship( const yarrr::PhysicalParameters& ship ) override;
-    virtual void print_text( uint16_t x, uint16_t y, const std::string& ) override;
+    virtual void print_text( uint16_t x, uint16_t y, const std::string&, const yarrr::Colour& ) override;
 
     void update_screen();
 
@@ -59,12 +50,12 @@ class SdlEngine : public yarrr::GraphicalEngine
     void draw_point(
         int16_t x,
         int16_t y,
-        int size, const Colour& );
+        int size, const yarrr::Colour& );
 
     void draw_scaled_point(
         const yarrr::Coordinate&,
         int size,
-        const Colour& );
+        const yarrr::Colour& );
 
     yarrr::Coordinate scale_coordinate( const yarrr::Coordinate& ) const;
 
@@ -81,10 +72,10 @@ class SdlEngine : public yarrr::GraphicalEngine
 
     yarrr::Coordinate m_center_in_metres;
 
-    const Colour white{ 255, 255, 255, 255 };
-    const Colour red{ 255, 0, 0, 255 };
-    const Colour green{ 0, 255, 0, 255 };
-    const Colour strange{ 255, 255, 0, 255 };
+    const yarrr::Colour white{ 255, 255, 255, 255 };
+    const yarrr::Colour red{ 255, 0, 0, 255 };
+    const yarrr::Colour green{ 0, 255, 0, 255 };
+    const yarrr::Colour strange{ 255, 255, 0, 255 };
 
     TtfInitializer m_ttf_initializer;
     Font m_font;

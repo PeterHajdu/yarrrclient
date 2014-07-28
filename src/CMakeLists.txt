@@ -9,6 +9,6 @@ set(SOURCE_FILES
     )
 
 add_executable(yarrrclient ${SOURCE_FILES})
-target_link_libraries(yarrrclient SDL2 SDL2_ttf pthread thectci thenet thetime yarrr ${LIBS})
+target_link_libraries(yarrrclient SDL2 SDL2_ttf pthread thectci thenet thetime yarrrgraphics yarrr ${LIBS})
 install(TARGETS yarrrclient DESTINATION ${deploy_directory}/bin)
 

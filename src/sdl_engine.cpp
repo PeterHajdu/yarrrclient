@@ -21,7 +21,7 @@ TtfInitializer::~TtfInitializer()
 }
 
 Font::Font( const std::string& path )
-  : font( TTF_OpenFont( path.c_str(), 28 ) )
+  : font( TTF_OpenFont( path.c_str(), 14 ) )
 {
   assert( font );
 }
@@ -94,7 +94,7 @@ void
 SdlEngine::draw_scaled_point(
     const yarrr::Coordinate& coordinate,
     int size,
-    const Colour& colour )
+    const yarrr::Colour& colour )
 {
   const yarrr::Coordinate scaled( scale_coordinate( coordinate ) );
   //todo: scale size as well
@@ -106,7 +106,7 @@ void
 SdlEngine::draw_point(
     int16_t x,
     int16_t y,
-    int size, const Colour& colour )
+    int size, const yarrr::Colour& colour )
 {
   SDL_SetRenderDrawColor( m_renderer, colour.red, colour.green, colour.blue, colour.alpha );
   SDL_Rect rectangle = {
@@ -166,7 +166,7 @@ SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 
 
 void
-SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message )
+SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message, const yarrr::Colour& )
 {
   SDL_Surface *surface(
       TTF_RenderText_Blended(
