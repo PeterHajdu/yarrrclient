@@ -19,9 +19,9 @@ namespace
   {
     public:
       GraphicalBehavior()
-        : DrawableObject( the::ctci::ServiceRegistry::service< SdlEngine >() )
+        : DrawableObject( the::ctci::service< SdlEngine >() )
         , m_local_physical_behavior( nullptr )
-        , m_graphical_engine( the::ctci::ServiceRegistry::service< SdlEngine >() )
+        , m_graphical_engine( the::ctci::service< SdlEngine >() )
       {
       }
 
@@ -72,7 +72,7 @@ World::World()
       std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
 
   the::ctci::Dispatcher& local_event_dispatcher(
-      the::ctci::ServiceRegistry::service< LocalEventDispatcher >().dispatcher );
+      the::ctci::service< LocalEventDispatcher >().dispatcher );
   local_event_dispatcher.register_listener< LoggedIn >(
       std::bind( &World::handle_login, this, std::placeholders::_1 ) );
   local_event_dispatcher.register_listener<ConnectionEstablished>(

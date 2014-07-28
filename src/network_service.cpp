@@ -15,7 +15,7 @@ NetworkService::NetworkService(
       std::bind( &NetworkService::lost_connection, this, std::placeholders::_1 ) )
   , m_clock( clock )
   , m_server_address( address )
-  , m_local_event_dispatcher( the::ctci::ServiceRegistry::service< LocalEventDispatcher >().dispatcher )
+  , m_local_event_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher )
 {
   std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
   m_network_service.connect_to( address );
@@ -77,7 +77,7 @@ NetworkService::lost_connection( the::net::Connection& )
 
 
 LoginHandler::LoginHandler()
-  : m_local_event_dispatcher( the::ctci::ServiceRegistry::service< LocalEventDispatcher >().dispatcher )
+  : m_local_event_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher )
 {
   m_dispatcher.register_listener< yarrr::LoginResponse >(
       std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );

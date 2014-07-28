@@ -47,7 +47,7 @@ int main( int argc, char ** argv )
 
   bool running( true );
   KeyboardHandler keyboard_handler( running );
-  keyboard_handler.register_dispatcher( the::ctci::ServiceRegistry::service<LocalEventDispatcher>().dispatcher );
+  keyboard_handler.register_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
 
 
   while ( running )
@@ -60,7 +60,7 @@ int main( int argc, char ** argv )
     world.broadcast( yarrr::TimerUpdate( now ) );
     world.in_focus();
 
-    the::ctci::ServiceRegistry::service<SdlEngine>().update_screen();
+    the::ctci::service<SdlEngine>().update_screen();
     frequency_stabilizer.stabilize();
   }
 
