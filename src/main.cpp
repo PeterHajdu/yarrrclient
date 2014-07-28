@@ -1,5 +1,4 @@
 #include "network_service.hpp"
-#include "sdl_engine.hpp"
 #include "keyboard_handler.hpp"
 #include "local_event_dispatcher.hpp"
 #include "world.hpp"
@@ -16,18 +15,13 @@
 #include <yarrr/command.hpp>
 #include <yarrr/object_state_update.hpp>
 #include <yarrr/delete_object.hpp>
+#include <yarrr/graphical_engine.hpp>
 
 #include <thenet/address.hpp>
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
 #include <thectci/dispatcher.hpp>
 #include <thectci/service_registry.hpp>
-
-namespace
-{
-
-
-}
 
 
 int main( int argc, char ** argv )
@@ -60,7 +54,7 @@ int main( int argc, char ** argv )
     world.broadcast( yarrr::TimerUpdate( now ) );
     world.in_focus();
 
-    the::ctci::service<SdlEngine>().update_screen();
+    the::ctci::service<yarrr::GraphicalEngine>().update_screen();
     frequency_stabilizer.stabilize();
   }
 

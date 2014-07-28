@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <vector>
-#include <yarrr/types.hpp>
+#include <yarrr/graphical_engine.hpp>
 #include <thectci/id.hpp>
 
 struct SDL_Surface;
@@ -12,8 +12,7 @@ namespace yarrr
   class PhysicalParameters;
 }
 
-class DrawableObject;
-class SdlEngine
+class SdlEngine : public yarrr::GraphicalEngine
 {
   public:
     add_ctci( "sdl_engine" );
@@ -23,12 +22,10 @@ class SdlEngine
     SdlEngine( const SdlEngine& ) = delete;
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
-    void focus_to( const yarrr::Coordinate& center );
-    void draw_ship( const yarrr::PhysicalParameters& ship );
+    virtual void focus_to( const yarrr::Coordinate& center ) override;
+    virtual void draw_ship( const yarrr::PhysicalParameters& ship ) override;
 
     void update_screen();
-    void register_object( DrawableObject& object );
-    void delete_object( const DrawableObject& object );
 
   private:
     void draw_point(
@@ -45,7 +42,6 @@ class SdlEngine
 
     bool is_on_screen( const yarrr::Coordinate& ) const;
 
-    void draw_objects();
     void draw_grid();
     void draw_background();
 
@@ -54,28 +50,7 @@ class SdlEngine
 
     const yarrr::Coordinate m_screen_resolution;
     const yarrr::Coordinate m_center_of_screen;
-    std::vector< DrawableObject* > m_objects;
 
     yarrr::Coordinate m_center_in_metres;
-};
-
-class DrawableObject
-{
-  public:
-    DrawableObject( SdlEngine& graphical_engine )
-      : m_graphical_engine( graphical_engine )
-    {
-      m_graphical_engine.register_object( *this );
-    }
-
-    virtual ~DrawableObject()
-    {
-      m_graphical_engine.delete_object( *this );
-    }
-
-    virtual void draw() = 0;
-
-  protected:
-    SdlEngine& m_graphical_engine;
 };
 

@@ -6,6 +6,7 @@
 #include <yarrr/delete_object.hpp>
 #include <yarrr/object_state_update.hpp>
 #include <yarrr/basic_behaviors.hpp>
+#include <yarrr/graphical_engine.hpp>
 #include <yarrr/command.hpp>
 #include <thectci/service_registry.hpp>
 
@@ -15,13 +16,12 @@ namespace
 
   class GraphicalBehavior :
     public yarrr::ObjectBehavior,
-    public DrawableObject
+    public yarrr::GraphicalObject
   {
     public:
       GraphicalBehavior()
-        : DrawableObject( the::ctci::service< SdlEngine >() )
+        : yarrr::GraphicalObject( the::ctci::service< yarrr::GraphicalEngine >() )
         , m_local_physical_behavior( nullptr )
-        , m_graphical_engine( the::ctci::service< SdlEngine >() )
       {
       }
 
@@ -38,7 +38,7 @@ namespace
         m_graphical_engine.focus_to( m_local_physical_behavior->physical_parameters.coordinate );
       }
 
-      virtual void draw() override
+      virtual void draw() const override
       {
         assert( m_local_physical_behavior );
         m_graphical_engine.draw_ship( m_local_physical_behavior->physical_parameters );
@@ -46,7 +46,6 @@ namespace
 
     private:
       yarrr::LocalPhysicalBehavior* m_local_physical_behavior;
-      SdlEngine& m_graphical_engine;
   };
 
   yarrr::Object::Pointer create_basic_ship()

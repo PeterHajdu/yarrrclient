@@ -139,16 +139,6 @@ SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 
 
 void
-SdlEngine::draw_objects()
-{
-  for ( auto& object : m_objects )
-  {
-    object->draw();
-  }
-}
-
-
-void
 SdlEngine::draw_background()
 {
   SDL_Rect rectangle{
@@ -159,24 +149,8 @@ SdlEngine::draw_background()
   SDL_FillRect( m_screen, &rectangle, 0x000000 );
 }
 
-
-void
-SdlEngine::register_object( DrawableObject& object )
-{
-  m_objects.push_back( &object );
-}
-
-
-void
-SdlEngine::delete_object( const DrawableObject& object )
-{
-  m_objects.erase(
-      std::remove( std::begin( m_objects ), std::end( m_objects ), &object )
-      , std::end( m_objects ) );
-}
-
 namespace
 {
-  the::ctci::AutoServiceRegister< SdlEngine, SdlEngine > auto_sdl_engine_register( 800, 600 );
+  the::ctci::AutoServiceRegister< yarrr::GraphicalEngine, SdlEngine > auto_sdl_engine_register( 800, 600 );
 }
 
