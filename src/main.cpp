@@ -23,6 +23,19 @@
 #include <thectci/dispatcher.hpp>
 #include <thectci/service_registry.hpp>
 
+class SomeText : public yarrr::GraphicalObject
+{
+  public:
+    SomeText( yarrr::GraphicalEngine& engine )
+      : GraphicalObject( engine )
+    {
+    }
+
+    virtual void draw() const override
+    {
+      m_graphical_engine.print_text( 100, 100, "some text" );
+    }
+};
 
 int main( int argc, char ** argv )
 {
@@ -43,6 +56,7 @@ int main( int argc, char ** argv )
   KeyboardHandler keyboard_handler( running );
   keyboard_handler.register_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
 
+  SomeText some_text( the::ctci::service<yarrr::GraphicalEngine>() );
 
   while ( running )
   {

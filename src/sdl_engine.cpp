@@ -10,11 +10,34 @@
 
 #include <thectci/service_registry.hpp>
 
+TtfInitializer::TtfInitializer()
+{
+  TTF_Init();
+}
+
+TtfInitializer::~TtfInitializer()
+{
+  TTF_Quit();
+}
+
+Font::Font( const std::string& path )
+  : font( TTF_OpenFont( path.c_str(), 28 ) )
+{
+  assert( font );
+}
+
+Font::~Font()
+{
+  TTF_CloseFont( font );
+}
+
 SdlEngine::SdlEngine( int16_t x, int16_t y )
   : m_window( nullptr )
   , m_screen_resolution( x, y )
   , m_center_of_screen( x / 2, y / 2 )
   , m_center_in_metres( m_screen_resolution * 0.5 )
+  , m_ttf_initializer()
+  , m_font( "stuff.ttf" )
 {
   assert(
       SDL_Init( SDL_INIT_VIDEO ) == 0 &&
@@ -139,6 +162,26 @@ SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
   draw_scaled_point( ship.coordinate - heading, 4, red );
   draw_scaled_point( ship.coordinate - heading * 0.5 + perpendicular * 0.5, 4, red );
   draw_scaled_point( ship.coordinate - heading * 0.5 - perpendicular * 0.5, 4, red );
+}
+
+
+void
+SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message )
+{
+  SDL_Surface *surface(
+      TTF_RenderText_Blended(
+        m_font.font,
+        message.c_str(),
+        { 255, 255, 255, 255 } ) );
+  assert( surface );
+  SDL_Texture *texture( SDL_CreateTextureFromSurface( m_renderer, surface ) );
+  assert( texture );
+  SDL_FreeSurface( surface );
+
+  SDL_Rect destination{ x, y, 0, 0 };
+  SDL_QueryTexture( texture, nullptr, nullptr, &destination.w, &destination.h );
+
+  assert( 0 == SDL_RenderCopy( m_renderer, texture, nullptr, &destination ) );
 }
 
 

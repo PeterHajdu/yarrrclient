@@ -3,6 +3,7 @@
 #include <vector>
 #include <yarrr/graphical_engine.hpp>
 #include <thectci/id.hpp>
+#include <SDL2/SDL_ttf.h>
 
 struct SDL_Surface;
 struct SDL_Renderer;
@@ -13,6 +14,13 @@ namespace yarrr
   class PhysicalParameters;
 }
 
+class TtfInitializer
+{
+  public:
+    TtfInitializer();
+    ~TtfInitializer();
+};
+
 class Colour
 {
   public:
@@ -20,6 +28,15 @@ class Colour
     uint16_t green;
     uint16_t blue;
     uint16_t alpha;
+};
+
+class Font
+{
+  public:
+    Font( const std::string& path );
+    ~Font();
+
+    TTF_Font * font;
 };
 
 class SdlEngine : public yarrr::GraphicalEngine
@@ -34,6 +51,7 @@ class SdlEngine : public yarrr::GraphicalEngine
 
     virtual void focus_to( const yarrr::Coordinate& center ) override;
     virtual void draw_ship( const yarrr::PhysicalParameters& ship ) override;
+    virtual void print_text( uint16_t x, uint16_t y, const std::string& ) override;
 
     void update_screen();
 
@@ -67,5 +85,8 @@ class SdlEngine : public yarrr::GraphicalEngine
     const Colour red{ 255, 0, 0, 255 };
     const Colour green{ 0, 255, 0, 255 };
     const Colour strange{ 255, 255, 0, 255 };
+
+    TtfInitializer m_ttf_initializer;
+    Font m_font;
 };
 
