@@ -182,6 +182,7 @@ SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message )
   SDL_QueryTexture( texture, nullptr, nullptr, &destination.w, &destination.h );
 
   assert( 0 == SDL_RenderCopy( m_renderer, texture, nullptr, &destination ) );
+  SDL_DestroyTexture( texture );
 }
 
 
