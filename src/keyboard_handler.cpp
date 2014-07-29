@@ -1,12 +1,14 @@
 #include "keyboard_handler.hpp"
+#include "local_event_dispatcher.hpp"
 #include <thectci/service_registry.hpp>
 #include <SDL2/SDL.h>
 
 KeyboardHandler::KeyboardHandler( bool& running )
   : m_running( running )
   , m_cli( 0, 100, the::ctci::service< yarrr::GraphicalEngine >() )
+  , m_terminal( the::ctci::service< yarrr::GraphicalEngine >(), the::ctci::service< LocalEventDispatcher >().dispatcher, 6 )
 {
-  m_cli.register_multiplexer( *this );
+  m_cli.register_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher );
   SDL_StartTextInput();
 }
 

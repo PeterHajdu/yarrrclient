@@ -1,6 +1,7 @@
 #pragma once
 #include <yarrr/command.hpp>
 #include <yarrr/cli.hpp>
+#include <yarrr/terminal.hpp>
 #include <thectci/multiplexer.hpp>
 
 class KeyboardHandler : public the::ctci::Multiplexer
@@ -14,5 +15,6 @@ class KeyboardHandler : public the::ctci::Multiplexer
 
     bool& m_running;
     yarrr::Cli m_cli;
+    yarrr::Terminal m_terminal;
 };
 
