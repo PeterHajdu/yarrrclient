@@ -2,9 +2,9 @@
 #include <yarrr/command.hpp>
 #include <yarrr/cli.hpp>
 #include <yarrr/terminal.hpp>
-#include <thectci/multiplexer.hpp>
+#include <thectci/dispatcher.hpp>
 
-class KeyboardHandler : public the::ctci::Multiplexer
+class KeyboardHandler : public the::ctci::Dispatcher
 {
   public:
     KeyboardHandler( bool& running );
