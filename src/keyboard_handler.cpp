@@ -6,6 +6,7 @@ KeyboardHandler::KeyboardHandler( bool& running )
   : m_running( running )
   , m_cli( 0, 100, the::ctci::service< yarrr::GraphicalEngine >() )
 {
+  m_cli.register_multiplexer( *this );
   SDL_StartTextInput();
 }
 
@@ -36,6 +37,10 @@ KeyboardHandler::handle_text_input()
         else if ( event.key.keysym.sym == SDLK_ESCAPE )
         {
           m_running = false;
+        }
+        else if ( event.key.keysym.sym == SDLK_BACKSPACE )
+        {
+          m_cli.backspace();
         }
         break;
     }
