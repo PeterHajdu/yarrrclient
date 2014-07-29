@@ -5,6 +5,7 @@
 #include <yarrr/physical_parameters.hpp>
 #include <yarrr/connection_wrapper.hpp>
 #include <yarrr/clock_synchronizer.hpp>
+#include <yarrr/callback_queue.hpp>
 
 typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
 
@@ -66,6 +67,8 @@ class NetworkService
     void handle_chat_message( const yarrr::ChatMessage& chat_message );
     void send( yarrr::Data&& data );
     void new_connection( the::net::Connection& connection );
+    void new_connection_on_main_thread();
+
     void lost_connection( the::net::Connection& );
 
     the::net::Service m_network_service;
@@ -78,5 +81,6 @@ class NetworkService
     the::net::Address m_server_address;
 
     the::ctci::Dispatcher& m_local_event_dispatcher;
+    yarrr::CallbackQueue m_callback_queue;
 };
 
