@@ -7,6 +7,7 @@
 #include <yarrr/login.hpp>
 //todo: replace with decent log framework
 #include <iostream>
+#include <stdlib.h>
 
 NetworkService::NetworkService(
     the::time::Clock& clock,
@@ -32,7 +33,8 @@ NetworkService::NetworkService(
 void
 NetworkService::handle_chat_message( const yarrr::ChatMessage& chat_message )
 {
-  send( chat_message.serialize() );
+  //todo: cli should retrieve login name from an options container
+  send( yarrr::ChatMessage( chat_message.message(), getenv( "LOGNAME" ) ).serialize() );
 }
 
 
