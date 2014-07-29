@@ -3,6 +3,7 @@
 #include <thenet/address.hpp>
 #include <thectci/dispatcher.hpp>
 #include <yarrr/command.hpp>
+#include <yarrr/chat_message.hpp>
 #include <yarrr/login.hpp>
 //todo: replace with decent log framework
 #include <iostream>
@@ -23,13 +24,24 @@ NetworkService::NetworkService(
 
   m_local_event_dispatcher.register_listener<yarrr::Command>(
       std::bind( &NetworkService::handle_command, this, std::placeholders::_1 ) );
+  m_local_event_dispatcher.register_listener<yarrr::ChatMessage>(
+      std::bind( &NetworkService::handle_chat_message, this, std::placeholders::_1 ) );
 }
+
+
+void
+NetworkService::handle_chat_message( const yarrr::ChatMessage& chat_message )
+{
+  send( chat_message.serialize() );
+}
+
 
 void
 NetworkService::handle_command( const yarrr::Command& command )
 {
   send( command.serialize() );
 }
+
 
 void
 NetworkService::send( yarrr::Data&& data )

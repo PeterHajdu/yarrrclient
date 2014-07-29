@@ -52,6 +52,7 @@ class LoginHandler
 namespace yarrr
 {
   class Command;
+  class ChatMessage;
 }
 
 class NetworkService
@@ -62,6 +63,7 @@ class NetworkService
 
   private:
     void handle_command( const yarrr::Command& command );
+    void handle_chat_message( const yarrr::ChatMessage& chat_message );
     void send( yarrr::Data&& data );
     void new_connection( the::net::Connection& connection );
     void lost_connection( the::net::Connection& );
