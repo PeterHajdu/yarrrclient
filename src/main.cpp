@@ -3,20 +3,8 @@
 #include "local_event_dispatcher.hpp"
 #include "world.hpp"
 
-#include <iostream>
-#include <thread>
-#include <memory>
-#include <vector>
-#include <string>
-#include <map>
-
-#include <yarrr/basic_behaviors.hpp>
-#include <yarrr/object.hpp>
-#include <yarrr/command.hpp>
-#include <yarrr/object_state_update.hpp>
-#include <yarrr/delete_object.hpp>
 #include <yarrr/graphical_engine.hpp>
-
+#include <yarrr/basic_behaviors.hpp>
 #include <thenet/address.hpp>
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
