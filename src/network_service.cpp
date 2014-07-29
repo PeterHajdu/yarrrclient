@@ -78,6 +78,8 @@ NetworkService::new_connection( the::net::Connection& connection )
   m_connection_wrapper.reset( new ConnectionWrapper( connection ) );
   //todo: move to main thread
   m_local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
+  m_connection_wrapper->register_dispatcher(
+      the::ctci::service< LocalEventDispatcher >().network_dispatcher );
 }
 
 void

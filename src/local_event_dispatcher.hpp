@@ -8,5 +8,6 @@ class LocalEventDispatcher
   public:
     add_ctci( "local_event_dispatcher" );
     the::ctci::Dispatcher dispatcher;
+    the::ctci::Dispatcher network_dispatcher;
 };
 

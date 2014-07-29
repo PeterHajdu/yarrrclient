@@ -6,9 +6,11 @@
 KeyboardHandler::KeyboardHandler( bool& running )
   : m_running( running )
   , m_cli( 0, 100, the::ctci::service< yarrr::GraphicalEngine >() )
-  , m_terminal( the::ctci::service< yarrr::GraphicalEngine >(), the::ctci::service< LocalEventDispatcher >().dispatcher, 6 )
+  , m_terminal( the::ctci::service< yarrr::GraphicalEngine >(), 6 )
 {
   m_cli.register_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher );
+  the::ctci::service< LocalEventDispatcher >().dispatcher.register_dispatcher( m_terminal );
+  the::ctci::service< LocalEventDispatcher >().network_dispatcher.register_dispatcher( m_terminal );
   SDL_StartTextInput();
 }
 
