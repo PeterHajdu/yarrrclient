@@ -10,10 +10,12 @@
 #include <thetime/clock.hpp>
 #include <thectci/dispatcher.hpp>
 #include <thectci/service_registry.hpp>
+#include <theconf/configuration.hpp>
 
 
 int main( int argc, char ** argv )
 {
+  the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
   the::time::Clock clock;
 
   World world;

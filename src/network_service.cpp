@@ -5,9 +5,9 @@
 #include <yarrr/command.hpp>
 #include <yarrr/chat_message.hpp>
 #include <yarrr/login.hpp>
+#include <theconf/configuration.hpp>
 //todo: replace with decent log framework
 #include <iostream>
-#include <stdlib.h>
 
 NetworkService::NetworkService(
     the::time::Clock& clock,
@@ -33,8 +33,7 @@ NetworkService::NetworkService(
 void
 NetworkService::handle_chat_message( const yarrr::ChatMessage& chat_message )
 {
-  //todo: cli should retrieve login name from an options container
-  send( yarrr::ChatMessage( chat_message.message(), getenv( "LOGNAME" ) ).serialize() );
+  send( chat_message.serialize() );
 }
 
 
@@ -111,7 +110,8 @@ void
 LoginHandler::handle_connection_established( const ConnectionEstablished& connection_established )
 {
   connection_established.connection_wrapper.register_dispatcher( m_dispatcher );
-  connection_established.connection_wrapper.connection.send( yarrr::LoginRequest( "appletree" ).serialize() );
+  connection_established.connection_wrapper.connection.send(
+      yarrr::LoginRequest( the::conf::get_value( "login_name" ) ).serialize() );
 }
 
 void
