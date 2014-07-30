@@ -38,7 +38,8 @@ int main( int argc, char ** argv )
   bool running( true );
   KeyboardHandler keyboard_handler( running );
   keyboard_handler.register_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
-  stream_to_chat.register_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
+  //todo: this is ugly, a separate log class should be used
+  stream_to_chat.register_dispatcher( the::ctci::service<LocalEventDispatcher>().network_dispatcher );
 
   while ( running )
   {
