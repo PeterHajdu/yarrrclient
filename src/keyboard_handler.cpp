@@ -46,6 +46,14 @@ KeyboardHandler::handle_text_input()
         {
           m_cli.backspace();
         }
+        else if ( event.key.keysym.sym == SDLK_PAGEUP )
+        {
+          m_terminal.scroll_up();
+        }
+        else if ( event.key.keysym.sym == SDLK_PAGEDOWN )
+        {
+          m_terminal.scroll_down();
+        }
         break;
     }
   }
