@@ -10,6 +10,19 @@
 
 #include <thectci/service_registry.hpp>
 
+namespace
+{
+  SDL_Color to_sdl_colour( const yarrr::Colour& colour )
+  {
+    return {
+      colour.red,
+      colour.green,
+      colour.blue,
+      colour.alpha
+    };
+  }
+}
+
 TtfInitializer::TtfInitializer()
 {
   TTF_Init();
@@ -166,13 +179,13 @@ SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 
 
 void
-SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message, const yarrr::Colour& )
+SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message, const yarrr::Colour& colour )
 {
   SDL_Surface *surface(
       TTF_RenderText_Blended(
         m_font.font,
         message.c_str(),
-        { 255, 255, 255, 255 } ) );
+        to_sdl_colour( colour ) ) );
   assert( surface );
   SDL_Texture *texture( SDL_CreateTextureFromSurface( m_renderer, surface ) );
   assert( texture );
@@ -185,6 +198,16 @@ SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message, const
   SDL_DestroyTexture( texture );
 }
 
+void
+SdlEngine::print_text_tokens( uint16_t x, uint16_t y, const yarrr::TextTokens& tokens )
+{
+  size_t length( 0 );
+  for ( const auto& token : tokens )
+  {
+    print_text( x + length * 7, y, token.text, token.colour );
+    length += token.text.length();
+  }
+}
 
 void
 SdlEngine::draw_background()

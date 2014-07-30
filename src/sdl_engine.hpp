@@ -43,6 +43,7 @@ class SdlEngine : public yarrr::GraphicalEngine
     virtual void focus_to( const yarrr::Coordinate& center ) override;
     virtual void draw_ship( const yarrr::PhysicalParameters& ship ) override;
     virtual void print_text( uint16_t x, uint16_t y, const std::string&, const yarrr::Colour& ) override;
+    virtual void print_text_tokens( uint16_t x, uint16_t y, const yarrr::TextTokens& ) override;
 
     void update_screen();
 
