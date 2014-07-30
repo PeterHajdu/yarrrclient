@@ -6,8 +6,7 @@
 #include <yarrr/chat_message.hpp>
 #include <yarrr/login.hpp>
 #include <theconf/configuration.hpp>
-//todo: replace with decent log framework
-#include <iostream>
+#include <thelog/logger.hpp>
 
 NetworkService::NetworkService(
     the::time::Clock& clock,
@@ -19,7 +18,7 @@ NetworkService::NetworkService(
   , m_server_address( address )
   , m_local_event_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher )
 {
-  std::cout << "connecting to host: " << address.host << ", port: " << address.port << std::endl;
+  thelog( 1 )( "connecting to host: ", address.host, ":", address.port );
   m_network_service.connect_to( address );
   m_network_service.start();
 
@@ -76,8 +75,7 @@ NetworkService::new_connection( the::net::Connection& connection )
   connection.register_task( std::unique_ptr< ClockSync >( new ClockSync( m_clock, connection ) ) );
 
   std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
-  //todo: use decent logger instead of cout
-  std::cout << "new connection established" << std::endl;
+  thelog( 1 )( "Connection established." );
   m_connection_wrapper.reset( new ConnectionWrapper( connection ) );
   m_callback_queue.push_back( std::bind( &NetworkService::new_connection_on_main_thread, this ) );
 }
@@ -92,8 +90,7 @@ NetworkService::new_connection_on_main_thread()
 void
 NetworkService::lost_connection( the::net::Connection& )
 {
-  std::cout << "connection lost" << std::endl;
-  //todo: try to reconnect
+  thelog( 1 )( "Connection lost." );
 }
 
 

@@ -12,9 +12,12 @@
 #include <thectci/service_registry.hpp>
 #include <theconf/configuration.hpp>
 
+#include <thelog/logger.hpp>
+#include <iostream>
 
 int main( int argc, char ** argv )
 {
+  the::log::Logger::add_channel( std::cout );
   the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
   the::time::Clock clock;
 
