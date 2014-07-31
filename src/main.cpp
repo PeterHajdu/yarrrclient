@@ -6,6 +6,7 @@
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/stream_to_chat.hpp>
+#include <yarrr/object_container.hpp>
 #include <thenet/address.hpp>
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
@@ -24,7 +25,8 @@ int main( int argc, char ** argv )
   the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
   the::time::Clock clock;
 
-  World world;
+  yarrr::ObjectContainer object_container;
+  World world( object_container );
 
   NetworkService network_service(
       clock,
@@ -50,7 +52,7 @@ int main( int argc, char ** argv )
 
     stream_to_chat.flush();
 
-    world.broadcast( yarrr::TimerUpdate( now ) );
+    object_container.dispatch( yarrr::TimerUpdate( now ) );
     world.in_focus();
 
     the::ctci::service<yarrr::GraphicalEngine>().update_screen();

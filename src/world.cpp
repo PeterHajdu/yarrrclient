@@ -8,6 +8,7 @@
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/command.hpp>
+#include <yarrr/object_container.hpp>
 #include <thectci/service_registry.hpp>
 
 namespace
@@ -61,8 +62,9 @@ namespace
 }
 
 
-World::World()
-  : m_my_ship( nullptr )
+World::World( yarrr::ObjectContainer& object_container )
+  : m_objects( object_container )
+  , m_my_ship( nullptr )
 {
   m_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
       std::bind( &World::handle_object_state_update, this, std::placeholders::_1 ) );
