@@ -84,7 +84,7 @@ void
 NetworkService::new_connection_on_main_thread()
 {
   m_local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
-  m_connection_wrapper->register_dispatcher( the::ctci::service< LocalEventDispatcher >().network_dispatcher );
+  m_connection_wrapper->register_dispatcher( the::ctci::service< LocalEventDispatcher >().incoming );
 }
 
 void

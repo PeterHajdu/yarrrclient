@@ -10,7 +10,7 @@ KeyboardHandler::KeyboardHandler( bool& running )
 {
   m_cli.register_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher );
   the::ctci::service< LocalEventDispatcher >().dispatcher.register_dispatcher( m_terminal );
-  the::ctci::service< LocalEventDispatcher >().network_dispatcher.register_dispatcher( m_terminal );
+  the::ctci::service< LocalEventDispatcher >().incoming.register_dispatcher( m_terminal );
   SDL_StartTextInput();
 }
 
