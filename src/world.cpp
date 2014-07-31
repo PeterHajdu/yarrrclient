@@ -62,8 +62,7 @@ namespace
 
 
 World::World()
-  : m_my_ship_id( 0 )
-  , m_my_ship( nullptr )
+  : m_my_ship( nullptr )
 {
   m_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
       std::bind( &World::handle_object_state_update, this, std::placeholders::_1 ) );
@@ -89,7 +88,9 @@ World::handle_connection_established( const ConnectionEstablished& connection_es
 void
 World::handle_login( const LoggedIn& login )
 {
-  m_my_ship_id = login.user_id;
+  yarrr::Object::Pointer new_object( create_basic_ship() );
+  m_my_ship = new_object.get();
+  m_objects.add_object( login.user_id, std::move( new_object ) );
 }
 
 void
@@ -117,28 +118,21 @@ World::handle_command( const yarrr::Command& command )
 void
 World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 {
-  m_objects.erase( delete_object.object_id() );
+  m_objects.delete_object( delete_object.object_id() );
 }
 
 void
 World::handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update )
 {
   const yarrr::PhysicalParameters& physical_parameters( object_state_update.physical_parameters() );
+  const yarrr::Object::Id id( physical_parameters.id );
 
-  ObjectContainer::iterator object( m_objects.find( physical_parameters.id ) );
-  if ( object == m_objects.end() )
+  if ( !m_objects.has_object_with_id( id ) )
   {
-    object =
-      m_objects.emplace( std::make_pair(
-            physical_parameters.id,
-            create_basic_ship() ) ).first;
+    yarrr::Object::Pointer new_object( create_basic_ship() );
+    m_objects.add_object( id, std::move( new_object ) );
   }
 
-  if ( physical_parameters.id == m_my_ship_id )
-  {
-    m_my_ship = object->second.get();
-  }
-
-  object->second->dispatch( object_state_update );
+  m_objects.object_with_id( id ).dispatch( object_state_update );
 }
 
