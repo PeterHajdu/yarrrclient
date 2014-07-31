@@ -54,6 +54,14 @@ KeyboardHandler::handle_text_input()
         {
           m_terminal.scroll_down();
         }
+        else if ( event.key.keysym.sym == SDLK_HOME )
+        {
+          m_terminal.home();
+        }
+        else if ( event.key.keysym.sym == SDLK_END )
+        {
+          m_terminal.end();
+        }
         break;
     }
   }
