@@ -7,6 +7,7 @@
 #include <yarrr/login.hpp>
 #include <theconf/configuration.hpp>
 #include <thelog/logger.hpp>
+#include <thetime/clock.hpp>
 
 NetworkService::NetworkService(
     the::time::Clock& clock,

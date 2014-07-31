@@ -2,7 +2,7 @@
 #include <thectci/id.hpp>
 #include <thenet/service.hpp>
 #include <thenet/address.hpp>
-#include <yarrr/physical_parameters.hpp>
+#include <yarrr/object.hpp>
 #include <yarrr/connection_wrapper.hpp>
 #include <yarrr/clock_synchronizer.hpp>
 #include <yarrr/callback_queue.hpp>
@@ -13,12 +13,12 @@ class LoggedIn
 {
   public:
     add_ctci( "logged_id" );
-    LoggedIn( yarrr::PhysicalParameters::Id user_id )
+    LoggedIn( yarrr::Object::Id user_id )
       : user_id( user_id )
     {
     }
 
-    const yarrr::PhysicalParameters::Id user_id;
+    const yarrr::Object::Id user_id;
 };
 
 //todo: hide this the important one is logged in
@@ -54,6 +54,14 @@ namespace yarrr
 {
   class Command;
   class ChatMessage;
+}
+
+namespace the
+{
+namespace time
+{
+class Clock;
+}
 }
 
 class NetworkService
