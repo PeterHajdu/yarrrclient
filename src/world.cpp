@@ -4,7 +4,6 @@
 #include "sdl_engine.hpp"
 #include "local_event_dispatcher.hpp"
 #include <yarrr/delete_object.hpp>
-#include <yarrr/object_state_update.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/command.hpp>
@@ -22,43 +21,33 @@ namespace
     public:
       GraphicalBehavior()
         : yarrr::GraphicalObject( the::ctci::service< yarrr::GraphicalEngine >() )
-        , m_local_physical_behavior( nullptr )
+        , m_physical_behavior( nullptr )
       {
       }
 
       void register_to( the::ctci::Dispatcher& dispatcher, the::ctci::ComponentRegistry& registry )
       {
-        m_local_physical_behavior = &registry.component< yarrr::LocalPhysicalBehavior >();
+        m_physical_behavior = &registry.component< yarrr::PhysicalBehavior >();
         dispatcher.register_listener< FocusOnObject >( std::bind(
               &GraphicalBehavior::handle_focus_on_object, this, std::placeholders::_1 ) );
       }
 
       void handle_focus_on_object( const FocusOnObject& )
       {
-        assert( m_local_physical_behavior );
-        m_graphical_engine.focus_to( m_local_physical_behavior->physical_parameters.coordinate );
+        assert( m_physical_behavior );
+        m_graphical_engine.focus_to( m_physical_behavior->physical_parameters.coordinate );
       }
 
       virtual void draw() const override
       {
-        assert( m_local_physical_behavior );
-        m_graphical_engine.draw_ship( m_local_physical_behavior->physical_parameters );
+        assert( m_physical_behavior );
+        m_graphical_engine.draw_ship( m_physical_behavior->physical_parameters );
       }
 
     private:
-      yarrr::LocalPhysicalBehavior* m_local_physical_behavior;
+      yarrr::PhysicalBehavior* m_physical_behavior;
   };
 
-  yarrr::Object::Pointer create_basic_ship()
-  {
-    yarrr::Object::Pointer ship( new yarrr::Object() );
-    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new yarrr::LocalPhysicalBehavior() ) );
-    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new yarrr::SimplePhysicsUpdater() ) );
-    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new yarrr::NetworkSynchronizer() ) );
-    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new yarrr::Engine() ) );
-    ship->add_behavior( yarrr::ObjectBehavior::Pointer( new GraphicalBehavior() ) );
-    return ship;
-  }
 }
 
 
@@ -66,8 +55,9 @@ World::World( yarrr::ObjectContainer& object_container )
   : m_objects( object_container )
   , m_my_ship( nullptr )
 {
-  m_dispatcher.register_listener<yarrr::ObjectStateUpdate>(
-      std::bind( &World::handle_object_state_update, this, std::placeholders::_1 ) );
+  m_dispatcher.register_listener<yarrr::ObjectUpdate>(
+      std::bind( &yarrr::ObjectContainer::handle_object_update, &object_container, std::placeholders::_1 ) );
+
   m_dispatcher.register_listener<yarrr::DeleteObject>(
       std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
 
@@ -90,9 +80,7 @@ World::handle_connection_established( const ConnectionEstablished& connection_es
 void
 World::handle_login( const LoggedIn& login )
 {
-  yarrr::Object::Pointer new_object( create_basic_ship() );
-  m_my_ship = new_object.get();
-  m_objects.add_object( login.user_id, std::move( new_object ) );
+  //todo: save the id I guess...
 }
 
 void
@@ -121,20 +109,5 @@ void
 World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 {
   m_objects.delete_object( delete_object.object_id() );
-}
-
-void
-World::handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update )
-{
-  const yarrr::PhysicalParameters& physical_parameters( object_state_update.physical_parameters() );
-  const yarrr::Object::Id id( physical_parameters.id );
-
-  if ( !m_objects.has_object_with_id( id ) )
-  {
-    yarrr::Object::Pointer new_object( create_basic_ship() );
-    m_objects.add_object( id, std::move( new_object ) );
-  }
-
-  m_objects.object_with_id( id ).dispatch( object_state_update );
 }
 

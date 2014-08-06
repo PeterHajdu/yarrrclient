@@ -25,7 +25,6 @@ class World
     void handle_connection_established( const ConnectionEstablished& connection_established );
     void handle_login( const LoggedIn& login );
     void handle_delete_object( const yarrr::DeleteObject& delete_object );
-    void handle_object_state_update( const yarrr::ObjectStateUpdate& object_state_update );
 
     yarrr::ObjectContainer& m_objects;
     the::ctci::Dispatcher m_dispatcher;
