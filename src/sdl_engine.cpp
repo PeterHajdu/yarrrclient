@@ -114,6 +114,24 @@ SdlEngine::draw_scaled_point(
   draw_point( scaled.x, scaled.y, size, colour );
 }
 
+void
+SdlEngine::set_colour( const yarrr::Colour& colour )
+{
+  SDL_SetRenderDrawColor( m_renderer, colour.red, colour.green, colour.blue, colour.alpha );
+}
+
+void
+SdlEngine::draw_scaled_line(
+    const yarrr::Coordinate& start,
+    const yarrr::Coordinate& end,
+    const yarrr::Colour& colour )
+{
+  const yarrr::Coordinate scaled_start( scale_coordinate( start ) );
+  const yarrr::Coordinate scaled_end( scale_coordinate( end ) );
+
+  set_colour( colour );
+  SDL_RenderDrawLine( m_renderer, scaled_start.x, scaled_start.y, scaled_end.x, scaled_end.y );
+}
 
 void
 SdlEngine::draw_point(
@@ -121,7 +139,7 @@ SdlEngine::draw_point(
     int16_t y,
     int size, const yarrr::Colour& colour )
 {
-  SDL_SetRenderDrawColor( m_renderer, colour.red, colour.green, colour.blue, colour.alpha );
+  set_colour( colour );
   SDL_Rect rectangle = {
     static_cast<Sint16>( x ),
     static_cast<Sint16>( y ),
@@ -165,8 +183,7 @@ SdlEngine::draw_laser( const yarrr::PhysicalParameters& laser )
     return;
   }
 
-  draw_scaled_point( laser.coordinate, 4, strange );
-  draw_scaled_point( laser.coordinate + heading, 4, strange );
+  draw_scaled_line( laser.coordinate, laser.coordinate + heading, strange );
 }
 
 void

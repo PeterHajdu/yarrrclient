@@ -54,6 +54,13 @@ class SdlEngine : public yarrr::GraphicalEngine
         int16_t y,
         int size, const yarrr::Colour& );
 
+    void set_colour( const yarrr::Colour& );
+
+    void draw_scaled_line(
+        const yarrr::Coordinate&,
+        const yarrr::Coordinate&,
+        const yarrr::Colour& );
+
     void draw_scaled_point(
         const yarrr::Coordinate&,
         int size,
