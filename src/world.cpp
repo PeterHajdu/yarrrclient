@@ -11,51 +11,6 @@
 #include <thectci/service_registry.hpp>
 #include <thelog/trace.hpp>
 
-namespace
-{
-  class FocusOnObject { public: add_ctci( "focus_on_object" ) };
-
-  class GraphicalBehavior :
-    public yarrr::ObjectBehavior,
-    public yarrr::GraphicalObject
-  {
-    public:
-      add_polymorphic_ctci( "yarrr_graphical_behavior" );
-      GraphicalBehavior()
-        : yarrr::GraphicalObject( the::ctci::service< yarrr::GraphicalEngine >() )
-        , m_physical_behavior( nullptr )
-      {
-      }
-
-      Pointer clone() const override
-      {
-        return Pointer( new GraphicalBehavior() );
-      }
-
-      void register_to( the::ctci::Dispatcher& dispatcher, the::ctci::ComponentRegistry& registry ) override
-      {
-        m_physical_behavior = &registry.component< yarrr::PhysicalBehavior >();
-        dispatcher.register_listener< FocusOnObject >( std::bind(
-              &GraphicalBehavior::handle_focus_on_object, this, std::placeholders::_1 ) );
-      }
-
-      void handle_focus_on_object( const FocusOnObject& )
-      {
-        assert( m_physical_behavior );
-        m_graphical_engine.focus_to( m_physical_behavior->physical_parameters.coordinate );
-      }
-
-      virtual void draw() const override
-      {
-        assert( m_physical_behavior );
-        m_graphical_engine.draw_ship( m_physical_behavior->physical_parameters );
-      }
-
-    private:
-      yarrr::PhysicalBehavior* m_physical_behavior;
-  };
-
-}
 
 
 World::World( yarrr::ObjectContainer& object_container )
@@ -97,7 +52,7 @@ World::in_focus()
     return;
   }
 
-  m_my_ship->dispatch( FocusOnObject() );
+  m_my_ship->dispatch( yarrr::FocusOnObject() );
 }
 
 void
@@ -134,7 +89,6 @@ World::handle_object_update( const yarrr::ObjectUpdate& update )
     m_my_ship = new_object.get();
   }
 
-  new_object->add_behavior( yarrr::ObjectBehavior::Pointer( new GraphicalBehavior() ) );
   m_objects.add_object( std::move( new_object ) );
 }
 
