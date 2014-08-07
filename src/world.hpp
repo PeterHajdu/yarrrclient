@@ -21,6 +21,7 @@ class World
     void in_focus();
 
   private:
+    void handle_object_update( const yarrr::ObjectUpdate& );
     void handle_command( const yarrr::Command& command );
     void handle_connection_established( const ConnectionEstablished& connection_established );
     void handle_login( const LoggedIn& login );
@@ -28,6 +29,7 @@ class World
 
     yarrr::ObjectContainer& m_objects;
     the::ctci::Dispatcher m_dispatcher;
+    yarrr::Object::Id m_my_ship_id;
     yarrr::Object* m_my_ship;
 };
 

@@ -9,6 +9,7 @@
 #include <yarrr/command.hpp>
 #include <yarrr/object_container.hpp>
 #include <thectci/service_registry.hpp>
+#include <thelog/trace.hpp>
 
 namespace
 {
@@ -19,13 +20,19 @@ namespace
     public yarrr::GraphicalObject
   {
     public:
+      add_polymorphic_ctci( "yarrr_graphical_behavior" );
       GraphicalBehavior()
         : yarrr::GraphicalObject( the::ctci::service< yarrr::GraphicalEngine >() )
         , m_physical_behavior( nullptr )
       {
       }
 
-      void register_to( the::ctci::Dispatcher& dispatcher, the::ctci::ComponentRegistry& registry )
+      Pointer clone() const override
+      {
+        return Pointer( new GraphicalBehavior() );
+      }
+
+      void register_to( the::ctci::Dispatcher& dispatcher, the::ctci::ComponentRegistry& registry ) override
       {
         m_physical_behavior = &registry.component< yarrr::PhysicalBehavior >();
         dispatcher.register_listener< FocusOnObject >( std::bind(
@@ -53,14 +60,13 @@ namespace
 
 World::World( yarrr::ObjectContainer& object_container )
   : m_objects( object_container )
+  , m_my_ship_id( 0 )
   , m_my_ship( nullptr )
 {
   m_dispatcher.register_listener<yarrr::ObjectUpdate>(
-      std::bind( &yarrr::ObjectContainer::handle_object_update, &object_container, std::placeholders::_1 ) );
-
+      std::bind( &World::handle_object_update, this, std::placeholders::_1 ) );
   m_dispatcher.register_listener<yarrr::DeleteObject>(
       std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
-
   the::ctci::Dispatcher& local_event_dispatcher(
       the::ctci::service< LocalEventDispatcher >().dispatcher );
   local_event_dispatcher.register_listener< LoggedIn >(
@@ -80,7 +86,7 @@ World::handle_connection_established( const ConnectionEstablished& connection_es
 void
 World::handle_login( const LoggedIn& login )
 {
-  //todo: save the id I guess...
+  m_my_ship_id = login.user_id;
 }
 
 void
@@ -109,5 +115,26 @@ void
 World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 {
   m_objects.delete_object( delete_object.object_id() );
+}
+
+
+void
+World::handle_object_update( const yarrr::ObjectUpdate& update )
+{
+  if ( m_objects.has_object_with_id( update.id() ) )
+  {
+    m_objects.handle_object_update( update );
+    return;
+  }
+
+  yarrr::Object::Pointer new_object( update.create_object() );
+
+  if ( update.id() == m_my_ship_id )
+  {
+    m_my_ship = new_object.get();
+  }
+
+  new_object->add_behavior( yarrr::ObjectBehavior::Pointer( new GraphicalBehavior() ) );
+  m_objects.add_object( std::move( new_object ) );
 }
 

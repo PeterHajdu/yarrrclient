@@ -4,9 +4,9 @@
 #include "world.hpp"
 
 #include <yarrr/graphical_engine.hpp>
-#include <yarrr/basic_behaviors.hpp>
 #include <yarrr/stream_to_chat.hpp>
 #include <yarrr/object_container.hpp>
+#include <yarrr/basic_behaviors.hpp>
 #include <thenet/address.hpp>
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
@@ -19,8 +19,8 @@
 
 int main( int argc, char ** argv )
 {
+  the::log::Logger::set_loglevel( 10 );
   yarrr::StreamToChat stream_to_chat( "system" );
-  the::log::Logger::add_channel( std::cout );
   the::log::Logger::add_channel( stream_to_chat.stream() );
   the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
   the::time::Clock clock;
