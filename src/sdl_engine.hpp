@@ -41,7 +41,8 @@ class SdlEngine : public yarrr::GraphicalEngine
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
     virtual void focus_to( const yarrr::Coordinate& center ) override;
-    virtual void draw_ship( const yarrr::PhysicalParameters& ship ) override;
+    virtual void draw_ship( const yarrr::PhysicalParameters& ) override;
+    virtual void draw_laser( const yarrr::PhysicalParameters& ) override;
     virtual void print_text( uint16_t x, uint16_t y, const std::string&, const yarrr::Colour& ) override;
     virtual void print_text_tokens( uint16_t x, uint16_t y, const yarrr::TextTokens& ) override;
 

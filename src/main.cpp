@@ -19,7 +19,6 @@
 
 int main( int argc, char ** argv )
 {
-  the::log::Logger::set_loglevel( 10 );
   yarrr::StreamToChat stream_to_chat( "system" );
   the::log::Logger::add_channel( stream_to_chat.stream() );
   the::conf::set_value( "login_name", getenv( "LOGNAME" ) );

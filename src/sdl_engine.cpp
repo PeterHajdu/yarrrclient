@@ -154,6 +154,22 @@ SdlEngine::is_on_screen( const yarrr::Coordinate& coordinate ) const
 }
 
 void
+SdlEngine::draw_laser( const yarrr::PhysicalParameters& laser )
+{
+  const yarrr::Coordinate heading(
+      cos( laser.angle * 3.14 / 180.0 / 4.0 ) * 60.0,
+      sin( laser.angle * 3.14 / 180.0 / 4.0 ) * 60.0 );
+
+  if ( !is_on_screen( laser.coordinate ) )
+  {
+    return;
+  }
+
+  draw_scaled_point( laser.coordinate, 4, strange );
+  draw_scaled_point( laser.coordinate + heading, 4, strange );
+}
+
+void
 SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 {
   const yarrr::Coordinate heading(

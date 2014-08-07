@@ -9,9 +9,6 @@
 #include <yarrr/command.hpp>
 #include <yarrr/object_container.hpp>
 #include <thectci/service_registry.hpp>
-#include <thelog/trace.hpp>
-
-
 
 World::World( yarrr::ObjectContainer& object_container )
   : m_objects( object_container )
