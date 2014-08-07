@@ -174,25 +174,18 @@ SdlEngine::is_on_screen( const yarrr::Coordinate& coordinate ) const
 void
 SdlEngine::draw_laser( const yarrr::PhysicalParameters& laser )
 {
-  const yarrr::Coordinate heading(
-      cos( laser.angle * 3.14 / 180.0 / 4.0 ) * 60.0,
-      sin( laser.angle * 3.14 / 180.0 / 4.0 ) * 60.0 );
-
+  const yarrr::Coordinate head( yarrr::heading( laser, 60 ) );
   if ( !is_on_screen( laser.coordinate ) )
   {
     return;
   }
 
-  draw_scaled_line( laser.coordinate, laser.coordinate + heading, strange );
+  draw_scaled_line( laser.coordinate, laser.coordinate + head, strange );
 }
 
 void
 SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 {
-  const yarrr::Coordinate heading(
-      cos( ship.angle * 3.14 / 180.0 / 4.0 ) * 60.0,
-      sin( ship.angle * 3.14 / 180.0 / 4.0 ) * 60.0 );
-
   if ( !is_on_screen( ship.coordinate ) )
   {
     const yarrr::Coordinate diff(
@@ -202,12 +195,13 @@ SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
     return;
   }
 
-  const yarrr::Coordinate perpendicular( yarrr::perpendicular( heading ) );
+  const yarrr::Coordinate head( yarrr::heading( ship, 60 ) );
+  const yarrr::Coordinate perpendicular( yarrr::perpendicular( head ) );
   draw_scaled_point( ship.coordinate, 4, strange );
-  draw_scaled_point( ship.coordinate + heading, 4, green );
-  draw_scaled_point( ship.coordinate - heading, 4, red );
-  draw_scaled_point( ship.coordinate - heading * 0.5 + perpendicular * 0.5, 4, red );
-  draw_scaled_point( ship.coordinate - heading * 0.5 - perpendicular * 0.5, 4, red );
+  draw_scaled_point( ship.coordinate + head, 4, green );
+  draw_scaled_point( ship.coordinate - head, 4, red );
+  draw_scaled_point( ship.coordinate - head * 0.5 + perpendicular * 0.5, 4, red );
+  draw_scaled_point( ship.coordinate - head * 0.5 - perpendicular * 0.5, 4, red );
 }
 
 
