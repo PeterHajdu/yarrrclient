@@ -22,7 +22,7 @@ KeyboardHandler::send_command( yarrr::Command::Type cmd, the::time::Time& timest
 }
 
 void
-KeyboardHandler::handle_text_input()
+KeyboardHandler::handle_text_input( the::time::Time& now )
 {
   //todo: split this up somehow
   SDL_Event event;
@@ -62,6 +62,10 @@ KeyboardHandler::handle_text_input()
         {
           m_terminal.end();
         }
+        else if ( event.key.keysym.sym == SDLK_LCTRL )
+        {
+          send_command( yarrr::Command::fire, now );
+        }
         break;
     }
   }
@@ -70,7 +74,7 @@ KeyboardHandler::handle_text_input()
 void
 KeyboardHandler::check_keyboard( the::time::Time& now )
 {
-  handle_text_input();
+  handle_text_input( now );
   SDL_PumpEvents();
   const unsigned char *keystates = SDL_GetKeyboardState( nullptr );
   if (keystates[SDL_SCANCODE_RIGHT])

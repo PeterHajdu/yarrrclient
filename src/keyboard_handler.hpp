@@ -11,7 +11,7 @@ class KeyboardHandler : public the::ctci::Dispatcher
     void check_keyboard( the::time::Time& now );
   private:
     void send_command( yarrr::Command::Type cmd, the::time::Time& timestamp );
-    void handle_text_input();
+    void handle_text_input( the::time::Time& now );
 
     bool& m_running;
     yarrr::Cli m_cli;
