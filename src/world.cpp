@@ -49,7 +49,7 @@ World::in_focus()
     return;
   }
 
-  m_my_ship->dispatch( yarrr::FocusOnObject() );
+  m_my_ship->dispatcher.dispatch( yarrr::FocusOnObject() );
 }
 
 void
@@ -60,7 +60,7 @@ World::handle_command( const yarrr::Command& command )
     return;
   }
 
-  m_my_ship->dispatch( command );
+  m_my_ship->dispatcher.dispatch( command );
 }
 
 void
