@@ -180,7 +180,7 @@ SdlEngine::draw_laser( const yarrr::PhysicalParameters& laser )
     return;
   }
 
-  draw_scaled_line( laser.coordinate, laser.coordinate + head, strange );
+  draw_scaled_line( laser.coordinate, laser.coordinate - head, strange );
 }
 
 void
