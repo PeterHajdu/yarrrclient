@@ -84,6 +84,9 @@ World::handle_object_update( const yarrr::ObjectUpdate& update )
   if ( update.id() == m_my_ship_id )
   {
     m_my_ship = new_object.get();
+    m_hud.reset( new yarrr::Hud(
+          the::ctci::service< yarrr::GraphicalEngine >(),
+          m_my_ship->components.component< yarrr::PhysicalBehavior >().physical_parameters ) );
   }
 
   m_objects.add_object( std::move( new_object ) );

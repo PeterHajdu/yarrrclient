@@ -2,6 +2,7 @@
 
 #include <yarrr/object.hpp>
 #include <yarrr/physical_parameters.hpp>
+#include <yarrr/hud.hpp>
 
 namespace yarrr
 {
@@ -31,5 +32,7 @@ class World
     the::ctci::Dispatcher m_dispatcher;
     yarrr::Object::Id m_my_ship_id;
     yarrr::Object* m_my_ship;
+
+    std::unique_ptr< yarrr::Hud > m_hud;
 };
 
