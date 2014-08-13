@@ -6,6 +6,7 @@ set(SOURCE_FILES
   keyboard_handler.cpp
   local_event_dispatcher.cpp
   world.cpp
+  fps.cpp
     )
 
 

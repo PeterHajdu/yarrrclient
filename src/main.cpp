@@ -2,6 +2,7 @@
 #include "keyboard_handler.hpp"
 #include "local_event_dispatcher.hpp"
 #include "world.hpp"
+#include "fps.hpp"
 
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/stream_to_chat.hpp>
@@ -23,6 +24,8 @@ int main( int argc, char ** argv )
   the::log::Logger::add_channel( stream_to_chat.stream() );
   the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
   the::time::Clock clock;
+
+  FpsDrawer fps_drawer( clock );
 
   yarrr::ObjectContainer object_container;
   World world( object_container );
