@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include <thectci/service_registry.hpp>
+#include <thelog/logger.hpp>
 
 namespace
 {
@@ -52,9 +53,12 @@ SdlEngine::SdlEngine( int16_t x, int16_t y )
   , m_ttf_initializer()
   , m_font( "stuff.ttf" )
 {
-  assert(
-      SDL_Init( SDL_INIT_VIDEO ) == 0 &&
-      "Unable to initialize sdl!" );
+  if ( SDL_Init( SDL_INIT_VIDEO ) != 0 )
+  {
+    thelog( 1 )( SDL_GetError() );
+    assert( false );
+  }
+
   m_window = SDL_CreateWindow(
       "yarrr",
       SDL_WINDOWPOS_UNDEFINED,
