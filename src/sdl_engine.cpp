@@ -188,6 +188,17 @@ SdlEngine::draw_laser( const yarrr::PhysicalParameters& laser )
 }
 
 void
+SdlEngine::draw_particle( const yarrr::PhysicalParameters& particle, uint64_t age )
+{
+  if ( !is_on_screen( particle.coordinate ) )
+  {
+    return;
+  }
+
+  draw_scaled_point( particle.coordinate, 4, white );
+}
+
+void
 SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 {
   if ( !is_on_screen( ship.coordinate ) )
