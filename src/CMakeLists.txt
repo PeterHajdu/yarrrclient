@@ -7,6 +7,7 @@ set(SOURCE_FILES
   local_event_dispatcher.cpp
   world.cpp
   fps.cpp
+  particle_factory.cpp
     )
 
 
