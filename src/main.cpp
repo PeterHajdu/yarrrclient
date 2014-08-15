@@ -3,6 +3,7 @@
 #include "local_event_dispatcher.hpp"
 #include "world.hpp"
 #include "fps.hpp"
+#include "particle_factory.hpp"
 
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/stream_to_chat.hpp>
@@ -45,6 +46,10 @@ int main( int argc, char ** argv )
   //todo: this is ugly, a separate log class should be used
   stream_to_chat.register_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
 
+  yarrr::ParticleContainer particles;
+  the::ctci::AutoServiceRegister< yarrr::ParticleFactory, ParticleFactory >
+    auto_particle_factory_register( particles );
+
   while ( running )
   {
     the::time::Clock::Time now( clock.now() );
@@ -55,6 +60,8 @@ int main( int argc, char ** argv )
     stream_to_chat.flush();
 
     object_container.dispatch( yarrr::TimerUpdate( now ) );
+    particles.travel_in_time_to( now );
+
     world.in_focus();
 
     the::ctci::service<yarrr::GraphicalEngine>().update_screen();
