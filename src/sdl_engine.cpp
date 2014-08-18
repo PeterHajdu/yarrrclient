@@ -71,6 +71,10 @@ SdlEngine::SdlEngine( int16_t x, int16_t y )
       -1,
       SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
   assert( m_renderer );
+
+  assert( 0 == SDL_SetRenderDrawBlendMode(
+        m_renderer,
+        SDL_BLENDMODE_BLEND ) );
 }
 
 
@@ -195,7 +199,9 @@ SdlEngine::draw_particle( const yarrr::PhysicalParameters& particle, uint64_t ag
     return;
   }
 
-  draw_scaled_point( particle.coordinate, 4, white );
+  yarrr::Colour particle_colour( white );
+  particle_colour.alpha = 255.0 / 3100000.0 * ( 3100000 - age );
+  draw_scaled_point( particle.coordinate, 4, particle_colour );
 }
 
 void
