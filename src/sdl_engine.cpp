@@ -37,7 +37,11 @@ TtfInitializer::~TtfInitializer()
 Font::Font( const std::string& path )
   : font( TTF_OpenFont( path.c_str(), 14 ) )
 {
-  assert( font );
+  if ( nullptr == font )
+  {
+    thelog( 1 )( SDL_GetError() );
+    assert( font );
+  }
 }
 
 Font::~Font()
@@ -51,7 +55,8 @@ SdlEngine::SdlEngine( int16_t x, int16_t y )
   , m_center_of_screen( x / 2, y / 2 )
   , m_center_in_metres( m_screen_resolution * 0.5 )
   , m_ttf_initializer()
-  , m_font( "stuff.ttf" )
+    //todo: fix this abomination
+  , m_font( "/usr/local/share/yarrr/stuff.ttf" )
 {
   if ( SDL_Init( SDL_INIT_VIDEO ) != 0 )
   {
