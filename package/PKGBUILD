@@ -9,7 +9,7 @@ depends=('sdl2' 'sdl2_ttf')
 makedepends=('cmake' 'git' 'clang')
 
 source=(
-'./yarrr.tar.gz'
+'./source.tar.gz'
 'http://yarrrthegame.com/stuff.ttf'
 )
 
