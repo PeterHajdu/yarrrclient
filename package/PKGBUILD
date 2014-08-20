@@ -1,0 +1,44 @@
+pkgname=yarrr
+pkgver=0.123.g4ff2c73
+pkgrel=1
+pkgdesc="The world's most wonderful online space shooter."
+arch=('i686' 'x86_64')
+url="https://yarrrthegame.com"
+license=('Proprietary')
+depends=('sdl2' 'sdl2_ttf')
+makedepends=('cmake' 'git' 'clang')
+
+source=(
+'./yarrr.tar.gz'
+'http://yarrrthegame.com/stuff.ttf'
+)
+
+md5sums=(
+'SKIP'
+'SKIP'
+)
+
+pkgver()
+{
+echo 0.`git rev-list --count HEAD`.`git rev-parse --short HEAD`
+}
+
+build()
+{
+cd "${srcdir}"
+compile
+}
+
+package()
+{
+make install DESTDIR=${pkgdir}
+mkdir -p ${pkgdir}/usr/local/share/yarrr
+cp -f stuff.ttf ${pkgdir}/usr/local/share/yarrr
+}
+
+check()
+{
+cd "${srcdir}"
+unittest
+}
+
