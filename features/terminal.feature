@@ -1,4 +1,4 @@
-@wip
+@smoke
 Feature: Print out meaningful information to the terminal
   To be able to start the binary as easily as possible
   As an aspiring yarrr player
