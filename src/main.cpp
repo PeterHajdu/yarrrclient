@@ -19,11 +19,35 @@
 #include <thelog/logger.hpp>
 #include <iostream>
 
+void print_help_and_exit()
+{
+std::cout <<
+  "yarrr is the most awesome spaceshooter game in the universe.\n"
+  "To learn more about it please visit: http://yarrrthegame.com\n"
+  "Or write an e-mail to: info@yarrrthegame.com\n"
+  "\n"
+  "usage: yarrrclient <server:port>\n"
+  << std::endl;
+  exit( 0 );
+}
+
+void parse_and_handle_configuration( const the::conf::ParameterVector& parameters )
+{
+  the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
+  the::conf::parse( parameters );
+
+  if ( the::conf::has( "help" ) )
+  {
+    print_help_and_exit();
+  }
+}
+
 int main( int argc, char ** argv )
 {
+  parse_and_handle_configuration( the::conf::ParameterVector( argv, argv + argc ) );
+
   yarrr::StreamToChat stream_to_chat( "system" );
   the::log::Logger::add_channel( stream_to_chat.stream() );
-  the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
   the::time::Clock clock;
 
   FpsDrawer fps_drawer( clock );
