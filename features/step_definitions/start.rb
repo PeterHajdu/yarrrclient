@@ -4,6 +4,6 @@ When(/^I start yarrr with command line parameter (.*)$/) do | parameter |
 end
 
 Then(/^I should see (.+)$/) do | pattern |
-  @output.expect =~/pattern/
+  expect( @output ).to match( /#{pattern}/ )
 end
 
