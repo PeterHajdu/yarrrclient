@@ -9,6 +9,11 @@ Almost certain:
  * linux
  * android
 
+Packages are going to be maintained for:
+ * arch
+ * ubuntu
+ * freebsd
+
 Maybe:
  * windows
  * iphone
