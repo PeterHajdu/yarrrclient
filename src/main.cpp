@@ -4,6 +4,7 @@
 #include "world.hpp"
 #include "fps.hpp"
 #include "particle_factory.hpp"
+#include "sdl_engine.hpp"
 
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/stream_to_chat.hpp>
@@ -46,6 +47,7 @@ int main( int argc, char ** argv )
 {
   parse_and_handle_configuration( the::conf::ParameterVector( argv, argv + argc ) );
 
+  the::ctci::AutoServiceRegister< yarrr::GraphicalEngine, SdlEngine > auto_sdl_engine_register( 800, 600 );
   yarrr::StreamToChat stream_to_chat( "system" );
   the::log::Logger::add_channel( stream_to_chat.stream() );
   the::time::Clock clock;

@@ -269,8 +269,3 @@ SdlEngine::draw_background()
   SDL_RenderClear( m_renderer );
 }
 
-namespace
-{
-  the::ctci::AutoServiceRegister< yarrr::GraphicalEngine, SdlEngine > auto_sdl_engine_register( 800, 600 );
-}
-
