@@ -10,7 +10,6 @@ makedepends=('cmake' 'git' 'clang')
 
 source=(
 './source.tar.gz'
-'http://yarrrthegame.com/stuff.ttf'
 )
 
 md5sums=(
@@ -32,8 +31,6 @@ compile
 package()
 {
 make install DESTDIR=${pkgdir}
-mkdir -p ${pkgdir}/usr/local/share/yarrr
-cp -f stuff.ttf ${pkgdir}/usr/local/share/yarrr
 }
 
 check()
