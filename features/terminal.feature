@@ -10,3 +10,9 @@ Feature: Print out meaningful information to the terminal
     And I should see info@yarrrthegame.com
     And I should see yarrrclient <server:port>
 
+  Scenario: starting without any parameter
+    When I start yarrr
+    Then I should see yarrrthegame.com
+    And I should see info@yarrrthegame.com
+    And I should see yarrrclient <server:port>
+
