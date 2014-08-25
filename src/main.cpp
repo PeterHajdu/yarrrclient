@@ -27,7 +27,7 @@ std::cout <<
   "To learn more about it please visit: http://yarrrthegame.com\n"
   "Or write an e-mail to: info@yarrrthegame.com\n"
   "\n"
-  "usage: yarrrclient <server:port>\n"
+  "usage: yarrrclient --server <server:port>\n"
   << std::endl;
   exit( 0 );
 }
@@ -37,7 +37,8 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
   the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
   the::conf::parse( parameters );
 
-  if ( the::conf::has( "help" ) )
+  if ( the::conf::has( "help" ) ||
+       !the::conf::has( "server" ) )
   {
     print_help_and_exit();
   }
@@ -59,10 +60,7 @@ int main( int argc, char ** argv )
 
   NetworkService network_service(
       clock,
-      the::net::Address(
-        argc > 1 ?
-        argv[1] :
-        "localhost:2001") );
+      the::net::Address( the::conf::get< std::string>( "server" ) ) );
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
