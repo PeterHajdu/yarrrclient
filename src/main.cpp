@@ -7,6 +7,7 @@
 #include "sdl_engine.hpp"
 
 #include <yarrr/graphical_engine.hpp>
+#include <yarrr/dummy_graphical_engine.hpp>
 #include <yarrr/stream_to_chat.hpp>
 #include <yarrr/object_container.hpp>
 #include <yarrr/basic_behaviors.hpp>
@@ -19,6 +20,11 @@
 
 #include <thelog/logger.hpp>
 #include <iostream>
+
+#include <unistd.h>
+
+namespace
+{
 
 void print_help_and_exit()
 {
@@ -44,11 +50,25 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
   }
 }
 
+typedef std::unique_ptr< yarrr::GraphicalEngine > GraphicalEnginePointer;
+GraphicalEnginePointer create_graphical_engine()
+{
+  if ( the::conf::has( "text" ) )
+  {
+    return GraphicalEnginePointer( new yarrr::DummyGraphicalEngine() );
+  }
+
+  return GraphicalEnginePointer( new SdlEngine( 800, 600 ) );
+}
+
+}
+
 int main( int argc, char ** argv )
 {
   parse_and_handle_configuration( the::conf::ParameterVector( argv, argv + argc ) );
+  GraphicalEnginePointer graphical_engine( create_graphical_engine() );
+  the::ctci::ServiceRegistry::register_service< yarrr::GraphicalEngine >( *graphical_engine );
 
-  the::ctci::AutoServiceRegister< yarrr::GraphicalEngine, SdlEngine > auto_sdl_engine_register( 800, 600 );
   yarrr::StreamToChat stream_to_chat( "system" );
   the::log::Logger::add_channel( stream_to_chat.stream() );
   the::time::Clock clock;
