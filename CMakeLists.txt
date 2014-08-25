@@ -7,7 +7,6 @@ if(UNIX)
     option(enable_libc++ "Enable looking for LLVM's libc++ and using it as standard library if found")
 endif(UNIX)
 
-set(deploy_directory $ENV{deploy_directory})
 set(LIBS ${LIBS})
 
 if(UNIX)
@@ -27,7 +26,6 @@ if(UNIX)
 endif(UNIX)
 
 include_directories(include)
-include_directories(${deploy_directory}/include)
 include_directories(/usr/local/include)
 
 add_definitions(-std=c++11
@@ -47,4 +45,5 @@ else(sanitize)
 endif(sanitize)
 
 add_subdirectory(src)
+add_subdirectory(share)
 
