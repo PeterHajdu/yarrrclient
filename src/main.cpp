@@ -21,8 +21,6 @@
 #include <thelog/logger.hpp>
 #include <iostream>
 
-#include <unistd.h>
-
 namespace
 {
 
