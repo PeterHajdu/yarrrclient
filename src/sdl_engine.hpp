@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <memory>
 #include <yarrr/graphical_engine.hpp>
 #include <thectci/id.hpp>
 #include <SDL2/SDL_ttf.h>
