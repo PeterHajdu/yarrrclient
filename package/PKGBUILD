@@ -34,7 +34,5 @@ make install DESTDIR=${pkgdir}
 
 check()
 {
-cd "${srcdir}"
-unittest
 }
 
