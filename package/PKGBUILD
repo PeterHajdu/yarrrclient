@@ -32,7 +32,3 @@ package()
 make install DESTDIR=${pkgdir}
 }
 
-check()
-{
-}
-
