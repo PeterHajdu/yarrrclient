@@ -8,9 +8,11 @@ _CPack*
 *core*
 *swp
 *.cmake
+*.core
 Makefile
 CMakeFiles
 CMakeCache.txt
 build
 install_manifest.txt
-
+test/test_runner
+test/valgrind.log
