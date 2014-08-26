@@ -11,6 +11,7 @@ Then(/^the help message should be on the screen$/) do
     Then I should see http://yarrrthegame.com
     And I should see info@yarrrthegame.com
     And I should see yarrrclient --server <server:port>
+    And I should see --fullscreen
   }
 end
 

@@ -31,7 +31,10 @@ std::cout <<
   "To learn more about it please visit: http://yarrrthegame.com\n"
   "Or write an e-mail to: info@yarrrthegame.com\n"
   "\n"
-  "usage: yarrrclient --server <server:port>\n"
+  "usage: yarrrclient --server <server:port> [options]\n"
+  "\n"
+  "other options:\n"
+  "  --fullscreen\n"
   << std::endl;
   exit( 0 );
 }
@@ -56,7 +59,7 @@ GraphicalEnginePointer create_graphical_engine()
     return GraphicalEnginePointer( new yarrr::DummyGraphicalEngine() );
   }
 
-  return GraphicalEnginePointer( new SdlEngine( 800, 600 ) );
+  return GraphicalEnginePointer( new SdlEngine() );
 }
 
 }

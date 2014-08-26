@@ -30,11 +30,45 @@ class Font
     TTF_Font * font;
 };
 
+class Window;
+class Renderer
+{
+  public:
+    typedef std::unique_ptr< Renderer > Pointer;
+    Renderer( SDL_Window* );
+    ~Renderer();
+    operator SDL_Renderer*();
+
+  private:
+    SDL_Renderer* m_renderer;
+};
+
+class Window
+{
+  public:
+    Window();
+    ~Window();
+    Renderer::Pointer create_renderer();
+
+    const yarrr::Coordinate screen_resolution;
+
+  private:
+    SDL_Window* m_window;
+};
+
+
+class SdlInitializer
+{
+  public:
+    SdlInitializer();
+    ~SdlInitializer();
+};
+
 class SdlEngine : public yarrr::GraphicalEngine
 {
   public:
     add_ctci( "sdl_engine" );
-    SdlEngine( int16_t x, int16_t y );
+    SdlEngine();
     ~SdlEngine();
 
     SdlEngine( const SdlEngine& ) = delete;
@@ -74,8 +108,10 @@ class SdlEngine : public yarrr::GraphicalEngine
     void draw_grid();
     void draw_background();
 
-    SDL_Window* m_window;
-    SDL_Renderer* m_renderer;
+    SdlInitializer m_sdl_initializer;
+    TtfInitializer m_ttf_initializer;
+    Window m_window;
+    Renderer::Pointer m_renderer;
 
     const yarrr::Coordinate m_screen_resolution;
     const yarrr::Coordinate m_center_of_screen;
@@ -87,7 +123,6 @@ class SdlEngine : public yarrr::GraphicalEngine
     const yarrr::Colour green{ 0, 255, 0, 255 };
     const yarrr::Colour strange{ 255, 255, 0, 255 };
 
-    TtfInitializer m_ttf_initializer;
     Font m_font;
 };
 

@@ -10,6 +10,7 @@
 
 #include <thectci/service_registry.hpp>
 #include <thelog/logger.hpp>
+#include <theconf/configuration.hpp>
 
 namespace
 {
@@ -34,6 +35,20 @@ TtfInitializer::~TtfInitializer()
   TTF_Quit();
 }
 
+SdlInitializer::SdlInitializer()
+{
+  if ( SDL_Init( SDL_INIT_VIDEO ) != 0 )
+  {
+    thelog( 1 )( SDL_GetError() );
+    assert( false );
+  }
+}
+
+SdlInitializer::~SdlInitializer()
+{
+  SDL_Quit();
+}
+
 Font::Font( const std::string& path )
   : font( TTF_OpenFont( path.c_str(), 14 ) )
 {
@@ -49,45 +64,98 @@ Font::~Font()
   TTF_CloseFont( font );
 }
 
-SdlEngine::SdlEngine( int16_t x, int16_t y )
-  : m_window( nullptr )
-  , m_screen_resolution( x, y )
-  , m_center_of_screen( x / 2, y / 2 )
-  , m_center_in_metres( m_screen_resolution * 0.5 )
-  , m_ttf_initializer()
-    //todo: fix this abomination
-  , m_font( "/usr/local/share/yarrr/stuff.ttf" )
+namespace
 {
-  if ( SDL_Init( SDL_INIT_VIDEO ) != 0 )
+
+  uint32_t calculate_window_flags()
   {
-    thelog( 1 )( SDL_GetError() );
-    assert( false );
+    uint32_t window_flags( SDL_WINDOW_SHOWN );
+
+    if ( the::conf::has( "fullscreen" ) )
+    {
+      window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    }
+
+    return window_flags;
   }
 
-  m_window = SDL_CreateWindow(
+  yarrr::Coordinate calculate_screen_resolution()
+  {
+    yarrr::Coordinate resolution( 800, 600 );
+
+    if ( the::conf::has( "fullscreen" ) )
+    {
+      const int display_in_use( 0 );
+      SDL_DisplayMode current_display_mode;
+      assert( 0 == SDL_GetCurrentDisplayMode( display_in_use, &current_display_mode ) );
+      resolution = yarrr::Coordinate{ current_display_mode.w, current_display_mode.h };
+    }
+
+    return resolution;
+  }
+}
+
+Window::Window()
+  : screen_resolution( calculate_screen_resolution() )
+  , m_window( SDL_CreateWindow(
       "yarrr",
       SDL_WINDOWPOS_UNDEFINED,
       SDL_WINDOWPOS_UNDEFINED,
-      x, y,
-      SDL_WINDOW_SHOWN );
+      screen_resolution.x, screen_resolution.y,
+      calculate_window_flags() ) )
+{
   assert( m_window );
-  m_renderer = SDL_CreateRenderer(
-      m_window,
-      -1,
-      SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
-  assert( m_renderer );
+}
 
+Window::~Window()
+{
+  SDL_DestroyWindow( m_window );
+}
+
+Renderer::Pointer
+Window::create_renderer()
+{
+  return Renderer::Pointer( new Renderer( m_window ) );
+}
+
+Renderer::Renderer( SDL_Window* window )
+  : m_renderer(
+      SDL_CreateRenderer(
+      window,
+      -1,
+      SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC ) )
+{
+  assert( m_renderer );
   assert( 0 == SDL_SetRenderDrawBlendMode(
         m_renderer,
         SDL_BLENDMODE_BLEND ) );
 }
 
+Renderer::~Renderer()
+{
+  SDL_DestroyRenderer( m_renderer );
+}
+
+Renderer::operator SDL_Renderer*()
+{
+  return m_renderer;
+}
+
+SdlEngine::SdlEngine()
+  : m_sdl_initializer()
+  , m_ttf_initializer()
+  , m_window()
+  , m_renderer( m_window.create_renderer() )
+  , m_screen_resolution( m_window.screen_resolution )
+  , m_center_of_screen( m_screen_resolution * 0.5 )
+  , m_center_in_metres( m_screen_resolution * 0.5 )
+    //todo: fix this abomination
+  , m_font( "/usr/local/share/yarrr/stuff.ttf" )
+{
+}
 
 SdlEngine::~SdlEngine()
 {
-  SDL_DestroyRenderer( m_renderer );
-  SDL_DestroyWindow( m_window );
-  SDL_Quit();
 }
 
 
@@ -97,7 +165,7 @@ SdlEngine::update_screen()
   draw_background();
   draw_grid();
   draw_objects();
-  SDL_RenderPresent( m_renderer );
+  SDL_RenderPresent( *m_renderer );
 }
 
 void
@@ -130,7 +198,7 @@ SdlEngine::draw_scaled_point(
 void
 SdlEngine::set_colour( const yarrr::Colour& colour )
 {
-  SDL_SetRenderDrawColor( m_renderer, colour.red, colour.green, colour.blue, colour.alpha );
+  SDL_SetRenderDrawColor( *m_renderer, colour.red, colour.green, colour.blue, colour.alpha );
 }
 
 void
@@ -143,7 +211,7 @@ SdlEngine::draw_scaled_line(
   const yarrr::Coordinate scaled_end( scale_coordinate( end ) );
 
   set_colour( colour );
-  SDL_RenderDrawLine( m_renderer, scaled_start.x, scaled_start.y, scaled_end.x, scaled_end.y );
+  SDL_RenderDrawLine( *m_renderer, scaled_start.x, scaled_start.y, scaled_end.x, scaled_end.y );
 }
 
 void
@@ -159,7 +227,7 @@ SdlEngine::draw_point(
     static_cast<Uint16>( size ),
     static_cast<Uint16>( size ) };
 
-  SDL_RenderFillRect( m_renderer, &rectangle );
+  SDL_RenderFillRect( *m_renderer, &rectangle );
 }
 
 
@@ -240,14 +308,14 @@ SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message, const
         message.c_str(),
         to_sdl_colour( colour ) ) );
   assert( surface );
-  SDL_Texture *texture( SDL_CreateTextureFromSurface( m_renderer, surface ) );
+  SDL_Texture *texture( SDL_CreateTextureFromSurface( *m_renderer, surface ) );
   assert( texture );
   SDL_FreeSurface( surface );
 
   SDL_Rect destination{ x, y, 0, 0 };
   SDL_QueryTexture( texture, nullptr, nullptr, &destination.w, &destination.h );
 
-  assert( 0 == SDL_RenderCopy( m_renderer, texture, nullptr, &destination ) );
+  assert( 0 == SDL_RenderCopy( *m_renderer, texture, nullptr, &destination ) );
   SDL_DestroyTexture( texture );
 }
 
@@ -265,7 +333,7 @@ SdlEngine::print_text_tokens( uint16_t x, uint16_t y, const yarrr::TextTokens& t
 void
 SdlEngine::draw_background()
 {
-  SDL_SetRenderDrawColor( m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
-  SDL_RenderClear( m_renderer );
+  SDL_SetRenderDrawColor( *m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
+  SDL_RenderClear( *m_renderer );
 }
 
