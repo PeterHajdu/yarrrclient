@@ -1,7 +1,8 @@
 src/yarrrclient
 package
 share
-
+_CPack*
+*.deb
 *core*
 *swp
 *.cmake
