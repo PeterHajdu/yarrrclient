@@ -23,6 +23,7 @@
 
 namespace
 {
+the::ctci::AutoServiceRegister< LocalEventDispatcher, LocalEventDispatcher > local_event_dispatcher_register;
 
 void print_help_and_exit()
 {

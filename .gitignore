@@ -1,4 +1,5 @@
 src/yarrrclient
+src/*.a
 package
 package_version
 share
