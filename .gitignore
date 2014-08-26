@@ -1,5 +1,6 @@
 src/yarrrclient
 package
+package_version
 share
 _CPack*
 *.deb
