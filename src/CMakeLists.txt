@@ -5,6 +5,7 @@ set(LIB_SOURCE_FILES
   world.cpp
   fps.cpp
   particle_factory.cpp
+  resources.cpp
   )
 
 set(CLIENT_SOURCE_FILES

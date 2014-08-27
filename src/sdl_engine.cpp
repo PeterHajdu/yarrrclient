@@ -1,4 +1,5 @@
 #include "sdl_engine.hpp"
+#include "resources.hpp"
 
 #include <yarrr/physical_parameters.hpp>
 
@@ -149,8 +150,7 @@ SdlEngine::SdlEngine()
   , m_screen_resolution( m_window.screen_resolution )
   , m_center_of_screen( m_screen_resolution * 0.5 )
   , m_center_in_metres( m_screen_resolution * 0.5 )
-    //todo: fix this abomination
-  , m_font( "/usr/local/share/yarrr/stuff.ttf" )
+  , m_font( yarrr::find_resource_file( "stuff.ttf" ) )
 {
 }
 

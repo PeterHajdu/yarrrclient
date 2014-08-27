@@ -4,6 +4,7 @@ include_directories(igloo)
 
 set(TEST_SOURCE_FILES
     test_runner.cpp
+    test_resources.cpp
     )
 
 
