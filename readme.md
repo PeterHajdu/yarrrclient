@@ -5,13 +5,13 @@ Yarrr is the most awesome space pirate mmorpg game ever made.
 # Planned platforms
 
 Almost certain:
- * freebsd
- * linux
+ * freebsd [ done ]
+ * linux [ done ]
  * android
 
 Packages are going to be maintained for:
- * arch
- * ubuntu
+ * arch [ done ]
+ * ubuntu [ done ]
  * freebsd
 
 Maybe:
