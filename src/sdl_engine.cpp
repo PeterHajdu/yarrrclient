@@ -272,7 +272,7 @@ SdlEngine::draw_particle( const yarrr::PhysicalParameters& particle, uint64_t ag
   }
 
   yarrr::Colour particle_colour( white );
-  particle_colour.alpha = 255.0 / 3100000.0 * ( 3100000 - age );
+  particle_colour.alpha = 100.0 / 3100000.0 * ( 3100000 - age );
   draw_scaled_point( particle.coordinate, 3, particle_colour );
 }
 
