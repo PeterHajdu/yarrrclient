@@ -6,7 +6,6 @@
 #include <cmath>
 #include <cassert>
 #include <SDL2/SDL.h>
-#include <iostream>
 #include <algorithm>
 
 #include <thectci/service_registry.hpp>
@@ -150,7 +149,7 @@ SdlEngine::SdlEngine()
   , m_screen_resolution( m_window.screen_resolution )
   , m_center_of_screen( m_screen_resolution * 0.5 )
   , m_center_in_metres( m_screen_resolution * 0.5 )
-  , m_font( yarrr::find_resource_file( "stuff.ttf" ) )
+  , m_font( the::ctci::service< yarrr::ResourceFinder >().find( "stuff.ttf" ) )
 {
 }
 

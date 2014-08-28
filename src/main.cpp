@@ -5,6 +5,7 @@
 #include "fps.hpp"
 #include "particle_factory.hpp"
 #include "sdl_engine.hpp"
+#include "resources.hpp"
 
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/dummy_graphical_engine.hpp>
@@ -19,11 +20,17 @@
 #include <theconf/configuration.hpp>
 
 #include <thelog/logger.hpp>
+
 #include <iostream>
 
 namespace
 {
+
 the::ctci::AutoServiceRegister< LocalEventDispatcher, LocalEventDispatcher > local_event_dispatcher_register;
+the::ctci::AutoServiceRegister< yarrr::ResourceFinder, yarrr::ResourceFinder > resource_finder_register(
+    yarrr::ResourceFinder::PathList{
+    "/usr/local/share/yarrr/",
+    "/usr/share/yarrr/" } );
 
 void print_help_and_exit()
 {
