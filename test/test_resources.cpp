@@ -10,6 +10,7 @@ Describe( a_resource_finder )
   void touch_file( const std::string& path )
   {
     std::ofstream touched_file( path );
+    touched_file.close();
   }
 
   void SetUp()
