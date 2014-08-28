@@ -17,8 +17,7 @@ ResourceFinder::find( const std::string& filename ) const
 {
   for ( const std::string& resource_prefix : m_pathlist )
   {
-    //without the c_str() call it left the trailing 0 in the concatenated string on freebsd
-    const std::string full_path( resource_prefix.c_str() + filename );
+    const std::string full_path( resource_prefix + filename );
 
     if ( 0 == access( full_path.c_str(), R_OK ) )
     {
