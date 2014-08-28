@@ -5,7 +5,7 @@ Feature: Starting without a graphical interface
   I should be able to start the client with a terminal only output
 
   Scenario: starting with --text parameter
-    When I start yarrr with command line parameter --text --server not.existing.domain:2001
+    When I plain start yarrr with command line parameter --text --server not.existing.domain:2001
     Then there should be no failed assertion
     And the client should be running
 

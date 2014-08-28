@@ -1,9 +1,13 @@
 
-When(/^I start yarrr with command line parameter (.*)$/) do | parameter |
+When(/^I plain start yarrr with command line parameter (.*)$/) do | parameter |
   @yarrr_client = ProcessRunner.new(
     { "SDL_VIDEODRIVER" => "dummy" },
     "yarrrclient #{parameter} 2>&1" )
   @yarrr_client.start
+end
+
+When(/^I start yarrr with command line parameter (.*)$/) do | parameter |
+  step "I plain start yarrr with command line parameter --text #{parameter}"
 end
 
 Then(/^the help message should be on the screen$/) do

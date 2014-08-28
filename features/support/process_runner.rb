@@ -30,8 +30,10 @@ class ProcessRunner
   end
 
   def run_process_on_child_thread()
+    p @command
     IO.popen( @env, @command ) do | f |
       @pid = f.pid
+      p @pid
       @is_running = true
       while ( line = f.gets() ) do
         @output << line
