@@ -19,7 +19,7 @@
 #include <thectci/service_registry.hpp>
 #include <theconf/configuration.hpp>
 
-#include <thelog/logger.hpp>
+#include <yarrr/log.hpp>
 
 #include <iostream>
 

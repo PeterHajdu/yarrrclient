@@ -9,7 +9,7 @@
 #include <algorithm>
 
 #include <thectci/service_registry.hpp>
-#include <thelog/logger.hpp>
+#include <yarrr/log.hpp>
 #include <theconf/configuration.hpp>
 
 namespace
@@ -23,6 +23,13 @@ namespace
       colour.alpha
     };
   }
+
+  void handle_unrecoverable_sdl_error()
+  {
+    thelog( yarrr::log::error )( SDL_GetError() );
+    assert( false );
+  }
+
 }
 
 TtfInitializer::TtfInitializer()
@@ -39,8 +46,7 @@ SdlInitializer::SdlInitializer()
 {
   if ( SDL_Init( SDL_INIT_VIDEO ) != 0 )
   {
-    thelog( 1 )( SDL_GetError() );
-    assert( false );
+    handle_unrecoverable_sdl_error();
   }
 }
 
@@ -54,8 +60,7 @@ Font::Font( const std::string& path )
 {
   if ( nullptr == font )
   {
-    thelog( 1 )( SDL_GetError() );
-    assert( font );
+    handle_unrecoverable_sdl_error();
   }
 }
 
