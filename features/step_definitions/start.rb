@@ -2,7 +2,7 @@
 When(/^I plain start yarrr with command line parameter (.*)$/) do | parameter |
   @yarrr_client = ProcessRunner.new(
     { "SDL_VIDEODRIVER" => "dummy" },
-    "yarrrclient #{parameter} 2>&1" )
+    "yarrrclient #{parameter}" )
   @yarrr_client.start
 end
 
@@ -25,10 +25,6 @@ end
 
 Then(/^I should not see (.+)$/) do | pattern |
   expect(  @yarrr_client.output ).not_to match( /#{pattern}/ )
-end
-
-Then(/^there should be no failed assertion$/) do
-  expect(  @yarrr_client.output ).not_to match( /assert/i )
 end
 
 Then(/^the client should be running$/) do

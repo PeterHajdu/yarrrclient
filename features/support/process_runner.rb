@@ -7,7 +7,7 @@ class ProcessRunner
 
   def initialize( env, command )
     @env = env
-    @command = command
+    @command = command.split
     @output = ""
     @is_running = false
   end
