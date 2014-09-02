@@ -5,6 +5,10 @@ include_directories(igloo)
 set(TEST_SOURCE_FILES
     test_runner.cpp
     test_resources.cpp
+    test_hud.cpp
+    test_cli.cpp
+    test_terminal.cpp
+    test_stream_to_chat.cpp
     )
 
 

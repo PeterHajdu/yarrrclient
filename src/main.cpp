@@ -6,10 +6,10 @@
 #include "particle_factory.hpp"
 #include "sdl_engine.hpp"
 #include "resources.hpp"
+#include "stream_to_chat.hpp"
 
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/dummy_graphical_engine.hpp>
-#include <yarrr/stream_to_chat.hpp>
 #include <yarrr/object_container.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <thenet/address.hpp>
@@ -78,7 +78,7 @@ int main( int argc, char ** argv )
   GraphicalEnginePointer graphical_engine( create_graphical_engine() );
   the::ctci::ServiceRegistry::register_service< yarrr::GraphicalEngine >( *graphical_engine );
 
-  yarrr::StreamToChat stream_to_chat( "system" );
+  yarrrc::StreamToChat stream_to_chat( "system" );
   the::log::Logger::add_channel( stream_to_chat.stream() );
   the::time::Clock clock;
 

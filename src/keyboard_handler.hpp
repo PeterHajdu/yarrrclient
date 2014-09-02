@@ -1,7 +1,7 @@
 #pragma once
 #include <yarrr/command.hpp>
-#include <yarrr/cli.hpp>
-#include <yarrr/terminal.hpp>
+#include "cli.hpp"
+#include "terminal.hpp"
 #include <thectci/dispatcher.hpp>
 
 class KeyboardHandler : public the::ctci::Dispatcher
@@ -14,7 +14,7 @@ class KeyboardHandler : public the::ctci::Dispatcher
     void handle_text_input( the::time::Time& now );
 
     bool& m_running;
-    yarrr::Cli m_cli;
-    yarrr::Terminal m_terminal;
+    yarrrc::Cli m_cli;
+    yarrrc::Terminal m_terminal;
 };
 
