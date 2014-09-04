@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-kramdown ./testerinfo.md > index.html
-ftp -u yarrrthegame.com@free.dotroll.com:doc/tester/index.html ./index.html
-
