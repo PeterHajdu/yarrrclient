@@ -75,6 +75,7 @@ class SdlEngine : public yarrr::GraphicalEngine
     SdlEngine( const SdlEngine& ) = delete;
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
+    virtual void draw_loot( const yarrr::PhysicalParameters& ) override;
     virtual void draw_particle( const yarrr::PhysicalParameters&, uint64_t age ) override;
     virtual void focus_to( const yarrr::Coordinate& center ) override;
     virtual void draw_ship( const yarrr::PhysicalParameters& ) override;
@@ -85,6 +86,8 @@ class SdlEngine : public yarrr::GraphicalEngine
     void update_screen();
 
   private:
+    void show_on_radar( const yarrr::Coordinate& );
+
     void draw_point(
         int16_t x,
         int16_t y,

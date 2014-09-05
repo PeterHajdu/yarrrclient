@@ -282,14 +282,34 @@ SdlEngine::draw_particle( const yarrr::PhysicalParameters& particle, uint64_t ag
 }
 
 void
+SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate )
+{
+  const yarrr::Coordinate diff(
+      ( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres ) * 0.01 +
+      m_center_of_screen );
+  draw_point( diff.x, diff.y, 4, green );
+}
+
+
+void
+SdlEngine::draw_loot( const yarrr::PhysicalParameters& loot )
+{
+  if ( !is_on_screen( loot.coordinate ) )
+  {
+    show_on_radar( loot.coordinate );
+    return;
+  }
+
+  draw_scaled_point( loot.coordinate, 8, green );
+}
+
+
+void
 SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 {
   if ( !is_on_screen( ship.coordinate ) )
   {
-    const yarrr::Coordinate diff(
-        ( yarrr::huplons_to_metres( ship.coordinate ) - m_center_in_metres ) * 0.01 +
-          m_center_of_screen );
-    draw_point( diff.x, diff.y, 4, white );
+    show_on_radar( ship.coordinate );
     return;
   }
 
