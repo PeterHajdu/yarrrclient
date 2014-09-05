@@ -287,7 +287,7 @@ SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate )
   const yarrr::Coordinate diff(
       ( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres ) * 0.01 +
       m_center_of_screen );
-  draw_point( diff.x, diff.y, 4, green );
+  draw_point( diff.x, diff.y, 4, white );
 }
 
 
