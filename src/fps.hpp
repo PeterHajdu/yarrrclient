@@ -14,6 +14,9 @@ class Clock;
 }
 }
 
+namespace yarrrc
+{
+
 class FpsDrawer : yarrr::GraphicalObject
 {
   public:
@@ -23,5 +26,8 @@ class FpsDrawer : yarrr::GraphicalObject
 
   private:
     mutable the::time::FrequencyMeter< the::time::Clock > m_frequency_meter;
+    const yarrr::Coordinate m_position;
 };
+
+}
 

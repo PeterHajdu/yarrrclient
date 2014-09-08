@@ -82,7 +82,7 @@ int main( int argc, char ** argv )
   the::log::Logger::add_channel( stream_to_chat.stream() );
   the::time::Clock clock;
 
-  FpsDrawer fps_drawer( clock );
+  yarrrc::FpsDrawer fps_drawer( clock );
 
   yarrr::ObjectContainer object_container;
   World world( object_container );

@@ -377,3 +377,10 @@ SdlEngine::draw_background()
   SDL_RenderClear( *m_renderer );
 }
 
+
+const yarrr::Coordinate&
+SdlEngine::screen_resolution() const
+{
+  return m_screen_resolution;
+}
+
