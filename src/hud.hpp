@@ -17,6 +17,7 @@ class Hud : public yarrr::GraphicalObject
     Lines build_hud_lines() const;
     void print_lines( const Lines& ) const;
     yarrr::PhysicalParameters& m_physical_parameters;
+    const int m_height_of_screen;
 };
 
 }
