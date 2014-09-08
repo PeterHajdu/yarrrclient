@@ -170,7 +170,22 @@ SdlEngine::update_screen()
   draw_background();
   draw_grid();
   draw_objects();
+  draw_radar();
   SDL_RenderPresent( *m_renderer );
+}
+
+void
+SdlEngine::draw_radar()
+{
+  const int diff_from_middle( 30 );
+  set_colour( { 100, 100, 100, 255 } );
+  SDL_RenderDrawLine( *m_renderer,
+      m_center_of_radar.x - diff_from_middle, m_center_of_radar.y,
+      m_center_of_radar.x + diff_from_middle, m_center_of_radar.y );
+
+  SDL_RenderDrawLine( *m_renderer,
+      m_center_of_radar.x, m_center_of_radar.y - diff_from_middle,
+      m_center_of_radar.x, m_center_of_radar.y + diff_from_middle );
 }
 
 void

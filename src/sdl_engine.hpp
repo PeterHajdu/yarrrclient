@@ -110,6 +110,7 @@ class SdlEngine : public yarrr::GraphicalEngine
     bool is_on_screen( const yarrr::Coordinate& ) const;
 
     void draw_grid();
+    void draw_radar();
     void draw_background();
 
     SdlInitializer m_sdl_initializer;
