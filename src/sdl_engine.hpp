@@ -119,13 +119,9 @@ class SdlEngine : public yarrr::GraphicalEngine
 
     const yarrr::Coordinate m_screen_resolution;
     const yarrr::Coordinate m_center_of_screen;
+    const yarrr::Coordinate m_center_of_radar;
 
     yarrr::Coordinate m_center_in_metres;
-
-    const yarrr::Colour white{ 255, 255, 255, 255 };
-    const yarrr::Colour red{ 255, 0, 0, 255 };
-    const yarrr::Colour green{ 0, 255, 0, 255 };
-    const yarrr::Colour strange{ 255, 255, 0, 255 };
 
     Font m_font;
 };

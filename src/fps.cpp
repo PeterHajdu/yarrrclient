@@ -13,7 +13,7 @@ void
 FpsDrawer::draw() const
 {
   m_frequency_meter.tick();
-  m_graphical_engine.print_text( 0, 300, "fps: ", yarrr::Colour::white );
-  m_graphical_engine.print_text( 50, 300, std::to_string( m_frequency_meter.per_second() ), yarrr::Colour::white );
+  m_graphical_engine.print_text( 0, 300, "fps: ", yarrr::Colour::White );
+  m_graphical_engine.print_text( 50, 300, std::to_string( m_frequency_meter.per_second() ), yarrr::Colour::White );
 }
 

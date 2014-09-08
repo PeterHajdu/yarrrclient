@@ -153,6 +153,7 @@ SdlEngine::SdlEngine()
   , m_renderer( m_window.create_renderer() )
   , m_screen_resolution( m_window.screen_resolution )
   , m_center_of_screen( m_screen_resolution * 0.5 )
+  , m_center_of_radar( m_screen_resolution * 0.8 )
   , m_center_in_metres( m_screen_resolution * 0.5 )
   , m_font( the::ctci::service< yarrr::ResourceFinder >().find( "stuff.ttf" ) )
 {
@@ -182,7 +183,7 @@ SdlEngine::draw_grid()
     for ( ssize_t j( 0 ); j <= number_of_dots.y; ++j )
     {
       const yarrr::Coordinate grid_point( top_left + yarrr::Coordinate( i * 100, j * 100 ) );
-      draw_scaled_point( yarrr::metres_to_huplons( grid_point ), 2, white );
+      draw_scaled_point( yarrr::metres_to_huplons( grid_point ), 2, yarrr::Colour::White );
     }
   }
 }
@@ -265,7 +266,7 @@ SdlEngine::draw_laser( const yarrr::PhysicalParameters& laser )
     return;
   }
 
-  draw_scaled_line( laser.coordinate, laser.coordinate - head, strange );
+  draw_scaled_line( laser.coordinate, laser.coordinate - head, yarrr::Colour::Strange );
 }
 
 void
@@ -276,7 +277,7 @@ SdlEngine::draw_particle( const yarrr::PhysicalParameters& particle, uint64_t ag
     return;
   }
 
-  yarrr::Colour particle_colour( white );
+  yarrr::Colour particle_colour( yarrr::Colour::White );
   particle_colour.alpha = 100.0 / 3100000.0 * ( 3100000 - age );
   draw_scaled_point( particle.coordinate, 3, particle_colour );
 }
@@ -285,9 +286,9 @@ void
 SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate )
 {
   const yarrr::Coordinate diff(
-      ( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres ) * 0.01 +
-      m_center_of_screen );
-  draw_point( diff.x, diff.y, 4, white );
+      ( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres ) * 0.005 +
+      m_center_of_radar );
+  draw_point( diff.x, diff.y, 4, yarrr::Colour::White );
 }
 
 
@@ -300,7 +301,7 @@ SdlEngine::draw_loot( const yarrr::PhysicalParameters& loot )
     return;
   }
 
-  draw_scaled_point( loot.coordinate, 8, green );
+  draw_scaled_point( loot.coordinate, 8, yarrr::Colour::Green );
 }
 
 
@@ -315,11 +316,11 @@ SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
 
   const yarrr::Coordinate head( yarrr::heading( ship, 60 ) );
   const yarrr::Coordinate perpendicular( yarrr::perpendicular( head ) );
-  draw_scaled_point( ship.coordinate, 4, strange );
-  draw_scaled_point( ship.coordinate + head, 4, green );
-  draw_scaled_point( ship.coordinate - head, 4, red );
-  draw_scaled_point( ship.coordinate - head * 0.5 + perpendicular * 0.5, 4, red );
-  draw_scaled_point( ship.coordinate - head * 0.5 - perpendicular * 0.5, 4, red );
+  draw_scaled_point( ship.coordinate, 4, yarrr::Colour::Strange );
+  draw_scaled_point( ship.coordinate + head, 4, yarrr::Colour::Green );
+  draw_scaled_point( ship.coordinate - head, 4, yarrr::Colour::Red );
+  draw_scaled_point( ship.coordinate - head * 0.5 + perpendicular * 0.5, 4, yarrr::Colour::Red );
+  draw_scaled_point( ship.coordinate - head * 0.5 - perpendicular * 0.5, 4, yarrr::Colour::Red );
 }
 
 
