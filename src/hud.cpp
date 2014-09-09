@@ -1,13 +1,17 @@
 #include "hud.hpp"
 #include <yarrr/physical_parameters.hpp>
+#include <yarrr/inventory.hpp>
+#include <yarrr/basic_behaviors.hpp>
+#include <yarrr/object.hpp>
 
 namespace yarrrc
 {
 
 
-Hud::Hud( yarrr::GraphicalEngine& graphical_engine, yarrr::PhysicalParameters& physical_parameters )
+Hud::Hud( yarrr::GraphicalEngine& graphical_engine, const yarrr::Object& object )
   : GraphicalObject( graphical_engine )
-  , m_physical_parameters( physical_parameters )
+  , m_physical_parameters( yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters )
+  , m_inventory( yarrr::component_of< yarrr::Inventory >( object ) )
   , m_height_of_screen( m_graphical_engine.screen_resolution().y )
 {
   (void)m_physical_parameters;
@@ -24,6 +28,12 @@ Hud::Lines
 Hud::build_hud_lines() const
 {
   Lines lines;
+  lines.push_back( "inventory: " );
+
+  for ( const auto& item : m_inventory.items() )
+  {
+    lines.push_back( " -> " + item.get().name() );
+  }
 
   lines.push_back( "integrity: " +
       std::to_string( m_physical_parameters.integrity ) );

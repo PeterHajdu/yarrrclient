@@ -9,6 +9,7 @@ set(TEST_SOURCE_FILES
     test_cli.cpp
     test_terminal.cpp
     test_stream_to_chat.cpp
+    test_services.cpp
     )
 
 

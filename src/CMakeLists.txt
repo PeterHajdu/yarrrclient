@@ -14,6 +14,7 @@ set(LIB_SOURCE_FILES
 
 set(CLIENT_SOURCE_FILES
   main.cpp
+  services.cpp
   )
 
 
