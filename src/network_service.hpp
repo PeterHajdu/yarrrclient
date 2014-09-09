@@ -13,12 +13,12 @@ class LoggedIn
 {
   public:
     add_ctci( "logged_id" );
-    LoggedIn( yarrr::Object::Id user_id )
-      : user_id( user_id )
+    LoggedIn( yarrr::Object::Id object_id )
+      : object_id( object_id )
     {
     }
 
-    const yarrr::Object::Id user_id;
+    const yarrr::Object::Id object_id;
 };
 
 //todo: hide this the important one is logged in
@@ -36,7 +36,7 @@ class ConnectionEstablished
 
 namespace yarrr
 {
-  class LoginResponse;
+  class ObjectAssigned;
 }
 
 class LoginHandler
@@ -44,7 +44,7 @@ class LoginHandler
   public:
     LoginHandler();
     void handle_connection_established( const ConnectionEstablished& connection_established );
-    void handle_login_response( const yarrr::LoginResponse& response );
+    void handle_login_response( const yarrr::ObjectAssigned& object_assigned );
   private:
     the::ctci::Dispatcher m_dispatcher;
     the::ctci::Dispatcher& m_local_event_dispatcher;

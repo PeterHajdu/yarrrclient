@@ -98,7 +98,7 @@ NetworkService::lost_connection( the::net::Connection& )
 LoginHandler::LoginHandler()
   : m_local_event_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher )
 {
-  m_dispatcher.register_listener< yarrr::LoginResponse >(
+  m_dispatcher.register_listener< yarrr::ObjectAssigned >(
       std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
   m_local_event_dispatcher.register_listener<ConnectionEstablished>(
       std::bind( &LoginHandler::handle_connection_established, this, std::placeholders::_1 ) );
@@ -113,8 +113,8 @@ LoginHandler::handle_connection_established( const ConnectionEstablished& connec
 }
 
 void
-LoginHandler::handle_login_response( const yarrr::LoginResponse& response )
+LoginHandler::handle_login_response( const yarrr::ObjectAssigned& object_assigned )
 {
-  m_local_event_dispatcher.dispatch( LoggedIn( response.object_id() ) );
+  m_local_event_dispatcher.dispatch( LoggedIn( object_assigned.object_id() ) );
 }
 

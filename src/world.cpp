@@ -38,7 +38,7 @@ World::handle_connection_established( const ConnectionEstablished& connection_es
 void
 World::handle_login( const LoggedIn& login )
 {
-  m_my_ship_id = login.user_id;
+  m_my_ship_id = login.object_id;
 }
 
 void
