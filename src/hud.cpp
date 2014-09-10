@@ -46,6 +46,12 @@ Hud::build_hud_lines() const
       std::to_string( m_physical_parameters.velocity.x ) + " , " +
       std::to_string( m_physical_parameters.velocity.y ) );
 
+  lines.push_back( "orientation: " +
+      std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.orientation ) ) );
+
+  lines.push_back( "angular velocity: " +
+      std::to_string( m_physical_parameters.angular_velocity ) );
+
   return lines;
 }
 
