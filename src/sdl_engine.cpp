@@ -316,6 +316,14 @@ SdlEngine::draw_object_with_shape( const yarrr::Object& object )
   const yarrr::PhysicalParameters& parameters(
       yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters );
 
+  if ( !is_on_screen( parameters.coordinate ) )
+  {
+    show_on_radar( parameters.coordinate );
+    return;
+  }
+
+
+
   const yarrr::Shape& shape(
       yarrr::component_of< yarrr::ShapeBehavior >( object ).shape );
 
