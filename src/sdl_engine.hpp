@@ -79,7 +79,6 @@ class SdlEngine : public yarrr::GraphicalEngine
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
     virtual void draw_object_with_shape( const yarrr::Object& ) override;
-    virtual void draw_loot( const yarrr::PhysicalParameters& ) override;
     virtual void draw_particle( const yarrr::PhysicalParameters&, uint64_t age ) override;
     virtual void focus_to( const yarrr::Coordinate& center ) override;
     virtual void draw_laser( const yarrr::PhysicalParameters& ) override;

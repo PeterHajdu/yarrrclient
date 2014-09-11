@@ -310,19 +310,6 @@ SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate )
   draw_point( diff.x, diff.y, 4, yarrr::Colour::White );
 }
 
-
-void
-SdlEngine::draw_loot( const yarrr::PhysicalParameters& loot )
-{
-  if ( !is_on_screen( loot.coordinate ) )
-  {
-    show_on_radar( loot.coordinate );
-    return;
-  }
-
-  draw_scaled_point( loot.coordinate, 8, yarrr::Colour::Green );
-}
-
 void
 SdlEngine::draw_object_with_shape( const yarrr::Object& object )
 {
