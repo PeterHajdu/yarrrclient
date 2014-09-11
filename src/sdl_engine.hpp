@@ -13,6 +13,9 @@ struct SDL_Window;
 namespace yarrr
 {
   class PhysicalParameters;
+  class Shape;
+  class Tile;
+  class Object;
 }
 
 class TtfInitializer
@@ -75,10 +78,10 @@ class SdlEngine : public yarrr::GraphicalEngine
     SdlEngine( const SdlEngine& ) = delete;
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
+    virtual void draw_object_with_shape( const yarrr::Object& ) override;
     virtual void draw_loot( const yarrr::PhysicalParameters& ) override;
     virtual void draw_particle( const yarrr::PhysicalParameters&, uint64_t age ) override;
     virtual void focus_to( const yarrr::Coordinate& center ) override;
-    virtual void draw_ship( const yarrr::PhysicalParameters& ) override;
     virtual void draw_laser( const yarrr::PhysicalParameters& ) override;
     virtual void print_text( uint16_t x, uint16_t y, const std::string&, const yarrr::Colour& ) override;
     virtual void print_text_tokens( uint16_t x, uint16_t y, const yarrr::TextTokens& ) override;
@@ -87,6 +90,7 @@ class SdlEngine : public yarrr::GraphicalEngine
     void update_screen();
 
   private:
+    void draw_tile( const yarrr::Coordinate& center, const yarrr::Angle orientation, const yarrr::Shape&, const yarrr::Tile& );
     void show_on_radar( const yarrr::Coordinate& );
 
     void draw_point(

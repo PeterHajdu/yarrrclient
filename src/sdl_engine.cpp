@@ -2,6 +2,10 @@
 #include "resources.hpp"
 
 #include <yarrr/physical_parameters.hpp>
+#include <yarrr/object.hpp>
+#include <yarrr/basic_behaviors.hpp>
+#include <yarrr/shape.hpp>
+#include <yarrr/shape_behavior.hpp>
 
 #include <cmath>
 #include <cassert>
@@ -319,25 +323,42 @@ SdlEngine::draw_loot( const yarrr::PhysicalParameters& loot )
   draw_scaled_point( loot.coordinate, 8, yarrr::Colour::Green );
 }
 
+void
+SdlEngine::draw_object_with_shape( const yarrr::Object& object )
+{
+  const yarrr::PhysicalParameters& parameters(
+      yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters );
+
+  const yarrr::Shape& shape(
+      yarrr::component_of< yarrr::ShapeBehavior >( object ).shape );
+
+  for ( const auto& tile : shape.tiles() )
+  {
+    draw_tile( parameters.coordinate, parameters.orientation, shape, tile );
+  }
+}
+
 
 void
-SdlEngine::draw_ship( const yarrr::PhysicalParameters& ship )
+SdlEngine::draw_tile(
+    const yarrr::Coordinate& center,
+    const yarrr::Angle orientation,
+    const yarrr::Shape& shape,
+    const yarrr::Tile& tile )
 {
-  if ( !is_on_screen( ship.coordinate ) )
+  const yarrr::Polygon polygon( yarrr::generate_polygon_from( tile, center, shape.center_of_mass(), orientation ) );
+  if ( polygon.size() < 2 )
   {
-    show_on_radar( ship.coordinate );
     return;
   }
 
-  const yarrr::Coordinate head( yarrr::heading( ship, 60 ) );
-  const yarrr::Coordinate perpendicular( yarrr::perpendicular( head ) );
-  draw_scaled_point( ship.coordinate, 4, yarrr::Colour::Strange );
-  draw_scaled_point( ship.coordinate + head, 4, yarrr::Colour::Green );
-  draw_scaled_point( ship.coordinate - head, 4, yarrr::Colour::Red );
-  draw_scaled_point( ship.coordinate - head * 0.5 + perpendicular * 0.5, 4, yarrr::Colour::Red );
-  draw_scaled_point( ship.coordinate - head * 0.5 - perpendicular * 0.5, 4, yarrr::Colour::Red );
+  yarrr::Coordinate start{ polygon.at( 3 ) };
+  for ( size_t i( 0 ); i < polygon.size(); ++i )
+  {
+    draw_scaled_line( start, polygon.at( i ), yarrr::Colour::White );
+    start = polygon.at( i );
+  }
 }
-
 
 void
 SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message, const yarrr::Colour& colour )
