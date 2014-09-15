@@ -264,7 +264,11 @@ SdlEngine::focus_to( const yarrr::Coordinate& center )
 yarrr::Coordinate
 SdlEngine::scale_coordinate( const yarrr::Coordinate& coordinate ) const
 {
-  return yarrr::huplons_to_metres( coordinate ) - m_center_in_metres + m_center_of_screen;
+  yarrr::Coordinate scaled( yarrr::huplons_to_metres( coordinate ) );
+  scaled -= m_center_in_metres;
+  scaled.y *= -1;
+  scaled += m_center_of_screen;
+  return scaled;
 }
 
 bool
