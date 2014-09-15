@@ -39,12 +39,12 @@ Hud::build_hud_lines() const
       std::to_string( m_physical_parameters.integrity ) );
 
   lines.push_back( "coordinate: " +
-      std::to_string( m_physical_parameters.coordinate.x ) + " , " +
-      std::to_string( m_physical_parameters.coordinate.y ) );
+      std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.x ) ) + " , " +
+      std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.y ) ) );
 
   lines.push_back( "velocity: " +
-      std::to_string( m_physical_parameters.velocity.x ) + " , " +
-      std::to_string( m_physical_parameters.velocity.y ) );
+      std::to_string( yarrr::huplons_to_metres( m_physical_parameters.velocity.x ) ) + " , " +
+      std::to_string( yarrr::huplons_to_metres( m_physical_parameters.velocity.y ) ) );
 
   lines.push_back( "orientation: " +
       std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.orientation ) ) );

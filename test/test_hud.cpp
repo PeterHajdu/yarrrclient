@@ -15,6 +15,8 @@ Describe( a_hud )
     object = yarrr::create_ship();
     physical_parameters = &yarrr::component_of< yarrr::PhysicalBehavior >( *object ).physical_parameters;
     physical_parameters->orientation = 123;
+    physical_parameters->coordinate = yarrr::Coordinate{ 12938, 912898234 };
+    physical_parameters->velocity = yarrr::Coordinate{ 256, -512 };
     physical_parameters->angular_velocity = 423;
     hud.reset( new yarrrc::Hud( graphical_engine, *object ) );
     graphical_engine.printed_texts.clear();
@@ -37,18 +39,20 @@ Describe( a_hud )
     AssertThat( was_printed( "canon" ), Equals( true ) );
   }
 
-  It( prints_out_the_coordinates_of_the_ship )
+  It( prints_out_the_coordinates_of_the_ship_in_metres )
   {
     AssertThat( was_printed( "coordinate" ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( physical_parameters->coordinate.x ) ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( physical_parameters->coordinate.y ) ), Equals( true ) );
+    AssertThat( was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->coordinate.x ) ) ),
+        Equals( true ) );
+    AssertThat( was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->coordinate.y ) ) ),
+        Equals( true ) );
   }
 
-  It( prints_out_the_velocity_of_the_ship )
+  It( prints_out_the_velocity_of_the_ship_in_metres_per_second )
   {
     AssertThat( was_printed( "velocity" ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( physical_parameters->velocity.x ) ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( physical_parameters->velocity.y ) ), Equals( true ) );
+    AssertThat( was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->velocity.x ) ) ), Equals( true ) );
+    AssertThat( was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->velocity.y ) ) ), Equals( true ) );
   }
 
   It( prints_out_the_integrity_of_the_ship )

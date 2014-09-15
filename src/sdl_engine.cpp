@@ -279,7 +279,7 @@ SdlEngine::is_on_screen( const yarrr::Coordinate& coordinate ) const
 void
 SdlEngine::draw_laser( const yarrr::PhysicalParameters& laser )
 {
-  const yarrr::Coordinate head( yarrr::heading( laser, 60 ) );
+  const yarrr::Coordinate head( yarrr::heading( laser, 10_metres ) );
   if ( !is_on_screen( laser.coordinate ) )
   {
     return;
