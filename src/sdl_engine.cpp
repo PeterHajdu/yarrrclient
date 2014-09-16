@@ -308,9 +308,10 @@ SdlEngine::draw_particle( const yarrr::PhysicalParameters& particle, uint64_t ag
 void
 SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate )
 {
-  const yarrr::Coordinate diff(
-      ( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres ) * 0.01 +
-      m_center_of_radar );
+  yarrr::Coordinate diff( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres );
+  diff.y *= -1;
+  diff *= 0.01;
+  diff += m_center_of_radar;
   draw_point( diff.x, diff.y, 4, yarrr::Colour::White );
 }
 
