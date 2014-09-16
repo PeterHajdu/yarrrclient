@@ -67,10 +67,10 @@ Describe( a_hud )
     AssertThat( was_printed( std::to_string( yarrr::hiplon_to_degrees( physical_parameters->orientation ) ) ), Equals( true ) );
   }
 
-  It( prints_out_the_angular_velocity_of_the_ship )
+  It( prints_out_the_angular_velocity_of_the_ship_in_meaningful_units )
   {
     AssertThat( was_printed( "angular velocity" ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( physical_parameters->angular_velocity ) ), Equals( true ) );
+    AssertThat( was_printed( std::to_string( yarrr::hiplon_to_degrees( physical_parameters->angular_velocity ) ) ), Equals( true ) );
   }
 
   test::GraphicalEngine graphical_engine;
