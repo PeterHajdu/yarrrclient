@@ -23,6 +23,7 @@ class World
 
   private:
     void handle_object_update( const yarrr::ObjectUpdate& );
+    void handle_object_init( const yarrr::ObjectUpdate& );
     void handle_command( const yarrr::Command& command );
     void handle_connection_established( const ConnectionEstablished& connection_established );
     void handle_login( const LoggedIn& login );

@@ -15,8 +15,12 @@ World::World( yarrr::ObjectContainer& object_container )
   , m_my_ship_id( 0 )
   , m_my_ship( nullptr )
 {
-  m_dispatcher.register_listener<yarrr::ObjectUpdate>(
+  m_dispatcher.register_listener<yarrr::BasicObjectUpdate>(
       std::bind( &World::handle_object_update, this, std::placeholders::_1 ) );
+  m_dispatcher.register_listener<yarrr::ObjectInitializer>(
+      std::bind( &World::handle_object_init, this, std::placeholders::_1 ) );
+
+
   m_dispatcher.register_listener<yarrr::DeleteObject>(
       std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
   the::ctci::Dispatcher& local_event_dispatcher(
@@ -73,9 +77,15 @@ World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 void
 World::handle_object_update( const yarrr::ObjectUpdate& update )
 {
+  m_objects.handle_object_update( update );
+}
+
+void
+World::handle_object_init( const yarrr::ObjectUpdate& update )
+{
   if ( m_objects.has_object_with_id( update.id() ) )
   {
-    m_objects.handle_object_update( update );
+    handle_object_update( update );
     return;
   }
 
