@@ -35,5 +35,6 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsdl2-ttf-2.0-0, libsdl2-2.0-0")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "The best space shooter in the galaxy.")
 set(CPACK_DEBIAN_PACKAGE_SECTION "games")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/postinst")
 include(CPack)
 
