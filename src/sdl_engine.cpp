@@ -181,8 +181,8 @@ SdlEngine::update_screen()
 void
 SdlEngine::draw_radar()
 {
-  const int diff_from_middle( 30 );
-  set_colour( { 100, 100, 100, 255 } );
+  const int diff_from_middle( 100 );
+  set_colour( { 0, 100, 0, 255 } );
   SDL_RenderDrawLine( *m_renderer,
       m_center_of_radar.x - diff_from_middle, m_center_of_radar.y,
       m_center_of_radar.x + diff_from_middle, m_center_of_radar.y );
@@ -309,10 +309,20 @@ void
 SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate )
 {
   yarrr::Coordinate diff( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres );
-  diff.y *= -1;
+
   diff *= 0.01;
+
+  const int64_t radar_limit( 100 );
+  float radar_limit_length_ratio( 1.0 * radar_limit / yarrr::length_of( diff ) );
+  if ( radar_limit_length_ratio < 1.0 )
+  {
+    diff *= radar_limit_length_ratio;
+  }
+
+  diff.y *= -1;
   diff += m_center_of_radar;
-  draw_point( diff.x, diff.y, 4, yarrr::Colour::White );
+
+  draw_point( diff.x, diff.y, 4, yarrr::Colour::Green );
 }
 
 void
