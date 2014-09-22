@@ -15,14 +15,14 @@ KeyboardHandler::KeyboardHandler( bool& running )
 }
 
 void
-KeyboardHandler::send_command( yarrr::Command::Type cmd, the::time::Time& timestamp )
+KeyboardHandler::send_command( yarrr::Command::Type cmd, const the::time::Time& timestamp )
 {
   yarrr::Command command( cmd, timestamp );
   dispatch( command );
 }
 
 void
-KeyboardHandler::handle_text_input( the::time::Time& now )
+KeyboardHandler::handle_text_input( const the::time::Time& now )
 {
   //todo: split this up somehow
   SDL_Event event;
@@ -72,7 +72,7 @@ KeyboardHandler::handle_text_input( the::time::Time& now )
 }
 
 void
-KeyboardHandler::check_keyboard( the::time::Time& now )
+KeyboardHandler::check_keyboard( const the::time::Time& now )
 {
   handle_text_input( now );
   SDL_PumpEvents();

@@ -105,7 +105,7 @@ int main( int argc, char ** argv )
 
   while ( running )
   {
-    the::time::Clock::Time now( clock.now() );
+    const the::time::Clock::Time now( clock.now() );
 
     keyboard_handler.check_keyboard( now );
     network_service.process_incoming_messages();
