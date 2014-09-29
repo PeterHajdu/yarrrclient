@@ -5,7 +5,6 @@ set(LIB_SOURCE_FILES
   world.cpp
   fps.cpp
   particle_factory.cpp
-  resources.cpp
   hud.cpp
   cli.cpp
   terminal.cpp

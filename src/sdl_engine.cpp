@@ -1,11 +1,11 @@
 #include "sdl_engine.hpp"
-#include "resources.hpp"
 
 #include <yarrr/physical_parameters.hpp>
 #include <yarrr/object.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/shape.hpp>
 #include <yarrr/shape_behavior.hpp>
+#include <yarrr/resources.hpp>
 
 #include <cmath>
 #include <cassert>

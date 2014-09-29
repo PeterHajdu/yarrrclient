@@ -5,7 +5,7 @@
 #include "fps.hpp"
 #include "particle_factory.hpp"
 #include "sdl_engine.hpp"
-#include "resources.hpp"
+#include <yarrr/resources.hpp>
 #include "stream_to_chat.hpp"
 
 #include <yarrr/graphical_engine.hpp>
