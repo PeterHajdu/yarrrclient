@@ -8,7 +8,7 @@ namespace yarrr
 {
   class DeleteObject;
   class ObjectStateUpdate;
-  class Command;
+  class ShipControl;
   class ObjectContainer;
 }
 
@@ -24,7 +24,7 @@ class World
   private:
     void handle_object_update( const yarrr::ObjectUpdate& );
     void handle_object_init( const yarrr::ObjectUpdate& );
-    void handle_command( const yarrr::Command& command );
+    void handle_command( const yarrr::ShipControl& command );
     void handle_connection_established( const ConnectionEstablished& connection_established );
     void handle_login( const LoggedIn& login );
     void handle_delete_object( const yarrr::DeleteObject& delete_object );

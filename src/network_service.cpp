@@ -2,7 +2,7 @@
 #include "local_event_dispatcher.hpp"
 #include <thenet/address.hpp>
 #include <thectci/dispatcher.hpp>
-#include <yarrr/command.hpp>
+#include <yarrr/ship_control.hpp>
 #include <yarrr/chat_message.hpp>
 #include <yarrr/login.hpp>
 #include <theconf/configuration.hpp>
@@ -23,7 +23,7 @@ NetworkService::NetworkService(
   m_network_service.connect_to( address );
   m_network_service.start();
 
-  m_local_event_dispatcher.register_listener<yarrr::Command>(
+  m_local_event_dispatcher.register_listener<yarrr::ShipControl>(
       std::bind( &NetworkService::handle_command, this, std::placeholders::_1 ) );
   m_local_event_dispatcher.register_listener<yarrr::ChatMessage>(
       std::bind( &NetworkService::handle_chat_message, this, std::placeholders::_1 ) );
@@ -38,7 +38,7 @@ NetworkService::handle_chat_message( const yarrr::ChatMessage& chat_message )
 
 
 void
-NetworkService::handle_command( const yarrr::Command& command )
+NetworkService::handle_command( const yarrr::ShipControl& command )
 {
   send( command.serialize() );
 }

@@ -6,7 +6,7 @@
 #include <yarrr/delete_object.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/graphical_engine.hpp>
-#include <yarrr/command.hpp>
+#include <yarrr/ship_control.hpp>
 #include <yarrr/object_container.hpp>
 #include <thectci/service_registry.hpp>
 
@@ -29,7 +29,7 @@ World::World( yarrr::ObjectContainer& object_container )
       std::bind( &World::handle_login, this, std::placeholders::_1 ) );
   local_event_dispatcher.register_listener<ConnectionEstablished>(
       std::bind( &World::handle_connection_established, this, std::placeholders::_1 ) );
-  local_event_dispatcher.register_listener<yarrr::Command>(
+  local_event_dispatcher.register_listener<yarrr::ShipControl>(
       std::bind( &World::handle_command, this, std::placeholders::_1 ) );
 }
 
@@ -57,7 +57,7 @@ World::in_focus()
 }
 
 void
-World::handle_command( const yarrr::Command& command )
+World::handle_command( const yarrr::ShipControl& command )
 {
   if ( !m_my_ship )
   {

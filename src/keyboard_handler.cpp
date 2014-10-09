@@ -15,9 +15,9 @@ KeyboardHandler::KeyboardHandler( bool& running )
 }
 
 void
-KeyboardHandler::send_command( yarrr::Command::Type cmd, const the::time::Time& timestamp )
+KeyboardHandler::send_command( yarrr::ShipControl::Type cmd, const the::time::Time& timestamp )
 {
-  yarrr::Command command( cmd, timestamp );
+  yarrr::ShipControl command( cmd, timestamp );
   dispatch( command );
 }
 
@@ -64,7 +64,7 @@ KeyboardHandler::handle_text_input( const the::time::Time& now )
         }
         else if ( event.key.keysym.sym == SDLK_LCTRL )
         {
-          send_command( yarrr::Command::fire, now );
+          send_command( yarrr::ShipControl::fire, now );
         }
         break;
     }
@@ -79,17 +79,17 @@ KeyboardHandler::check_keyboard( const the::time::Time& now )
   const unsigned char *keystates = SDL_GetKeyboardState( nullptr );
   if (keystates[SDL_SCANCODE_RIGHT])
   {
-    send_command( yarrr::Command::port_thruster, now );
+    send_command( yarrr::ShipControl::port_thruster, now );
   }
 
   if (keystates[SDL_SCANCODE_LEFT])
   {
-    send_command( yarrr::Command::starboard_thruster, now );
+    send_command( yarrr::ShipControl::starboard_thruster, now );
   }
 
   if (keystates[SDL_SCANCODE_UP])
   {
-    send_command( yarrr::Command::main_thruster, now );
+    send_command( yarrr::ShipControl::main_thruster, now );
   }
 }
 
