@@ -53,6 +53,7 @@ class LoginHandler
 namespace yarrr
 {
   class ShipControl;
+  class Command;
   class ChatMessage;
 }
 
@@ -71,8 +72,9 @@ class NetworkService
     void process_incoming_messages();
 
   private:
-    void handle_command( const yarrr::ShipControl& command );
+    void handle_ship_control( const yarrr::ShipControl& command );
     void handle_chat_message( const yarrr::ChatMessage& chat_message );
+    void handle_command( const yarrr::Command& command );
     void send( yarrr::Data&& data );
     void new_connection( the::net::Connection& connection );
     void new_connection_on_main_thread();

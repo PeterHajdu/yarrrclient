@@ -4,6 +4,7 @@
 #include <thectci/dispatcher.hpp>
 #include <yarrr/ship_control.hpp>
 #include <yarrr/chat_message.hpp>
+#include <yarrr/command.hpp>
 #include <yarrr/login.hpp>
 #include <theconf/configuration.hpp>
 #include <yarrr/log.hpp>
@@ -24,6 +25,8 @@ NetworkService::NetworkService(
   m_network_service.start();
 
   m_local_event_dispatcher.register_listener<yarrr::ShipControl>(
+      std::bind( &NetworkService::handle_ship_control, this, std::placeholders::_1 ) );
+  m_local_event_dispatcher.register_listener<yarrr::Command>(
       std::bind( &NetworkService::handle_command, this, std::placeholders::_1 ) );
   m_local_event_dispatcher.register_listener<yarrr::ChatMessage>(
       std::bind( &NetworkService::handle_chat_message, this, std::placeholders::_1 ) );
@@ -38,7 +41,14 @@ NetworkService::handle_chat_message( const yarrr::ChatMessage& chat_message )
 
 
 void
-NetworkService::handle_command( const yarrr::ShipControl& command )
+NetworkService::handle_ship_control( const yarrr::ShipControl& command )
+{
+  send( command.serialize() );
+}
+
+
+void
+NetworkService::handle_command( const yarrr::Command& command )
 {
   send( command.serialize() );
 }
