@@ -1,6 +1,8 @@
 #include "cli.hpp"
 #include <yarrr/chat_message.hpp>
+#include <yarrr/command.hpp>
 #include <theconf/configuration.hpp>
+#include <regex>
 
 const std::string yarrrc::Cli::m_prompt{ "$ " };
 
@@ -52,7 +54,20 @@ Cli::finalize()
     return;
   }
 
-  dispatch( yarrr::ChatMessage( m_text, the::conf::get_value( "login_name" ) ) );
+  const char command_prefix{ '/' };
+  if ( command_prefix == m_text.front() )
+  {
+    std::regex whitespaces{ "\\s+" };
+    const int skip_slash{ 1 };
+    std::sregex_token_iterator first{ m_text.begin() + skip_slash, m_text.end(), whitespaces, -1 };
+    std::sregex_token_iterator last;
+    dispatch( yarrr::Command( { first, last } ) );
+  }
+  else
+  {
+    dispatch( yarrr::ChatMessage( m_text, the::conf::get_value( "login_name" ) ) );
+  }
+
   m_text.clear();
 }
 
