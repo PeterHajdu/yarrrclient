@@ -6,7 +6,6 @@
 #include "particle_factory.hpp"
 #include "sdl_engine.hpp"
 #include <yarrr/resources.hpp>
-#include "stream_to_chat.hpp"
 
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/dummy_graphical_engine.hpp>
@@ -78,8 +77,6 @@ int main( int argc, char ** argv )
   GraphicalEnginePointer graphical_engine( create_graphical_engine() );
   the::ctci::ServiceRegistry::register_service< yarrr::GraphicalEngine >( *graphical_engine );
 
-  yarrrc::StreamToChat stream_to_chat( "system" );
-  the::log::Logger::add_channel( stream_to_chat.stream() );
   the::time::Clock clock;
 
   yarrrc::FpsDrawer fps_drawer( clock );
@@ -96,8 +93,6 @@ int main( int argc, char ** argv )
   bool running( true );
   KeyboardHandler keyboard_handler( running );
   keyboard_handler.register_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
-  //todo: this is ugly, a separate log class should be used
-  stream_to_chat.register_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
 
   yarrr::ParticleContainer particles;
   the::ctci::AutoServiceRegister< yarrr::ParticleFactory, ParticleFactory >
@@ -109,8 +104,6 @@ int main( int argc, char ** argv )
 
     keyboard_handler.check_keyboard( now );
     network_service.process_incoming_messages();
-
-    stream_to_chat.flush();
 
     object_container.dispatch( yarrr::TimerUpdate( now ) );
     particles.travel_in_time_to( now );

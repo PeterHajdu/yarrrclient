@@ -8,7 +8,6 @@ set(LIB_SOURCE_FILES
   hud.cpp
   cli.cpp
   terminal.cpp
-  stream_to_chat.cpp
   )
 
 set(CLIENT_SOURCE_FILES
