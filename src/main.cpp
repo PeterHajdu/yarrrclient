@@ -56,6 +56,11 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
   {
     print_help_and_exit();
   }
+
+  the::log::Logger::set_loglevel(
+      the::conf::has( "loglevel" ) ?
+      the::conf::get<int>( "loglevel" ) :
+      yarrr::log::info );
 }
 
 typedef std::unique_ptr< yarrr::GraphicalEngine > GraphicalEnginePointer;

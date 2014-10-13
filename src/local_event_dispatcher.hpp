@@ -9,5 +9,6 @@ class LocalEventDispatcher
     add_ctci( "local_event_dispatcher" );
     the::ctci::Dispatcher dispatcher;
     the::ctci::Dispatcher incoming;
+    the::ctci::Dispatcher outgoing;
 };
 

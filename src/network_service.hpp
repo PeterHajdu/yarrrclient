@@ -91,6 +91,7 @@ class NetworkService
     the::net::Address m_server_address;
 
     the::ctci::Dispatcher& m_local_event_dispatcher;
+    the::ctci::Dispatcher& m_outgoing_dispatcher;
     yarrr::CallbackQueue m_callback_queue;
 };
 

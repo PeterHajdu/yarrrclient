@@ -19,6 +19,7 @@ NetworkService::NetworkService(
   , m_clock( clock )
   , m_server_address( address )
   , m_local_event_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher )
+  , m_outgoing_dispatcher( the::ctci::service< LocalEventDispatcher >().outgoing )
 {
   thelog( yarrr::log::info )( "connecting to host: ", address.host, ":", address.port );
   m_network_service.connect_to( address );
@@ -28,7 +29,8 @@ NetworkService::NetworkService(
       std::bind( &NetworkService::handle_ship_control, this, std::placeholders::_1 ) );
   m_local_event_dispatcher.register_listener<yarrr::Command>(
       std::bind( &NetworkService::handle_command, this, std::placeholders::_1 ) );
-  m_local_event_dispatcher.register_listener<yarrr::ChatMessage>(
+
+  m_outgoing_dispatcher.register_listener<yarrr::ChatMessage>(
       std::bind( &NetworkService::handle_chat_message, this, std::placeholders::_1 ) );
 }
 
@@ -37,6 +39,7 @@ void
 NetworkService::handle_chat_message( const yarrr::ChatMessage& chat_message )
 {
   send( chat_message.serialize() );
+  thelog( yarrr::log::debug )( "Sending chat message.", chat_message.message() );
 }
 
 

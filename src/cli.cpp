@@ -1,6 +1,7 @@
 #include "cli.hpp"
 #include <yarrr/chat_message.hpp>
 #include <yarrr/command.hpp>
+#include <yarrr/log.hpp>
 #include <theconf/configuration.hpp>
 #include <regex>
 
@@ -62,10 +63,12 @@ Cli::finalize()
     std::sregex_token_iterator first{ m_text.begin() + skip_slash, m_text.end(), whitespaces, -1 };
     std::sregex_token_iterator last;
     dispatch( yarrr::Command( { first, last } ) );
+    thelog( yarrr::log::debug )( "Command sent." );
   }
   else
   {
     dispatch( yarrr::ChatMessage( m_text, the::conf::get_value( "login_name" ) ) );
+    thelog( yarrr::log::debug )( "Chat message sent." );
   }
 
   m_text.clear();
