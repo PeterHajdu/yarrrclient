@@ -8,6 +8,7 @@
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/ship_control.hpp>
 #include <yarrr/object_container.hpp>
+#include <yarrr/log.hpp>
 #include <thectci/service_registry.hpp>
 
 World::World( yarrr::ObjectContainer& object_container )
@@ -70,6 +71,7 @@ World::handle_command( const yarrr::ShipControl& command )
 void
 World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 {
+  thelog( yarrr::log::debug )( "Deleting object.", delete_object.object_id() );
   m_objects.delete_object( delete_object.object_id() );
 }
 
