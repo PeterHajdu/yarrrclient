@@ -10,12 +10,21 @@ When(/^I start yarrr with command line parameter (.*)$/) do | parameter |
   step "I plain start yarrr with command line parameter --text #{parameter}"
 end
 
+When(/^I start yarrr with a server and command line parameter (.*)$/) do | parameter |
+  step "I plain start yarrr with command line parameter --server not.existing.domain:2001 --text #{parameter}"
+end
+
+Given(/^a running client$/) do
+  step "I plain start yarrr with command line parameter --server not.existing.domain:2001 --text"
+end
+
 Then(/^the help message should be on the screen$/) do
   steps %Q{
     Then I should see http://yarrrthegame.com
     And I should see info@yarrrthegame.com
     And I should see yarrrclient --server <server:port>
     And I should see --fullscreen
+    And I should see --loglevel
   }
 end
 

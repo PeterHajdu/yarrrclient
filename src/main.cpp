@@ -42,6 +42,7 @@ std::cout <<
   "\n"
   "other options:\n"
   "  --fullscreen\n"
+  "  --loglevel <int >= 0>\n"
   << std::endl;
   exit( 0 );
 }
@@ -57,10 +58,14 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
     print_help_and_exit();
   }
 
-  the::log::Logger::set_loglevel(
+  const int loglevel(
       the::conf::has( "loglevel" ) ?
       the::conf::get<int>( "loglevel" ) :
       yarrr::log::info );
+
+  the::log::Logger::set_loglevel( loglevel );
+  thelog( yarrr::log::debug )( "Loglevel is set to", loglevel );
+
 }
 
 typedef std::unique_ptr< yarrr::GraphicalEngine > GraphicalEnginePointer;
