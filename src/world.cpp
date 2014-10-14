@@ -81,6 +81,7 @@ World::handle_delete_object( const yarrr::DeleteObject& delete_object )
     thelog( yarrr::log::debug )( "Deleting focused object." );
     m_my_ship = nullptr;
     m_my_ship_id = 0;
+    m_hud.reset();
   }
 
   m_objects.delete_object( delete_object.object_id() );

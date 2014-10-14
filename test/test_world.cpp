@@ -4,12 +4,20 @@
 
 using namespace igloo;
 
-Describe(a_world)
+Describe_Only(a_world)
 {
-  It ( is_instantiable )
+  void SetUp()
   {
-    yarrr::ObjectContainer objects;
-    yarrrc::World world( objects );
+    objects.reset( new yarrr::ObjectContainer() );
+    world.reset( new yarrrc::World( *objects ) );
   }
+
+  It ( handles_focused_object_deletion )
+  {
+  }
+
+  std::unique_ptr< yarrr::ObjectContainer > objects;
+  std::unique_ptr< yarrrc::World > world;
+
 };
 
