@@ -48,6 +48,8 @@ World::handle_login( const LoggedIn& login )
 {
   thelog( yarrr::log::debug )( "Changing my ship id to", login.object_id );
   m_my_ship_id = login.object_id;
+  m_my_ship = nullptr;
+  m_hud.reset();
 }
 
 void
@@ -91,14 +93,17 @@ World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 void
 World::handle_object_update( const yarrr::ObjectUpdate& update )
 {
+  thelog( yarrr::log::debug )( "Object update." );
   m_objects.handle_object_update( update );
 }
 
 void
 World::handle_object_init( const yarrr::ObjectUpdate& update )
 {
+  thelog( yarrr::log::debug )( "Object init." );
   if ( m_objects.has_object_with_id( update.id() ) )
   {
+    thelog( yarrr::log::debug )( "Object exists." );
     handle_object_update( update );
     return;
   }
