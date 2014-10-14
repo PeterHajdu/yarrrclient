@@ -27,7 +27,8 @@ NetworkService::NetworkService(
 
   m_local_event_dispatcher.register_listener<yarrr::ShipControl>(
       std::bind( &NetworkService::handle_ship_control, this, std::placeholders::_1 ) );
-  m_local_event_dispatcher.register_listener<yarrr::Command>(
+
+  m_outgoing_dispatcher.register_listener<yarrr::Command>(
       std::bind( &NetworkService::handle_command, this, std::placeholders::_1 ) );
 
   m_outgoing_dispatcher.register_listener<yarrr::ChatMessage>(
@@ -128,6 +129,7 @@ LoginHandler::handle_connection_established( const ConnectionEstablished& connec
 void
 LoginHandler::handle_login_response( const yarrr::ObjectAssigned& object_assigned )
 {
+  thelog( yarrr::log::debug )( "ObjectAssigned received.", object_assigned.object_id() );
   m_local_event_dispatcher.dispatch( LoggedIn( object_assigned.object_id() ) );
 }
 

@@ -43,6 +43,7 @@ World::handle_connection_established( const ConnectionEstablished& connection_es
 void
 World::handle_login( const LoggedIn& login )
 {
+  thelog( yarrr::log::debug )( "Changing my ship id to", login.object_id );
   m_my_ship_id = login.object_id;
 }
 
@@ -72,6 +73,13 @@ void
 World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 {
   thelog( yarrr::log::debug )( "Deleting object.", delete_object.object_id() );
+  if ( delete_object.object_id() == m_my_ship_id )
+  {
+    thelog( yarrr::log::debug )( "Deleting focused object." );
+    m_my_ship = nullptr;
+    m_my_ship_id = 0;
+  }
+
   m_objects.delete_object( delete_object.object_id() );
 }
 
@@ -95,6 +103,7 @@ World::handle_object_init( const yarrr::ObjectUpdate& update )
 
   if ( update.id() == m_my_ship_id )
   {
+    thelog( yarrr::log::debug )( "Creating new hud." );
     m_my_ship = new_object.get();
     m_hud.reset( new yarrrc::Hud( the::ctci::service< yarrr::GraphicalEngine >(), *m_my_ship ) );
   }
