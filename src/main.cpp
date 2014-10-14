@@ -92,7 +92,7 @@ int main( int argc, char ** argv )
   yarrrc::FpsDrawer fps_drawer( clock );
 
   yarrr::ObjectContainer object_container;
-  World world( object_container );
+  yarrrc::World world( object_container );
 
   NetworkService network_service(
       clock,

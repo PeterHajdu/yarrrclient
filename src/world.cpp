@@ -11,6 +11,9 @@
 #include <yarrr/log.hpp>
 #include <thectci/service_registry.hpp>
 
+namespace yarrrc
+{
+
 World::World( yarrr::ObjectContainer& object_container )
   : m_objects( object_container )
   , m_my_ship_id( 0 )
@@ -20,12 +23,12 @@ World::World( yarrr::ObjectContainer& object_container )
       std::bind( &World::handle_object_update, this, std::placeholders::_1 ) );
   m_dispatcher.register_listener<yarrr::ObjectInitializer>(
       std::bind( &World::handle_object_init, this, std::placeholders::_1 ) );
-
-
   m_dispatcher.register_listener<yarrr::DeleteObject>(
       std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
+
   the::ctci::Dispatcher& local_event_dispatcher(
       the::ctci::service< LocalEventDispatcher >().dispatcher );
+
   local_event_dispatcher.register_listener< LoggedIn >(
       std::bind( &World::handle_login, this, std::placeholders::_1 ) );
   local_event_dispatcher.register_listener<ConnectionEstablished>(
@@ -109,5 +112,7 @@ World::handle_object_init( const yarrr::ObjectUpdate& update )
   }
 
   m_objects.add_object( std::move( new_object ) );
+}
+
 }
 

@@ -8,12 +8,15 @@ set(TEST_SOURCE_FILES
     test_cli.cpp
     test_terminal.cpp
     test_services.cpp
+    test_world.cpp
     )
 
 
 add_executable(test_runner EXCLUDE_FROM_ALL ${TEST_SOURCE_FILES})
 
-target_link_libraries(test_runner yarrr yarrrclientlib thelog theconf thectci ${LIBS})
+set(STATIC_C++ "-static-libstdc++ -static-libgcc")
+set(LIB_YARRR "-Wl,--whole-archive -lyarrr -Wl,--no-whole-archive")
+target_link_libraries(test_runner yarrrclientlib ${LIB_YARRR} thelog theconf thectci ${STATIC_C++} ${LIBS})
 
 get_target_property(TEST_RUNNER_BIN test_runner LOCATION)
 

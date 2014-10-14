@@ -15,6 +15,9 @@ namespace yarrr
 class ConnectionEstablished;
 class LoggedIn;
 
+namespace yarrrc
+{
+
 class World
 {
   public:
@@ -36,4 +39,6 @@ class World
 
     std::unique_ptr< yarrrc::Hud > m_hud;
 };
+
+}
 
