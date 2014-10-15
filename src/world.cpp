@@ -93,7 +93,7 @@ World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 void
 World::handle_object_update( const yarrr::ObjectUpdate& update )
 {
-  thelog( yarrr::log::debug )( "Object update." );
+  thelog( yarrr::log::debug )( "Object update for", update.id() );
   m_objects.handle_object_update( update );
 }
 
