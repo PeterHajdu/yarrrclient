@@ -25,6 +25,10 @@ if(UNIX)
     endif(enable_libc++)
 endif(UNIX)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(LIBS dl ${LIBS})
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
 include_directories(include)
 include_directories(/usr/local/include)
 
