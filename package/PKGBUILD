@@ -5,7 +5,7 @@ pkgdesc="The world's most wonderful online space shooter."
 arch=('i686' 'x86_64')
 url="https://yarrrthegame.com"
 license=('Proprietary')
-depends=('sdl2' 'sdl2_ttf' 'lua')
+depends=('sdl2' 'sdl2_ttf')
 makedepends=('cmake' 'git' 'clang')
 
 source=(
