@@ -21,7 +21,7 @@ add_executable(yarrrclient ${CLIENT_SOURCE_FILES})
 
 set(STATIC_C++ "-static-libstdc++ -static-libgcc")
 set(LIB_YARRR "-Wl,--whole-archive -lyarrr -Wl,--no-whole-archive")
-target_link_libraries(yarrrclient yarrrclientlib SDL2 SDL2_ttf pthread thelog theconf thectci thenet thetime ${LIB_YARRR} ${STATIC_C++} ${LIBS})
+target_link_libraries(yarrrclient yarrrclientlib SDL2 SDL2_ttf pthread thelog theconf thectci thenet thetime ${LIB_YARRR} ${STATIC_C++} lua ${LIBS})
 install(TARGETS yarrrclient DESTINATION bin)
 
 file (STRINGS "../package_version" CPACK_PACKAGE_VERSION)
