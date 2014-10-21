@@ -29,12 +29,15 @@ World::World( yarrr::ObjectContainer& object_container )
   the::ctci::Dispatcher& local_event_dispatcher(
       the::ctci::service< LocalEventDispatcher >().dispatcher );
 
-  local_event_dispatcher.register_listener< LoggedIn >(
+  local_event_dispatcher.register_listener< ObjectAssigned >(
       std::bind( &World::handle_login, this, std::placeholders::_1 ) );
   local_event_dispatcher.register_listener<ConnectionEstablished>(
       std::bind( &World::handle_connection_established, this, std::placeholders::_1 ) );
   local_event_dispatcher.register_listener<yarrr::ShipControl>(
       std::bind( &World::handle_command, this, std::placeholders::_1 ) );
+
+  local_event_dispatcher.register_listener<yarrr::ObjectInitializer>(
+      std::bind( &World::handle_object_init, this, std::placeholders::_1 ) );
 }
 
 void
@@ -44,7 +47,7 @@ World::handle_connection_established( const ConnectionEstablished& connection_es
 }
 
 void
-World::handle_login( const LoggedIn& login )
+World::handle_login( const ObjectAssigned& login )
 {
   thelog( yarrr::log::debug )( "Changing my ship id to", login.object_id );
   m_my_ship_id = login.object_id;
@@ -100,7 +103,7 @@ World::handle_object_update( const yarrr::ObjectUpdate& update )
 void
 World::handle_object_init( const yarrr::ObjectUpdate& update )
 {
-  thelog( yarrr::log::debug )( "Object init." );
+  thelog( yarrr::log::debug )( "Object init for", update.id() );
   if ( m_objects.has_object_with_id( update.id() ) )
   {
     thelog( yarrr::log::debug )( "Object exists." );

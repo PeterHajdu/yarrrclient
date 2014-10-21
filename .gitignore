@@ -1,9 +1,11 @@
 src/yarrrclient
+src/yarrrshipyard
 src/*.a
 package
 package_version
 share
 _CPack*
+*log*
 *.deb
 *core*
 *swp

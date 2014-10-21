@@ -9,17 +9,22 @@
 
 typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
 
-class LoggedIn
+namespace yarrrc
+{
+
+class ObjectAssigned
 {
   public:
     add_ctci( "logged_id" );
-    LoggedIn( yarrr::Object::Id object_id )
+    ObjectAssigned( yarrr::Object::Id object_id )
       : object_id( object_id )
     {
     }
 
     const yarrr::Object::Id object_id;
 };
+
+}
 
 //todo: hide this the important one is logged in
 class ConnectionEstablished

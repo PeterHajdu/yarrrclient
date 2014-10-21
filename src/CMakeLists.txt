@@ -11,18 +11,28 @@ set(LIB_SOURCE_FILES
   )
 
 set(CLIENT_SOURCE_FILES
-  main.cpp
+  yarrrclient.cpp
   services.cpp
   )
 
-
 add_library(yarrrclientlib STATIC ${LIB_SOURCE_FILES})
+
 add_executable(yarrrclient ${CLIENT_SOURCE_FILES})
+
+set(SHIPYARD_SOURCE_FILES
+  yarrrshipyard.cpp
+  services.cpp
+  )
+
+add_executable(yarrrshipyard ${SHIPYARD_SOURCE_FILES})
 
 set(STATIC_C++ "-static-libstdc++ -static-libgcc")
 set(LIB_YARRR "-Wl,--whole-archive -lyarrr -Wl,--no-whole-archive")
-target_link_libraries(yarrrclient yarrrclientlib SDL2 SDL2_ttf pthread thelog theconf thectci thenet thetime ${LIB_YARRR} ${STATIC_C++} lua ${LIBS})
+target_link_libraries(yarrrclient yarrrclientlib SDL2 SDL2_ttf pthread thectci thenet thetime ${LIB_YARRR} ${STATIC_C++} theconf thelog lua ${LIBS})
 install(TARGETS yarrrclient DESTINATION bin)
+
+target_link_libraries(yarrrshipyard yarrrclientlib SDL2 SDL2_ttf pthread thectci thenet thetime ${LIB_YARRR} ${STATIC_C++} theconf thelog lua ${LIBS})
+install(TARGETS yarrrshipyard DESTINATION bin)
 
 file (STRINGS "../package_version" CPACK_PACKAGE_VERSION)
 set(CPACK_GENERATOR "DEB")

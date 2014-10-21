@@ -13,10 +13,10 @@ namespace yarrr
 }
 
 class ConnectionEstablished;
-class LoggedIn;
 
 namespace yarrrc
 {
+class ObjectAssigned;
 
 class World
 {
@@ -29,7 +29,7 @@ class World
     void handle_object_init( const yarrr::ObjectUpdate& );
     void handle_command( const yarrr::ShipControl& command );
     void handle_connection_established( const ConnectionEstablished& connection_established );
-    void handle_login( const LoggedIn& login );
+    void handle_login( const ObjectAssigned& login );
     void handle_delete_object( const yarrr::DeleteObject& delete_object );
 
     yarrr::ObjectContainer& m_objects;

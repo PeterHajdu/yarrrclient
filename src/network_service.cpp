@@ -130,6 +130,6 @@ void
 LoginHandler::handle_login_response( const yarrr::ObjectAssigned& object_assigned )
 {
   thelog( yarrr::log::debug )( "ObjectAssigned received.", object_assigned.object_id() );
-  m_local_event_dispatcher.dispatch( LoggedIn( object_assigned.object_id() ) );
+  m_local_event_dispatcher.dispatch( yarrrc::ObjectAssigned( object_assigned.object_id() ) );
 }
 
