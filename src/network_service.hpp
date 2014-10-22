@@ -31,6 +31,7 @@ namespace yarrr
   class ObjectAssigned;
 }
 
+//todo: remove not needed crap
 class LoginHandler
 {
   public:
