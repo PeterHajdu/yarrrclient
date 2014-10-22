@@ -9,6 +9,7 @@
 #include <yarrr/ship_control.hpp>
 #include <yarrr/object_container.hpp>
 #include <yarrr/log.hpp>
+#include <yarrr/login.hpp>
 #include <thectci/service_registry.hpp>
 
 namespace yarrrc
@@ -19,38 +20,35 @@ World::World( yarrr::ObjectContainer& object_container )
   , m_my_ship_id( 0 )
   , m_my_ship( nullptr )
 {
-  m_dispatcher.register_listener<yarrr::BasicObjectUpdate>(
+  the::ctci::Dispatcher& incoming_dispatcher(
+      the::ctci::service< LocalEventDispatcher >().incoming );
+
+  incoming_dispatcher.register_listener<yarrr::BasicObjectUpdate>(
       std::bind( &World::handle_object_update, this, std::placeholders::_1 ) );
-  m_dispatcher.register_listener<yarrr::ObjectInitializer>(
+  incoming_dispatcher.register_listener<yarrr::ObjectInitializer>(
       std::bind( &World::handle_object_init, this, std::placeholders::_1 ) );
-  m_dispatcher.register_listener<yarrr::DeleteObject>(
+  incoming_dispatcher.register_listener<yarrr::DeleteObject>(
       std::bind( &World::handle_delete_object, this, std::placeholders::_1 ) );
 
   the::ctci::Dispatcher& local_event_dispatcher(
       the::ctci::service< LocalEventDispatcher >().dispatcher );
 
-  local_event_dispatcher.register_listener< ObjectAssigned >(
+  local_event_dispatcher.register_listener< yarrr::ObjectAssigned >(
       std::bind( &World::handle_login, this, std::placeholders::_1 ) );
-  local_event_dispatcher.register_listener<ConnectionEstablished>(
-      std::bind( &World::handle_connection_established, this, std::placeholders::_1 ) );
+
   local_event_dispatcher.register_listener<yarrr::ShipControl>(
       std::bind( &World::handle_command, this, std::placeholders::_1 ) );
 
   local_event_dispatcher.register_listener<yarrr::ObjectInitializer>(
       std::bind( &World::handle_object_init, this, std::placeholders::_1 ) );
+
 }
 
 void
-World::handle_connection_established( const ConnectionEstablished& connection_established )
+World::handle_login( const yarrr::ObjectAssigned& login )
 {
-  connection_established.connection_wrapper.register_dispatcher( m_dispatcher );
-}
-
-void
-World::handle_login( const ObjectAssigned& login )
-{
-  thelog( yarrr::log::debug )( "Changing my ship id to", login.object_id );
-  m_my_ship_id = login.object_id;
+  thelog( yarrr::log::debug )( "Changing my ship id to", login.object_id() );
+  m_my_ship_id = login.object_id();
   m_my_ship = nullptr;
   m_hud.reset();
 }

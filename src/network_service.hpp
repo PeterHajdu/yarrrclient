@@ -12,21 +12,6 @@ typedef yarrr::ConnectionWrapper< the::net::Connection > ConnectionWrapper;
 namespace yarrrc
 {
 
-class ObjectAssigned
-{
-  public:
-    add_ctci( "logged_id" );
-    ObjectAssigned( yarrr::Object::Id object_id )
-      : object_id( object_id )
-    {
-    }
-
-    const yarrr::Object::Id object_id;
-};
-
-}
-
-//todo: hide this the important one is logged in
 class ConnectionEstablished
 {
   public:
@@ -39,6 +24,8 @@ class ConnectionEstablished
     ConnectionWrapper& connection_wrapper;
 };
 
+}
+
 namespace yarrr
 {
   class ObjectAssigned;
@@ -48,7 +35,7 @@ class LoginHandler
 {
   public:
     LoginHandler();
-    void handle_connection_established( const ConnectionEstablished& connection_established );
+    void handle_connection_established( const yarrrc::ConnectionEstablished& connection_established );
     void handle_login_response( const yarrr::ObjectAssigned& object_assigned );
   private:
     the::ctci::Dispatcher m_dispatcher;

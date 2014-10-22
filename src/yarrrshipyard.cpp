@@ -7,6 +7,7 @@
 #include "network_service.hpp"
 
 #include <yarrr/log.hpp>
+#include <yarrr/login.hpp>
 #include <yarrr/chat_message.hpp>
 #include <yarrr/lua_setup.hpp>
 #include <yarrr/object_container.hpp>
@@ -83,7 +84,7 @@ void ship_requested( const yarrr::Command& request )
   }
 
   the::ctci::Dispatcher& local_event_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
-  local_event_dispatcher.dispatch( yarrrc::ObjectAssigned( new_ship->id() ) );
+  local_event_dispatcher.dispatch( yarrr::ObjectAssigned( new_ship->id() ) );
   local_event_dispatcher.polymorphic_dispatch( *new_ship->generate_update() );
 }
 
@@ -123,7 +124,7 @@ int main( int argc, char ** argv )
 
   {
     yarrr::Object::Pointer ship( yarrr::create_ship() );
-    local_event_dispatcher.dispatch( yarrrc::ObjectAssigned( ship->id() ) );
+    local_event_dispatcher.dispatch( yarrr::ObjectAssigned( ship->id() ) );
     local_event_dispatcher.polymorphic_dispatch( *ship->generate_update() );
   }
 

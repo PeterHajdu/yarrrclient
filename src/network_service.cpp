@@ -98,7 +98,7 @@ NetworkService::new_connection( the::net::Connection& connection )
 void
 NetworkService::new_connection_on_main_thread()
 {
-  m_local_event_dispatcher.dispatch( ConnectionEstablished( *m_connection_wrapper ) );
+  m_local_event_dispatcher.dispatch( yarrrc::ConnectionEstablished( *m_connection_wrapper ) );
   m_connection_wrapper->register_dispatcher( the::ctci::service< LocalEventDispatcher >().incoming );
 }
 
@@ -114,12 +114,12 @@ LoginHandler::LoginHandler()
 {
   m_dispatcher.register_listener< yarrr::ObjectAssigned >(
       std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
-  m_local_event_dispatcher.register_listener<ConnectionEstablished>(
+  m_local_event_dispatcher.register_listener< yarrrc::ConnectionEstablished >(
       std::bind( &LoginHandler::handle_connection_established, this, std::placeholders::_1 ) );
 }
 
 void
-LoginHandler::handle_connection_established( const ConnectionEstablished& connection_established )
+LoginHandler::handle_connection_established( const yarrrc::ConnectionEstablished& connection_established )
 {
   connection_established.connection_wrapper.register_dispatcher( m_dispatcher );
   connection_established.connection_wrapper.connection.send(
@@ -130,6 +130,6 @@ void
 LoginHandler::handle_login_response( const yarrr::ObjectAssigned& object_assigned )
 {
   thelog( yarrr::log::debug )( "ObjectAssigned received.", object_assigned.object_id() );
-  m_local_event_dispatcher.dispatch( yarrrc::ObjectAssigned( object_assigned.object_id() ) );
+  m_local_event_dispatcher.dispatch( object_assigned );
 }
 
