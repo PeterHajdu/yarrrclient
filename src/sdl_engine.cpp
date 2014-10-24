@@ -6,6 +6,7 @@
 #include <yarrr/shape.hpp>
 #include <yarrr/shape_behavior.hpp>
 #include <yarrr/resources.hpp>
+#include <yarrr/polygon.hpp>
 
 #include <cmath>
 #include <cassert>
