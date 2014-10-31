@@ -24,6 +24,7 @@ void
 KeyboardHandler::handle_text_input( const the::time::Time& now )
 {
   //todo: split this up somehow
+  //todo: should add focus selection and destination of events somehow
   SDL_Event event;
   while( SDL_PollEvent( &event ) )
   {
