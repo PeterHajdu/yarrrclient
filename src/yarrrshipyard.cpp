@@ -11,6 +11,7 @@
 #include <yarrr/chat_message.hpp>
 #include <yarrr/lua_setup.hpp>
 #include <yarrr/object_container.hpp>
+#include <yarrr/object_exporter.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/resources.hpp>
 #include <yarrr/object_factory.hpp>
@@ -108,6 +109,7 @@ int main( int argc, char ** argv )
   the::time::Clock clock;
   yarrr::ObjectContainer object_container;
   yarrrc::World world( object_container );
+  yarrr::ObjectExporter object_exporter( object_container );
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 

@@ -30,7 +30,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 include_directories(include)
+include_directories(thirdparty/sol)
+include_directories(thirdparty/igloo)
 include_directories(/usr/local/include)
+include_directories(/usr/local/include/lua52)
 
 add_definitions(-std=c++11
                 -Wall
