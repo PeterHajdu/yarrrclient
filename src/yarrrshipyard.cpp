@@ -142,16 +142,20 @@ class MissionWindow : public yarrr::GraphicalObject
 
     virtual void draw() const override
     {
+      static const std::unordered_map< int, yarrr::Colour > state_to_colour{
+        { yarrr::ongoing, yarrr::Colour::White },
+        { yarrr::succeeded, yarrr::Colour::Green },
+        { yarrr::failed, yarrr::Colour::Red } };
       size_t y_coordinate_of_line{ 150 };
       for ( const auto& mission_iterator : m_missions )
       {
         const yarrr::Mission& mission( *mission_iterator.second );
-        m_graphical_engine.print_text( 100, y_coordinate_of_line, mission.name(), yarrr::Colour::White );
+        m_graphical_engine.print_text( 100, y_coordinate_of_line, mission.name(), state_to_colour.at( mission.state() ) );
         y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
 
         for ( const auto& objective : mission.objectives() )
         {
-          m_graphical_engine.print_text( 110, y_coordinate_of_line, objective.description(), yarrr::Colour::White );
+          m_graphical_engine.print_text( 110, y_coordinate_of_line, objective.description(), state_to_colour.at( objective.state() ) );
           y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
         }
       }
