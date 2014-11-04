@@ -19,7 +19,10 @@
 #include <yarrr/object_creator.hpp>
 #include <yarrr/delete_object.hpp>
 #include <yarrr/engine_dispatcher.hpp>
+#include <yarrr/mission.hpp>
+#include <yarrr/mission_factory.hpp>
 #include <yarrr/main_thread_callback_queue.hpp>
+#include <yarrr/graphical_engine.hpp>
 
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
@@ -28,6 +31,7 @@
 
 namespace
 {
+the::ctci::AutoServiceRegister< yarrr::MissionFactory, yarrr::MissionFactory > mission_factory_register;
 the::ctci::AutoServiceRegister< yarrr::ObjectFactory, yarrr::ObjectFactory > object_factory_register;
 the::ctci::AutoServiceRegister< LocalEventDispatcher, LocalEventDispatcher > local_event_dispatcher_register;
 the::ctci::AutoServiceRegister< yarrr::ResourceFinder, yarrr::ResourceFinder > resource_finder_register(
@@ -76,9 +80,24 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
   thelog( yarrr::log::debug )( "Loglevel is set to", loglevel );
 }
 
-void ship_requested( const yarrr::Command& request )
+typedef std::unordered_map< std::string, yarrr::Mission::Pointer > Missions;
+Missions missions;
+
+void mission_requested( const std::string& name )
 {
-  yarrr::Object::Pointer new_ship( the::ctci::service< yarrr::ObjectFactory >().create_a( request.command() ) );
+  yarrr::Mission::Pointer new_mission( the::ctci::service< yarrr::MissionFactory >().create_a( name ) );
+  if ( !new_mission )
+  {
+    thelog( yarrr::log::info )( "Wasn't able to create mission with name:", name );
+    return;
+  }
+
+  missions[ name ] = std::move( new_mission );
+}
+
+void ship_requested( const std::string& type )
+{
+  yarrr::Object::Pointer new_ship( the::ctci::service< yarrr::ObjectFactory >().create_a( type ) );
   if ( !new_ship )
   {
     return;
@@ -89,12 +108,58 @@ void ship_requested( const yarrr::Command& request )
   local_event_dispatcher.polymorphic_dispatch( *new_ship->generate_update() );
 }
 
+void command_handler( const yarrr::Command& command )
+{
+  const std::string name( command.command() );
+  if ( name == "ship" )
+  {
+    ship_requested( command.parameters().back() );
+    return;
+  }
+
+  if ( name == "mission" )
+  {
+    mission_requested( command.parameters().back() );
+    return;
+  }
+}
+
 void print_help()
 {
   the::ctci::Dispatcher& incoming_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
   incoming_dispatcher.dispatch( yarrr::ChatMessage( "Welcome to the shipyard.", "system" ) );
   incoming_dispatcher.dispatch( yarrr::ChatMessage( "You can try out your new ships by typing /<shiptype> in the terminal.", "system" ) );
 }
+
+class MissionWindow : public yarrr::GraphicalObject
+{
+  public:
+    MissionWindow( const Missions& missions )
+      : GraphicalObject( the::ctci::service< yarrr::GraphicalEngine >() )
+      , m_missions( missions )
+    {
+    }
+
+    virtual void draw() const override
+    {
+      size_t y_coordinate_of_line{ 150 };
+      for ( const auto& mission_iterator : m_missions )
+      {
+        const yarrr::Mission& mission( *mission_iterator.second );
+        m_graphical_engine.print_text( 100, y_coordinate_of_line, mission.name(), yarrr::Colour::White );
+        y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
+
+        for ( const auto& objective : mission.objectives() )
+        {
+          m_graphical_engine.print_text( 110, y_coordinate_of_line, objective.description(), yarrr::Colour::White );
+          y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
+        }
+      }
+    }
+
+  private:
+    const Missions& m_missions;
+};
 
 }
 
@@ -130,7 +195,7 @@ int main( int argc, char ** argv )
     local_event_dispatcher.polymorphic_dispatch( *ship->generate_update() );
   }
 
-  local_event_dispatcher.register_listener< yarrr::Command >( &ship_requested );
+  local_event_dispatcher.register_listener< yarrr::Command >( &command_handler );
   the::ctci::service<yarrr::EngineDispatcher>().register_listener< yarrr::ObjectCreated >(
       [ &object_container ]( const yarrr::ObjectCreated& event )
       {
@@ -152,6 +217,7 @@ int main( int argc, char ** argv )
       } );
 
   print_help();
+  MissionWindow mission_window( missions );
 
   while ( running )
   {
@@ -162,6 +228,11 @@ int main( int argc, char ** argv )
     object_container.dispatch( yarrr::TimerUpdate( now ) );
     particles.travel_in_time_to( now );
     object_exporter.refresh();
+    for ( auto& mission_iterator : missions )
+    {
+      yarrr::Mission& mission( *mission_iterator.second );
+      mission.update();
+    }
 
     world.in_focus();
 
