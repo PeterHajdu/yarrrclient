@@ -109,7 +109,7 @@ int main( int argc, char ** argv )
   the::time::Clock clock;
   yarrr::ObjectContainer object_container;
   yarrrc::World world( object_container );
-  yarrr::ObjectExporter object_exporter( object_container );
+  yarrr::ObjectExporter object_exporter( object_container, yarrr::Lua::state() );
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
@@ -161,6 +161,7 @@ int main( int argc, char ** argv )
 
     object_container.dispatch( yarrr::TimerUpdate( now ) );
     particles.travel_in_time_to( now );
+    object_exporter.refresh();
 
     world.in_focus();
 
