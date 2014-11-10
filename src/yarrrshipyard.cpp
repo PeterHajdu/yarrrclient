@@ -21,6 +21,7 @@
 #include <yarrr/engine_dispatcher.hpp>
 #include <yarrr/mission.hpp>
 #include <yarrr/mission_factory.hpp>
+#include <yarrr/mission_exporter.hpp>
 #include <yarrr/main_thread_callback_queue.hpp>
 #include <yarrr/graphical_engine.hpp>
 
@@ -82,6 +83,8 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
 
 typedef std::unordered_map< std::string, yarrr::Mission::Pointer > Missions;
 Missions missions;
+yarrr::MissionsModel mission_exporter( "missions", yarrr::LuaEngine::model() );
+std::string character_object_id;
 
 void mission_requested( const std::string& name )
 {
@@ -92,6 +95,10 @@ void mission_requested( const std::string& name )
     return;
   }
 
+  mission_exporter.add_node( the::model::Node::Pointer( new yarrr::MissionModel(
+          std::to_string( new_mission->id() ),
+          character_object_id,
+          mission_exporter ) ) );
   missions[ name ] = std::move( new_mission );
 }
 
@@ -103,6 +110,7 @@ void ship_requested( const std::string& type )
     return;
   }
 
+  character_object_id = std::to_string( new_ship->id() );
   the::ctci::Dispatcher& local_event_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
   local_event_dispatcher.dispatch( yarrr::ObjectAssigned( new_ship->id() ) );
   local_event_dispatcher.polymorphic_dispatch( *new_ship->generate_update() );
@@ -193,11 +201,7 @@ int main( int argc, char ** argv )
   the::ctci::AutoServiceRegister< yarrr::ParticleFactory, ParticleFactory >
     auto_particle_factory_register( particles );
 
-  {
-    yarrr::Object::Pointer ship( yarrr::create_ship() );
-    local_event_dispatcher.dispatch( yarrr::ObjectAssigned( ship->id() ) );
-    local_event_dispatcher.polymorphic_dispatch( *ship->generate_update() );
-  }
+  ship_requested( "ship" );
 
   local_event_dispatcher.register_listener< yarrr::Command >( &command_handler );
   the::ctci::service<yarrr::EngineDispatcher>().register_listener< yarrr::ObjectCreated >(
