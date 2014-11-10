@@ -227,6 +227,7 @@ int main( int argc, char ** argv )
   print_help();
   MissionWindow mission_window( missions );
 
+  the::ctci::Dispatcher& incoming_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
   while ( running )
   {
     const the::time::Clock::Time now( clock.now() );
@@ -244,13 +245,14 @@ int main( int argc, char ** argv )
       mission.update();
       if ( mission.state() != yarrr::ongoing )
       {
+        const std::string message( std::string( "Mission " ) + ( mission.state() == yarrr::succeeded ? "succeeded." : "failed." ) );
+        incoming_dispatcher.dispatch( yarrr::ChatMessage( message, "system" ) );
         finished_missions.push_back( std::to_string( mission.id() ) );
       }
     }
 
     for ( auto& finished_mission : finished_missions )
     {
-      std::cout << "mission is finished: " << finished_mission << std::endl;
       missions.erase( finished_mission );
       mission_exporter.delete_node( finished_mission );
     }
