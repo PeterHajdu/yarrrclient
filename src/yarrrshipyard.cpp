@@ -99,7 +99,7 @@ void mission_requested( const std::string& name )
           std::to_string( new_mission->id() ),
           character_object_id,
           mission_exporter ) ) );
-  missions[ name ] = std::move( new_mission );
+  missions[ std::to_string( new_mission->id() ) ] = std::move( new_mission );
 }
 
 void ship_requested( const std::string& type )
@@ -236,10 +236,23 @@ int main( int argc, char ** argv )
     object_container.dispatch( yarrr::TimerUpdate( now ) );
     particles.travel_in_time_to( now );
     object_exporter.refresh();
+
+    std::vector< std::string > finished_missions;
     for ( auto& mission_iterator : missions )
     {
       yarrr::Mission& mission( *mission_iterator.second );
       mission.update();
+      if ( mission.state() != yarrr::ongoing )
+      {
+        finished_missions.push_back( std::to_string( mission.id() ) );
+      }
+    }
+
+    for ( auto& finished_mission : finished_missions )
+    {
+      std::cout << "mission is finished: " << finished_mission << std::endl;
+      missions.erase( finished_mission );
+      mission_exporter.delete_node( finished_mission );
     }
 
     world.in_focus();
