@@ -178,7 +178,7 @@ int main( int argc, char ** argv )
   the::time::Clock clock;
   yarrr::ObjectContainer object_container;
   yarrrc::World world( object_container );
-  yarrr::ObjectExporter object_exporter( object_container, yarrr::Lua::state() );
+  yarrr::ObjectExporter object_exporter( object_container, yarrr::LuaEngine::model() );
 
   the::time::FrequencyStabilizer< 60, the::time::Clock > frequency_stabilizer( clock );
 
