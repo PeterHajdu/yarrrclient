@@ -22,6 +22,7 @@
 #include <yarrr/mission.hpp>
 #include <yarrr/mission_factory.hpp>
 #include <yarrr/mission_exporter.hpp>
+#include <yarrr/mission_container.hpp>
 #include <yarrr/main_thread_callback_queue.hpp>
 #include <yarrr/graphical_engine.hpp>
 
@@ -82,9 +83,18 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
   thelog( yarrr::log::debug )( "Loglevel is set to", loglevel );
 }
 
-typedef std::unordered_map< std::string, yarrr::Mission::Pointer > Missions;
-Missions missions;
 yarrr::MissionsModel mission_exporter( "missions", yarrr::LuaEngine::model() );
+
+void mission_finished( const yarrr::Mission& mission )
+{
+  const std::string message( std::string( "Mission " ) + ( mission.state() == yarrr::succeeded ? "succeeded." : "failed." ) );
+  the::ctci::Dispatcher& incoming_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
+  incoming_dispatcher.dispatch( yarrr::ChatMessage( message, "system" ) );
+  mission_exporter.delete_node( std::to_string( mission.id() ) );
+}
+
+yarrr::MissionContainer missions( &mission_finished );
+
 std::string character_object_id;
 
 void mission_requested( const std::string& name )
@@ -100,7 +110,8 @@ void mission_requested( const std::string& name )
           std::to_string( new_mission->id() ),
           character_object_id,
           mission_exporter ) ) );
-  missions[ std::to_string( new_mission->id() ) ] = std::move( new_mission );
+
+  missions.add_mission( std::move( new_mission ) );
 }
 
 void ship_requested( const std::string& type )
@@ -143,7 +154,7 @@ void print_help()
 class MissionWindow : public yarrr::GraphicalObject
 {
   public:
-    MissionWindow( const Missions& missions )
+    MissionWindow( const yarrr::MissionContainer& missions )
       : GraphicalObject( the::ctci::service< yarrr::GraphicalEngine >() )
       , m_missions( missions )
     {
@@ -156,9 +167,9 @@ class MissionWindow : public yarrr::GraphicalObject
         { yarrr::succeeded, yarrr::Colour::Green },
         { yarrr::failed, yarrr::Colour::Red } };
       size_t y_coordinate_of_line{ 150 };
-      for ( const auto& mission_iterator : m_missions )
+      for ( const auto& mission_iterator : m_missions.missions() )
       {
-        const yarrr::Mission& mission( *mission_iterator.second );
+        const yarrr::Mission& mission( *mission_iterator );
         m_graphical_engine.print_text( 100, y_coordinate_of_line, mission.name(), state_to_colour.at( mission.state() ) );
         y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
 
@@ -171,7 +182,7 @@ class MissionWindow : public yarrr::GraphicalObject
     }
 
   private:
-    const Missions& m_missions;
+    const yarrr::MissionContainer& m_missions;
 };
 
 }
@@ -242,25 +253,7 @@ int main( int argc, char ** argv )
     mission_updater.run(
         [ = ]()
         {
-          std::vector< std::string > finished_missions;
-          for ( auto& mission_iterator : missions )
-          {
-            yarrr::Mission& mission( *mission_iterator.second );
-            mission.update();
-            if ( mission.state() != yarrr::ongoing )
-            {
-              const std::string message( std::string( "Mission " ) + ( mission.state() == yarrr::succeeded ? "succeeded." : "failed." ) );
-              the::ctci::Dispatcher& incoming_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
-              incoming_dispatcher.dispatch( yarrr::ChatMessage( message, "system" ) );
-              finished_missions.push_back( std::to_string( mission.id() ) );
-            }
-          }
-
-          for ( auto& finished_mission : finished_missions )
-          {
-            missions.erase( finished_mission );
-            mission_exporter.delete_node( finished_mission );
-          }
+            missions.update();
         } );
 
     world.in_focus();
