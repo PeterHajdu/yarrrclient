@@ -27,6 +27,7 @@
 
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
+#include <thetime/once_in.hpp>
 #include <thectci/service_registry.hpp>
 #include <theconf/configuration.hpp>
 
@@ -227,7 +228,7 @@ int main( int argc, char ** argv )
   print_help();
   MissionWindow mission_window( missions );
 
-  the::ctci::Dispatcher& incoming_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
+  the::time::OnceIn< the::time::Clock > mission_updater( clock, the::time::Clock::ticks_per_second );
   while ( running )
   {
     const the::time::Clock::Time now( clock.now() );
@@ -238,24 +239,29 @@ int main( int argc, char ** argv )
     particles.travel_in_time_to( now );
     object_exporter.refresh();
 
-    std::vector< std::string > finished_missions;
-    for ( auto& mission_iterator : missions )
-    {
-      yarrr::Mission& mission( *mission_iterator.second );
-      mission.update();
-      if ( mission.state() != yarrr::ongoing )
-      {
-        const std::string message( std::string( "Mission " ) + ( mission.state() == yarrr::succeeded ? "succeeded." : "failed." ) );
-        incoming_dispatcher.dispatch( yarrr::ChatMessage( message, "system" ) );
-        finished_missions.push_back( std::to_string( mission.id() ) );
-      }
-    }
+    mission_updater.run(
+        [ = ]()
+        {
+          std::vector< std::string > finished_missions;
+          for ( auto& mission_iterator : missions )
+          {
+            yarrr::Mission& mission( *mission_iterator.second );
+            mission.update();
+            if ( mission.state() != yarrr::ongoing )
+            {
+              const std::string message( std::string( "Mission " ) + ( mission.state() == yarrr::succeeded ? "succeeded." : "failed." ) );
+              the::ctci::Dispatcher& incoming_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
+              incoming_dispatcher.dispatch( yarrr::ChatMessage( message, "system" ) );
+              finished_missions.push_back( std::to_string( mission.id() ) );
+            }
+          }
 
-    for ( auto& finished_mission : finished_missions )
-    {
-      missions.erase( finished_mission );
-      mission_exporter.delete_node( finished_mission );
-    }
+          for ( auto& finished_mission : finished_missions )
+          {
+            missions.erase( finished_mission );
+            mission_exporter.delete_node( finished_mission );
+          }
+        } );
 
     world.in_focus();
 
