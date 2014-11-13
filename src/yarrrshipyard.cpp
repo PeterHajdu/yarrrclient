@@ -106,7 +106,7 @@ void mission_requested( const std::string& name )
     return;
   }
 
-  mission_exporter.add_node( the::model::Node::Pointer( new yarrr::MissionModel(
+  mission_exporter.add_node( the::model::OwningNode::Pointer( new yarrr::MissionModel(
           std::to_string( new_mission->id() ),
           character_object_id,
           mission_exporter ) ) );
