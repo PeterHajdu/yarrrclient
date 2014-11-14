@@ -148,7 +148,8 @@ void print_help()
 {
   the::ctci::Dispatcher& incoming_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
   incoming_dispatcher.dispatch( yarrr::ChatMessage( "Welcome to the shipyard.", "system" ) );
-  incoming_dispatcher.dispatch( yarrr::ChatMessage( "You can try out your new ships by typing /<shiptype> in the terminal.", "system" ) );
+  incoming_dispatcher.dispatch( yarrr::ChatMessage( "You can try out your new ships by typing /ship <shiptype> in the terminal.", "system" ) );
+  incoming_dispatcher.dispatch( yarrr::ChatMessage( "You can try out your new missions by typing /mission <mission name> in the terminal.", "system" ) );
 }
 
 class MissionWindow : public yarrr::GraphicalObject
