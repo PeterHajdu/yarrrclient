@@ -8,6 +8,7 @@ set(TEST_SOURCE_FILES
     test_terminal.cpp
     test_services.cpp
     test_world.cpp
+    test_mission_window.cpp
     )
 
 

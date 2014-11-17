@@ -23,54 +23,44 @@ Describe( a_hud )
     graphical_engine.draw_objects();
   }
 
-
-  bool was_printed( const std::string& text ) const
-  {
-    return std::any_of( std::begin( graphical_engine.printed_texts ), std::end( graphical_engine.printed_texts ),
-        [ this, text ]( const std::string& line )
-        {
-          return line.find( text ) != std::string::npos;
-        } );
-  }
-
   It( prints_out_the_inventory )
   {
-    AssertThat( was_printed( "inventory" ), Equals( true ) );
-    AssertThat( was_printed( "canon" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( "inventory" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( "canon" ), Equals( true ) );
   }
 
   It( prints_out_the_coordinates_of_the_ship_in_metres )
   {
-    AssertThat( was_printed( "coordinate" ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->coordinate.x ) ) ),
+    AssertThat( graphical_engine.was_printed( "coordinate" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->coordinate.x ) ) ),
         Equals( true ) );
-    AssertThat( was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->coordinate.y ) ) ),
+    AssertThat( graphical_engine.was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->coordinate.y ) ) ),
         Equals( true ) );
   }
 
   It( prints_out_the_velocity_of_the_ship_in_metres_per_second )
   {
-    AssertThat( was_printed( "velocity" ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->velocity.x ) ) ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->velocity.y ) ) ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( "velocity" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->velocity.x ) ) ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( std::to_string( yarrr::huplons_to_metres( physical_parameters->velocity.y ) ) ), Equals( true ) );
   }
 
   It( prints_out_the_integrity_of_the_ship )
   {
-    AssertThat( was_printed( "integrity" ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( physical_parameters->integrity ) ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( "integrity" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( std::to_string( physical_parameters->integrity ) ), Equals( true ) );
   }
 
   It( prints_out_the_orientation_of_the_ship_in_degrees )
   {
-    AssertThat( was_printed( "orientation" ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( yarrr::hiplon_to_degrees( physical_parameters->orientation ) ) ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( "orientation" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( std::to_string( yarrr::hiplon_to_degrees( physical_parameters->orientation ) ) ), Equals( true ) );
   }
 
   It( prints_out_the_angular_velocity_of_the_ship_in_meaningful_units )
   {
-    AssertThat( was_printed( "angular velocity" ), Equals( true ) );
-    AssertThat( was_printed( std::to_string( yarrr::hiplon_to_degrees( physical_parameters->angular_velocity ) ) ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( "angular velocity" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( std::to_string( yarrr::hiplon_to_degrees( physical_parameters->angular_velocity ) ) ), Equals( true ) );
   }
 
   test::GraphicalEngine graphical_engine;
