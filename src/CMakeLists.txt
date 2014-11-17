@@ -8,6 +8,7 @@ set(LIB_SOURCE_FILES
   hud.cpp
   cli.cpp
   terminal.cpp
+  mission_window.cpp
   )
 
 set(CLIENT_SOURCE_FILES
