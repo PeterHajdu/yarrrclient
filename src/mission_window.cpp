@@ -21,12 +21,12 @@ MissionWindow::generate_lines() const
   ListWindow::Lines lines;
   for ( const auto& mission : m_missions.missions() )
   {
-    lines.push_back( mission->name() );
-    lines.push_back( mission->description() );
+    lines.push_back( { mission->name(), yarrr::Colour::White } );
+    lines.push_back( { mission->description(), yarrr::Colour::White } );
 
     for ( const auto& objective : mission->objectives() )
     {
-      lines.push_back( objective.description() );
+      lines.push_back( { objective.description(), yarrr::Colour::White } );
     }
   }
   return lines;

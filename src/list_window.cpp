@@ -19,7 +19,7 @@ ListWindow::draw() const
   Lines lines( generate_lines() );
   for ( const auto& line : lines )
   {
-    m_graphical_engine.print_text( m_x,y_coordinate_of_line, line, yarrr::Colour::White );
+    m_graphical_engine.print_text( m_x,y_coordinate_of_line, line.text, line.colour );
     y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
   }
 }

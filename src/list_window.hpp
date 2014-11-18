@@ -8,7 +8,7 @@ namespace yarrrc
 class ListWindow : yarrr::GraphicalObject
 {
   public:
-    using Lines = std::vector< std::string >;
+    using Lines = std::vector< yarrr::TextToken >;
     using LineGenerator = std::function< Lines() >;
     ListWindow( int x, int y, yarrr::GraphicalEngine&, LineGenerator generator );
 

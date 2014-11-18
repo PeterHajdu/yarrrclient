@@ -21,11 +21,12 @@ Describe( a_list_window )
 
   It( prints_out_lines_provided_by_the_generator )
   {
-    AssertThat( graphical_engine.was_printed( lines.front() ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( lines.front().text ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( lines.back().text ), Equals( true ) );
   }
 
   test::GraphicalEngine graphical_engine;
   std::unique_ptr< yarrrc::ListWindow > list_window;
-  const yarrrc::ListWindow::Lines lines{ "first line", "second line" };
+  const yarrrc::ListWindow::Lines lines{ { "first line", yarrr::Colour::White }, { "second line", yarrr::Colour::White } };
 };
 

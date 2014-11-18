@@ -18,29 +18,29 @@ ListWindow::Lines
 Hud::build_hud_lines() const
 {
   ListWindow::Lines lines;
-  lines.push_back( "inventory: " );
+  lines.push_back( { "inventory: ", yarrr::Colour::White } );
 
   for ( const auto& item : m_inventory.items() )
   {
-    lines.push_back( " -> " + item.get().name() );
+    lines.push_back( { " -> " + item.get().name(), yarrr::Colour::White } );
   }
 
-  lines.push_back( "integrity: " +
-      std::to_string( m_physical_parameters.integrity ) );
+  lines.push_back( { "integrity: " +
+      std::to_string( m_physical_parameters.integrity ), yarrr::Colour::White } );
 
-  lines.push_back( "coordinate: " +
+  lines.push_back( { "coordinate: " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.x ) ) + " , " +
-      std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.y ) ) );
+      std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.y ) ), yarrr::Colour::White } );
 
-  lines.push_back( "velocity: " +
+  lines.push_back( { "velocity: " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.velocity.x ) ) + " , " +
-      std::to_string( yarrr::huplons_to_metres( m_physical_parameters.velocity.y ) ) );
+      std::to_string( yarrr::huplons_to_metres( m_physical_parameters.velocity.y ) ), yarrr::Colour::White } );
 
-  lines.push_back( "orientation: " +
-      std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.orientation ) ) );
+  lines.push_back( { "orientation: " +
+      std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.orientation ) ), yarrr::Colour::White } );
 
-  lines.push_back( "angular velocity: " +
-      std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.angular_velocity ) ) );
+  lines.push_back( { "angular velocity: " +
+      std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.angular_velocity ) ), yarrr::Colour::White } );
 
   return lines;
 }
