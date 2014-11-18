@@ -94,17 +94,17 @@ World::handle_delete_object( const yarrr::DeleteObject& delete_object )
 void
 World::handle_object_update( const yarrr::ObjectUpdate& update )
 {
-  thelog( yarrr::log::debug )( "Object update for", update.id() );
+  thelog( yarrr::log::insane )( "Object update for", update.id() );
   m_objects.handle_object_update( update );
 }
 
 void
 World::handle_object_init( const yarrr::ObjectUpdate& update )
 {
-  thelog( yarrr::log::debug )( "Object init for", update.id() );
+  thelog( yarrr::log::insane )( "Object init for", update.id() );
   if ( m_objects.has_object_with_id( update.id() ) )
   {
-    thelog( yarrr::log::debug )( "Object exists." );
+    thelog( yarrr::log::insane )( "Object exists." );
     handle_object_update( update );
     return;
   }

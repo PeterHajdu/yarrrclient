@@ -5,12 +5,16 @@ namespace yarrrc
 {
 
 MissionWindow::MissionWindow( yarrr::GraphicalEngine& engine, the::ctci::Dispatcher& mission_source )
-  : m_missions( []( const yarrr::Mission& ){} )
+  : m_missions( []( const yarrr::Mission& mission )
+      {
+        thelog( yarrr::log::debug )( "Mission finished.", mission.id() );
+      } )
   , m_window( 0, 120, engine, [ this ](){ return generate_lines(); } )
 {
   mission_source.register_listener< yarrr::Mission >(
       [ this ]( const yarrr::Mission& mission )
       {
+        thelog( yarrr::log::debug )( "Mission update arrived:", mission.id(), mission.name() );
         m_missions.add_mission( yarrr::Mission::Pointer( new yarrr::Mission( mission ) ) );
       } );
 }
