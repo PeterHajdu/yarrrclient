@@ -1,6 +1,6 @@
 #pragma once
 
-#include <yarrr/graphical_engine.hpp>
+#include "list_window.hpp"
 #include <yarrr/mission_container.hpp>
 
 namespace the
@@ -14,14 +14,15 @@ class Dispatcher;
 namespace yarrrc
 {
 
-class MissionWindow : public yarrr::GraphicalObject
+class MissionWindow
 {
   public:
     MissionWindow( yarrr::GraphicalEngine&, the::ctci::Dispatcher& mission_source );
 
   private:
-    virtual void draw() const override;
+    ListWindow::Lines generate_lines() const;
     yarrr::MissionContainer m_missions;
+    yarrrc::ListWindow m_window;
 };
 
 }

@@ -5,8 +5,8 @@ namespace yarrrc
 {
 
 MissionWindow::MissionWindow( yarrr::GraphicalEngine& engine, the::ctci::Dispatcher& mission_source )
-  : GraphicalObject( engine )
-  , m_missions( []( const yarrr::Mission& ){} )
+  : m_missions( []( const yarrr::Mission& ){} )
+  , m_window( 0, 120, engine, [ this ](){ return generate_lines(); } )
 {
   mission_source.register_listener< yarrr::Mission >(
       [ this ]( const yarrr::Mission& mission )
@@ -15,19 +15,21 @@ MissionWindow::MissionWindow( yarrr::GraphicalEngine& engine, the::ctci::Dispatc
       } );
 }
 
-void
-MissionWindow::draw() const
+ListWindow::Lines
+MissionWindow::generate_lines() const
 {
+  ListWindow::Lines lines;
   for ( const auto& mission : m_missions.missions() )
   {
-    m_graphical_engine.print_text( 0, 0, mission->name(), yarrr::Colour::White );
-    m_graphical_engine.print_text( 0, 0, mission->description(), yarrr::Colour::White );
+    lines.push_back( mission->name() );
+    lines.push_back( mission->description() );
 
     for ( const auto& objective : mission->objectives() )
     {
-      m_graphical_engine.print_text( 0, 0, objective.description(), yarrr::Colour::White );
+      lines.push_back( objective.description() );
     }
   }
+  return lines;
 }
 
 }
