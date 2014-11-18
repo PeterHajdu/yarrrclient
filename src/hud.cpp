@@ -4,13 +4,22 @@
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/object.hpp>
 
+namespace
+{
+  int calculate_x_from( const yarrr::Coordinate& screen_resolution )
+  {
+    return screen_resolution.x - 250;
+  }
+
+}
+
 namespace yarrrc
 {
 
 Hud::Hud( yarrr::GraphicalEngine& graphical_engine, const yarrr::Object& object )
   : m_physical_parameters( yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters )
   , m_inventory( yarrr::component_of< yarrr::Inventory >( object ) )
-  , m_window( 400, 120, graphical_engine, [ this ](){ return build_hud_lines(); } )
+  , m_window( calculate_x_from( graphical_engine.screen_resolution() ), 120, graphical_engine, [ this ](){ return build_hud_lines(); } )
 {
 }
 
