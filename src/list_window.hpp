@@ -9,8 +9,7 @@ class ListWindow : yarrr::GraphicalObject
 {
   public:
     using Lines = std::vector< std::string >;
-    using LinesRef = const Lines&;
-    using LineGenerator = std::function< LinesRef() >;
+    using LineGenerator = std::function< Lines() >;
     ListWindow( int x, int y, yarrr::GraphicalEngine&, LineGenerator generator );
 
   private:

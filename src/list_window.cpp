@@ -1,5 +1,4 @@
 #include "list_window.hpp"
-#include <iostream>
 
 namespace yarrrc
 {
@@ -17,7 +16,8 @@ void
 ListWindow::draw() const
 {
   int y_coordinate_of_line{ m_y };
-  for ( const auto& line : generate_lines() )
+  Lines lines( generate_lines() );
+  for ( const auto& line : lines )
   {
     m_graphical_engine.print_text( m_x,y_coordinate_of_line, line, yarrr::Colour::White );
     y_coordinate_of_line += yarrr::GraphicalEngine::font_height;

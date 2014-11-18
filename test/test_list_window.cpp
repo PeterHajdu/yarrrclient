@@ -4,14 +4,14 @@
 
 using namespace igloo;
 
-Describe_Only( a_list_window )
+Describe( a_list_window )
 {
 
   void SetUp()
   {
     graphical_engine.printed_texts.clear();
     list_window.reset( new yarrrc::ListWindow( 0, 0, graphical_engine,
-          [ this ]() -> yarrrc::ListWindow::LinesRef
+          [ this ]() -> yarrrc::ListWindow::Lines
           {
             return lines;
           } ) );

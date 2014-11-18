@@ -1,6 +1,6 @@
 #pragma once
 
-#include <yarrr/graphical_engine.hpp>
+#include "list_window.hpp"
 
 namespace yarrr
 {
@@ -14,20 +14,17 @@ class Inventory;
 namespace yarrrc
 {
 
-class Hud : public yarrr::GraphicalObject
+class Hud
 {
   public:
     Hud( yarrr::GraphicalEngine&, const yarrr::Object& object );
-    virtual void draw() const override;
-    virtual ~Hud() = default;
+
   private:
-    typedef std::vector< std::string > Lines;
-    Lines build_hud_lines() const;
-    void print_lines( const Lines& ) const;
+    ListWindow::Lines build_hud_lines() const;
 
     yarrr::PhysicalParameters& m_physical_parameters;
     yarrr::Inventory& m_inventory;
-    const int m_height_of_screen;
+    yarrrc::ListWindow m_window;
 };
 
 }

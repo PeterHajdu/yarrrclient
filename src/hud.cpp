@@ -9,25 +9,16 @@ namespace yarrrc
 
 
 Hud::Hud( yarrr::GraphicalEngine& graphical_engine, const yarrr::Object& object )
-  : GraphicalObject( graphical_engine )
-  , m_physical_parameters( yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters )
+  : m_physical_parameters( yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters )
   , m_inventory( yarrr::component_of< yarrr::Inventory >( object ) )
-  , m_height_of_screen( m_graphical_engine.screen_resolution().y )
+  , m_window( 0, 120, graphical_engine, [ this ](){ return build_hud_lines(); } )
 {
-  (void)m_physical_parameters;
 }
 
-void
-Hud::draw() const
-{
-  print_lines( build_hud_lines() );
-}
-
-
-Hud::Lines
+ListWindow::Lines
 Hud::build_hud_lines() const
 {
-  Lines lines;
+  ListWindow::Lines lines;
   lines.push_back( "inventory: " );
 
   for ( const auto& item : m_inventory.items() )
@@ -53,18 +44,6 @@ Hud::build_hud_lines() const
       std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.angular_velocity ) ) );
 
   return lines;
-}
-
-
-void
-Hud::print_lines( const Lines& lines ) const
-{
-  size_t y_coordinate_of_line{ m_height_of_screen - lines.size() * yarrr::GraphicalEngine::font_height };
-  for ( const auto& line: lines )
-  {
-    m_graphical_engine.print_text( 0, y_coordinate_of_line, line, yarrr::Colour::White );
-    y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
-  }
 }
 
 }
