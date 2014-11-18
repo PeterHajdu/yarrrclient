@@ -1,4 +1,5 @@
 #include "igloo/igloo.h"
+#include <thelog/logger.hpp>
 
 using namespace igloo;
 
@@ -40,6 +41,7 @@ bool hasArg(const T& argv, const std::string & needle)
 
 int main(int argc, const char* argv[])
 {
+  the::log::Logger::set_loglevel( 0 );
   DefaultTestResultsOutput output;
   TestRunner runner(output);
 

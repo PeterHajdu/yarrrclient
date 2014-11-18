@@ -23,6 +23,7 @@ class MissionWindow
     ListWindow::Lines generate_lines() const;
     yarrr::MissionContainer m_missions;
     yarrrc::ListWindow m_window;
+    ListWindow::Lines m_mission_log;
 };
 
 }
