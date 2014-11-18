@@ -9,6 +9,7 @@ set(LIB_SOURCE_FILES
   cli.cpp
   terminal.cpp
   mission_window.cpp
+  list_window.cpp
   )
 
 set(CLIENT_SOURCE_FILES

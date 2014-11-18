@@ -9,6 +9,7 @@ set(TEST_SOURCE_FILES
     test_services.cpp
     test_world.cpp
     test_mission_window.cpp
+    test_list_window.cpp
     )
 
 
