@@ -1,5 +1,16 @@
 #include "mission_window.hpp"
 #include <thectci/dispatcher.hpp>
+#include <yarrr/mission.hpp>
+#include <unordered_map>
+namespace
+{
+
+std::unordered_map< int, yarrr::Colour > state_to_colour = {
+  { yarrr::ongoing, yarrr::Colour::White },
+  { yarrr::succeeded, yarrr::Colour::Green },
+  { yarrr::failed, yarrr::Colour::Red } };
+
+}
 
 namespace yarrrc
 {
@@ -25,12 +36,12 @@ MissionWindow::generate_lines() const
   ListWindow::Lines lines;
   for ( const auto& mission : m_missions.missions() )
   {
-    lines.push_back( { mission->name(), yarrr::Colour::White } );
+    lines.push_back( { mission->name(), state_to_colour[ mission->state() ] } );
     lines.push_back( { mission->description(), yarrr::Colour::White } );
 
     for ( const auto& objective : mission->objectives() )
     {
-      lines.push_back( { objective.description(), yarrr::Colour::White } );
+      lines.push_back( { objective.description(), state_to_colour[ objective.state() ] } );
     }
   }
   return lines;
