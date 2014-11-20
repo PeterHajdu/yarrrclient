@@ -1,6 +1,7 @@
 #pragma once
 
 #include <yarrr/graphical_engine.hpp>
+#include <functional>
 
 namespace yarrrc
 {
