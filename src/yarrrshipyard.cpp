@@ -5,6 +5,7 @@
 #include "particle_factory.hpp"
 #include "local_event_dispatcher.hpp"
 #include "network_service.hpp"
+#include "mission_control.hpp"
 
 #include <yarrr/log.hpp>
 #include <yarrr/login.hpp>
@@ -22,7 +23,6 @@
 #include <yarrr/mission.hpp>
 #include <yarrr/mission_factory.hpp>
 #include <yarrr/mission_exporter.hpp>
-#include <yarrr/mission_container.hpp>
 #include <yarrr/main_thread_callback_queue.hpp>
 #include <yarrr/graphical_engine.hpp>
 
@@ -85,15 +85,10 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
 
 yarrr::MissionsModel mission_exporter( "missions", yarrr::LuaEngine::model() );
 
-void mission_finished( const yarrr::Mission& mission )
+void mission_finished( const yarrrc::MissionFinished& finished )
 {
-  const std::string message( std::string( "Mission " ) + ( mission.state() == yarrr::succeeded ? "succeeded." : "failed." ) );
-  the::ctci::Dispatcher& incoming_dispatcher( the::ctci::service<LocalEventDispatcher>().incoming );
-  incoming_dispatcher.dispatch( yarrr::ChatMessage( message, "system" ) );
-  mission_exporter.delete_node( std::to_string( mission.id() ) );
+  mission_exporter.delete_node( std::to_string( finished.mission.id() ) );
 }
-
-yarrr::MissionContainer missions( &mission_finished );
 
 std::string character_object_id;
 
@@ -111,7 +106,7 @@ void mission_requested( const std::string& name )
           character_object_id,
           mission_exporter ) ) );
 
-  missions.add_mission( std::move( new_mission ) );
+  yarrrc::local_dispatch( *new_mission );
 }
 
 void ship_requested( const std::string& type )
@@ -151,40 +146,6 @@ void print_help()
   incoming_dispatcher.dispatch( yarrr::ChatMessage( "You can try out your new ships by typing /ship <shiptype> in the terminal.", "system" ) );
   incoming_dispatcher.dispatch( yarrr::ChatMessage( "You can try out your new missions by typing /mission <mission name> in the terminal.", "system" ) );
 }
-
-class MissionWindow : public yarrr::GraphicalObject
-{
-  public:
-    MissionWindow( const yarrr::MissionContainer& missions )
-      : GraphicalObject( the::ctci::service< yarrr::GraphicalEngine >() )
-      , m_missions( missions )
-    {
-    }
-
-    virtual void draw() const override
-    {
-      static const std::unordered_map< int, yarrr::Colour > state_to_colour{
-        { yarrr::ongoing, yarrr::Colour::White },
-        { yarrr::succeeded, yarrr::Colour::Green },
-        { yarrr::failed, yarrr::Colour::Red } };
-      size_t y_coordinate_of_line{ 150 };
-      for ( const auto& mission_iterator : m_missions.missions() )
-      {
-        const yarrr::Mission& mission( *mission_iterator );
-        m_graphical_engine.print_text( 100, y_coordinate_of_line, mission.name(), state_to_colour.at( mission.state() ) );
-        y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
-
-        for ( const auto& objective : mission.objectives() )
-        {
-          m_graphical_engine.print_text( 110, y_coordinate_of_line, objective.description(), state_to_colour.at( objective.state() ) );
-          y_coordinate_of_line += yarrr::GraphicalEngine::font_height;
-        }
-      }
-    }
-
-  private:
-    const yarrr::MissionContainer& m_missions;
-};
 
 }
 
@@ -238,7 +199,8 @@ int main( int argc, char ** argv )
       } );
 
   print_help();
-  MissionWindow mission_window( missions );
+  yarrrc::MissionControl mission_control( *graphical_engine, local_event_dispatcher );
+  local_event_dispatcher.register_listener< yarrrc::MissionFinished >( &mission_finished );
 
   the::time::OnceIn< the::time::Clock > mission_updater( clock, the::time::Clock::ticks_per_second );
   while ( running )
@@ -252,9 +214,9 @@ int main( int argc, char ** argv )
     object_exporter.refresh();
 
     mission_updater.run(
-        [ = ]()
+        [ &mission_control ]()
         {
-            missions.update();
+          mission_control.update();
         } );
 
     world.in_focus();
