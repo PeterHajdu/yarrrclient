@@ -14,6 +14,18 @@ class Dispatcher;
 namespace yarrrc
 {
 
+class MissionFinished
+{
+  public:
+    add_ctci( "yarrrc_mission_finished" );
+    MissionFinished( const yarrr::Mission& mission )
+      : mission( mission )
+    {
+    }
+
+    const yarrr::Mission& mission;
+};
+
 class MissionControl
 {
   public:
@@ -21,6 +33,7 @@ class MissionControl
     void update();
 
   private:
+    void handle_mission_finished( const yarrr::Mission& );
     ListWindow::Lines generate_lines() const;
     yarrr::MissionContainer m_missions;
     yarrrc::ListWindow m_window;

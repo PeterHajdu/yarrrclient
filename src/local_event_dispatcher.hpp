@@ -12,3 +12,14 @@ class LocalEventDispatcher
     the::ctci::Dispatcher outgoing;
 };
 
+namespace yarrrc
+{
+
+template < typename T >
+void local_dispatch( const T& event )
+{
+  the::ctci::service< LocalEventDispatcher >().dispatcher.dispatch( event );
+}
+
+}
+
