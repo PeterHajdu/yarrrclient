@@ -18,6 +18,7 @@ class MissionControl
 {
   public:
     MissionControl( yarrr::GraphicalEngine&, the::ctci::Dispatcher& mission_source );
+    void update();
 
   private:
     ListWindow::Lines generate_lines() const;

@@ -51,5 +51,11 @@ MissionControl::generate_lines() const
   return lines;
 }
 
+void
+MissionControl::update()
+{
+  m_missions.update();
+}
+
 }
 

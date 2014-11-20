@@ -14,7 +14,7 @@ Describe( a_mission_control )
     objective_state = state;
     mission.add_objective( objective );
     mission.update();
-    assert( mission.state() == objective_state );
+    was_mission_updated = false;
     mission_source->dispatch( mission );
     graphical_engine.draw_objects();
   }
@@ -51,6 +51,13 @@ Describe( a_mission_control )
     AssertThat( graphical_engine.was_printed( "Mission log" ), Equals( true ) );
   }
 
+  It( can_update_missions )
+  {
+    update_mission( yarrr::ongoing );
+    mission_control->update();
+    AssertThat( was_mission_updated, Equals( true ) );
+  }
+
   test::GraphicalEngine graphical_engine;
   std::unique_ptr< yarrrc::MissionControl > mission_control;
   std::unique_ptr< the::ctci::Dispatcher > mission_source;
@@ -61,9 +68,11 @@ Describe( a_mission_control )
   yarrr::Mission mission{ info };
   const std::string objective_description{ "objective description" };
   yarrr::TaskState objective_state;
+  bool was_mission_updated;
   const yarrr::Mission::Objective objective{ objective_description,
     [ this ]( const std::string& ) -> yarrr::TaskState
     {
+      was_mission_updated = true;
       return objective_state;
     } };
 };
