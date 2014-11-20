@@ -14,10 +14,10 @@ class Dispatcher;
 namespace yarrrc
 {
 
-class MissionWindow
+class MissionControl
 {
   public:
-    MissionWindow( yarrr::GraphicalEngine&, the::ctci::Dispatcher& mission_source );
+    MissionControl( yarrr::GraphicalEngine&, the::ctci::Dispatcher& mission_source );
 
   private:
     ListWindow::Lines generate_lines() const;

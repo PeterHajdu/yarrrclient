@@ -1,11 +1,11 @@
-#include "../src/mission_window.hpp"
+#include "../src/mission_control.hpp"
 #include <yarrr/test_graphical_engine.hpp>
 #include <yarrr/mission_container.hpp>
 #include <igloo/igloo_alt.h>
 
 using namespace igloo;
 
-Describe( a_mission_window )
+Describe( a_mission_control )
 {
 
   void update_mission( yarrr::TaskState state )
@@ -23,7 +23,7 @@ Describe( a_mission_window )
   {
     graphical_engine.printed_texts.clear();
     mission_source.reset( new the::ctci::Dispatcher() );
-    mission_window.reset( new yarrrc::MissionWindow( graphical_engine, *mission_source ) );
+    mission_control.reset( new yarrrc::MissionControl( graphical_engine, *mission_source ) );
   }
 
   It( prints_out_mission_name )
@@ -52,7 +52,7 @@ Describe( a_mission_window )
   }
 
   test::GraphicalEngine graphical_engine;
-  std::unique_ptr< yarrrc::MissionWindow > mission_window;
+  std::unique_ptr< yarrrc::MissionControl > mission_control;
   std::unique_ptr< the::ctci::Dispatcher > mission_source;
 
   const std::string mission_name{ "mission name" };

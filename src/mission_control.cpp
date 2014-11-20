@@ -1,4 +1,4 @@
-#include "mission_window.hpp"
+#include "mission_control.hpp"
 #include <thectci/dispatcher.hpp>
 #include <yarrr/mission.hpp>
 #include <unordered_map>
@@ -15,7 +15,7 @@ std::unordered_map< int, yarrr::Colour > state_to_colour = {
 namespace yarrrc
 {
 
-MissionWindow::MissionWindow( yarrr::GraphicalEngine& engine, the::ctci::Dispatcher& mission_source )
+MissionControl::MissionControl( yarrr::GraphicalEngine& engine, the::ctci::Dispatcher& mission_source )
   : m_missions( [ this ]( const yarrr::Mission& mission )
       {
         thelog( yarrr::log::debug )( "Mission finished.", mission.id() );
@@ -32,7 +32,7 @@ MissionWindow::MissionWindow( yarrr::GraphicalEngine& engine, the::ctci::Dispatc
 }
 
 ListWindow::Lines
-MissionWindow::generate_lines() const
+MissionControl::generate_lines() const
 {
   ListWindow::Lines lines;
   for ( const auto& mission : m_missions.missions() )

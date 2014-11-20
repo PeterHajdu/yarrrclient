@@ -8,7 +8,7 @@ set(LIB_SOURCE_FILES
   hud.cpp
   cli.cpp
   terminal.cpp
-  mission_window.cpp
+  mission_control.cpp
   list_window.cpp
   )
 

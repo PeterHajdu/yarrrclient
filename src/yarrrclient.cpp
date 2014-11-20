@@ -5,7 +5,7 @@
 #include "fps.hpp"
 #include "particle_factory.hpp"
 #include "sdl_engine.hpp"
-#include "mission_window.hpp"
+#include "mission_control.hpp"
 #include <yarrr/resources.hpp>
 
 #include <yarrr/graphical_engine.hpp>
@@ -109,7 +109,7 @@ int main( int argc, char ** argv )
   the::ctci::AutoServiceRegister< yarrr::ParticleFactory, ParticleFactory >
     auto_particle_factory_register( particles );
 
-  yarrrc::MissionWindow mission_window( *graphical_engine, the::ctci::service<LocalEventDispatcher>().incoming );
+  yarrrc::MissionControl mission_control( *graphical_engine, the::ctci::service<LocalEventDispatcher>().incoming );
 
   while ( running )
   {
