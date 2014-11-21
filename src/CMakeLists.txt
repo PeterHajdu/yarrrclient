@@ -10,6 +10,7 @@ set(LIB_SOURCE_FILES
   terminal.cpp
   mission_control.cpp
   list_window.cpp
+  information_window.cpp
   )
 
 set(CLIENT_SOURCE_FILES

@@ -20,7 +20,7 @@ namespace yarrrc
 MissionControl::MissionControl( yarrr::GraphicalEngine& engine, the::ctci::Dispatcher& mission_source )
   : m_missions( [ this ]( const yarrr::Mission& mission )
       { handle_mission_finished( mission ); } )
-  , m_window( 0, 120, engine, [ this ](){ return generate_lines(); } )
+  , m_window( 0, 150, engine, [ this ](){ return generate_lines(); } )
 {
   mission_source.register_listener< yarrr::Mission >(
       [ this ]( const yarrr::Mission& mission )

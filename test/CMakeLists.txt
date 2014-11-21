@@ -10,6 +10,7 @@ set(TEST_SOURCE_FILES
     test_world.cpp
     test_mission_control.cpp
     test_list_window.cpp
+    test_information_window.cpp
     )
 
 

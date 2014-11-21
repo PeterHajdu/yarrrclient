@@ -6,8 +6,9 @@
 #include "particle_factory.hpp"
 #include "sdl_engine.hpp"
 #include "mission_control.hpp"
-#include <yarrr/resources.hpp>
+#include "information_window.hpp"
 
+#include <yarrr/resources.hpp>
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/dummy_graphical_engine.hpp>
 #include <yarrr/object_container.hpp>
@@ -110,6 +111,7 @@ int main( int argc, char ** argv )
     auto_particle_factory_register( particles );
 
   yarrrc::MissionControl mission_control( *graphical_engine, the::ctci::service<LocalEventDispatcher>().incoming );
+  yarrrc::InformationWindow information_window( *graphical_engine, clock );
 
   while ( running )
   {

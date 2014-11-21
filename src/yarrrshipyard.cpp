@@ -6,6 +6,7 @@
 #include "local_event_dispatcher.hpp"
 #include "network_service.hpp"
 #include "mission_control.hpp"
+#include "information_window.hpp"
 
 #include <yarrr/log.hpp>
 #include <yarrr/login.hpp>
@@ -204,7 +205,10 @@ int main( int argc, char ** argv )
   yarrrc::MissionControl mission_control( *graphical_engine, local_event_dispatcher );
   local_event_dispatcher.register_listener< yarrrc::MissionFinished >( &mission_finished );
 
+  yarrrc::InformationWindow information_window( *graphical_engine, clock );
+
   the::time::OnceIn< the::time::Clock > mission_updater( clock, the::time::Clock::ticks_per_second );
+
   while ( running )
   {
     const the::time::Clock::Time now( clock.now() );

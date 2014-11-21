@@ -14,7 +14,7 @@ class ListWindow : yarrr::GraphicalObject
     ListWindow( int x, int y, yarrr::GraphicalEngine&, LineGenerator generator );
 
   private:
-    virtual void draw() const override;
+    virtual void draw() const override final;
 
     LineGenerator generate_lines;
     const int m_x;
