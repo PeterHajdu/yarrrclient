@@ -10,7 +10,7 @@ namespace
 std::string epoch_to_time( unsigned long epoch )
 {
   const time_t timet( epoch );
-  struct tm* timeinfo( std::localtime( &timet ) );
+  struct tm* timeinfo( std::gmtime( &timet ) );
   std::array< char, 80 > buffer;
   strftime( &buffer.front(), 80, "%T", timeinfo );
   return buffer.data();

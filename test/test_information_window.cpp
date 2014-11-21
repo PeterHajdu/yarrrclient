@@ -22,7 +22,7 @@ Describe( the_information_window )
 
   It( prints_out_the_universe_time )
   {
-    AssertThat( graphical_engine.was_printed( "01:00" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( "00:00" ), Equals( true ) );
   }
 
   test::GraphicalEngine graphical_engine;
