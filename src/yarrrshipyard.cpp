@@ -25,6 +25,7 @@
 #include <yarrr/mission_exporter.hpp>
 #include <yarrr/main_thread_callback_queue.hpp>
 #include <yarrr/graphical_engine.hpp>
+#include <yarrr/clock_exporter.hpp>
 
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
@@ -158,6 +159,7 @@ int main( int argc, char ** argv )
   std::unique_ptr< yarrr::GraphicalEngine > graphical_engine( new SdlEngine() );
   the::ctci::ServiceRegistry::register_service< yarrr::GraphicalEngine >( *graphical_engine );
   the::time::Clock clock;
+  yarrr::ClockExporter clock_exporter( clock, yarrr::LuaEngine::model() );
   yarrr::ObjectContainer object_container;
   yarrrc::World world( object_container );
   yarrr::ObjectExporter object_exporter( object_container, yarrr::LuaEngine::model() );
