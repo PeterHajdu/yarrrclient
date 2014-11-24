@@ -277,8 +277,8 @@ SdlEngine::is_on_screen( const yarrr::Coordinate& coordinate ) const
 {
   const yarrr::Coordinate scaled( scale_coordinate( coordinate ) );
   return
-    abs( scaled.x - m_center_of_screen.x ) < m_center_of_screen.x &&
-    abs( scaled.y - m_center_of_screen.y ) < m_center_of_screen.y;
+    std::abs( scaled.x - m_center_of_screen.x ) < m_center_of_screen.x &&
+    std::abs( scaled.y - m_center_of_screen.y ) < m_center_of_screen.y;
 }
 
 void
