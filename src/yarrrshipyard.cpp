@@ -19,6 +19,7 @@
 #include <yarrr/object_factory.hpp>
 #include <yarrr/command.hpp>
 #include <yarrr/object_creator.hpp>
+#include <yarrr/object_created.hpp>
 #include <yarrr/delete_object.hpp>
 #include <yarrr/engine_dispatcher.hpp>
 #include <yarrr/mission.hpp>
