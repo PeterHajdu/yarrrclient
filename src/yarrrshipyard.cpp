@@ -218,6 +218,7 @@ int main( int argc, char ** argv )
     keyboard_handler.check_keyboard( now );
 
     object_container.dispatch( yarrr::TimerUpdate( now ) );
+    object_container.check_collision();
     particles.travel_in_time_to( now );
     object_exporter.refresh();
 
