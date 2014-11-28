@@ -96,7 +96,7 @@ Describe( a_mission_control )
   yarrr::TaskState objective_state;
   bool was_mission_updated;
   const yarrr::Mission::Objective objective{ objective_description,
-    [ this ]( const std::string& ) -> yarrr::TaskState
+    [ this ]( yarrr::Mission& ) -> yarrr::TaskState
     {
       was_mission_updated = true;
       return objective_state;
