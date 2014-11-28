@@ -109,6 +109,7 @@ void mission_requested( const std::string& name )
           character_object_id,
           mission_exporter ) ) );
 
+  new_mission->update();
   yarrrc::local_dispatch( *new_mission );
 }
 
