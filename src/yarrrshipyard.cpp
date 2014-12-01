@@ -86,7 +86,7 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
   thelog( yarrr::log::debug )( "Loglevel is set to", loglevel );
 }
 
-yarrr::MissionsModel mission_exporter( "missions", yarrr::LuaEngine::model() );
+yarrr::MissionsModel mission_exporter( "mission_contexts", yarrr::LuaEngine::model() );
 
 void mission_finished( const yarrrc::MissionFinished& finished )
 {
