@@ -31,9 +31,8 @@ ListWindow::Lines
 InformationWindow::generate_lines() const
 {
   ListWindow::Lines lines;
-  lines.push_back( { "universe time: ", yarrr::Colour::White } );
   const auto epoch( m_clock.now() / the::time::Clock::ticks_per_second );
-  lines.push_back( { epoch_to_time( epoch ), yarrr::Colour::White } );
+  lines.push_back( { std::string( "universe time: " ) + epoch_to_time( epoch ), yarrr::Colour::White } );
   return lines;
 }
 

@@ -62,11 +62,25 @@ Describe( a_mission_control )
     AssertThat( graphical_engine.was_printed( objective_description ), Equals( true ) );
   }
 
+  It( prints_out_the_current_missions_text_only_if_there_is_one )
+  {
+    graphical_engine.draw_objects();
+    AssertThat( graphical_engine.was_printed( "Current missions:" ), Equals( false ) );
+    update_mission( yarrr::ongoing );
+    AssertThat( graphical_engine.was_printed( "Current missions:" ), Equals( true ) );
+  }
+
   It( should_keep_a_history_of_finished_missions )
   {
     update_mission( yarrr::succeeded );
     AssertThat( graphical_engine.was_printed( mission_name ), Equals( true ) );
-    AssertThat( graphical_engine.was_printed( "Mission log" ), Equals( true ) );
+    AssertThat( graphical_engine.was_printed( "Finished missions" ), Equals( true ) );
+  }
+
+  It( should_print_finished_missions_only_if_they_exist )
+  {
+    update_mission( yarrr::ongoing );
+    AssertThat( graphical_engine.was_printed( "Finished missions" ), Equals( false ) );
   }
 
   It( can_update_missions )

@@ -12,6 +12,8 @@ std::unordered_map< int, yarrr::Colour > state_to_colour = {
   { yarrr::succeeded, yarrr::Colour::Green },
   { yarrr::failed, yarrr::Colour::Red } };
 
+const yarrr::Colour blue{ 100, 100, 255, 255 };
+
 }
 
 namespace yarrrc
@@ -38,23 +40,44 @@ MissionControl::handle_mission_finished( const yarrr::Mission& mission )
   yarrrc::local_dispatch( yarrrc::MissionFinished( mission ) );
 }
 
-ListWindow::Lines
-MissionControl::generate_lines() const
+void
+MissionControl::append_finished_missions( ListWindow::Lines& lines ) const
 {
-  ListWindow::Lines lines;
+  if ( m_mission_log.empty() )
+  {
+    return;
+  }
+
+  lines.push_back( { "Finished missions:", blue } );
+  lines.insert( std::end( lines ), std::begin( m_mission_log ), std::end( m_mission_log ) );
+}
+
+void
+MissionControl::append_ongoing_missions( ListWindow::Lines& lines ) const
+{
+  if ( m_missions.missions().empty() )
+  {
+    return;
+  }
+
+  lines.push_back( { "Current missions:", blue } );
   for ( const auto& mission : m_missions.missions() )
   {
-    lines.push_back( { mission->name(), state_to_colour[ mission->state() ] } );
-    lines.push_back( { mission->description(), yarrr::Colour::White } );
+    lines.push_back( { mission->name() + " | " + mission->description(), blue } );
 
     for ( const auto& objective : mission->objectives() )
     {
       lines.push_back( { objective.description(), state_to_colour[ objective.state() ] } );
     }
   }
+}
 
-  lines.push_back( { "Mission log:", yarrr::Colour::White } );
-  lines.insert( std::end( lines ), std::begin( m_mission_log ), std::end( m_mission_log ) );
+ListWindow::Lines
+MissionControl::generate_lines() const
+{
+  ListWindow::Lines lines;
+  append_finished_missions( lines );
+  append_ongoing_missions( lines );
   return lines;
 }
 

@@ -35,6 +35,9 @@ class MissionControl
   private:
     void handle_mission_finished( const yarrr::Mission& );
     ListWindow::Lines generate_lines() const;
+    void append_finished_missions( ListWindow::Lines& ) const;
+    void append_ongoing_missions( ListWindow::Lines& ) const;
+
     yarrr::MissionContainer m_missions;
     yarrrc::ListWindow m_window;
     ListWindow::Lines m_mission_log;
