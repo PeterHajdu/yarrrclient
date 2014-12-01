@@ -53,6 +53,8 @@ SdlInitializer::SdlInitializer()
   {
     handle_unrecoverable_sdl_error();
   }
+
+  SDL_ShowCursor( false );
 }
 
 SdlInitializer::~SdlInitializer()
