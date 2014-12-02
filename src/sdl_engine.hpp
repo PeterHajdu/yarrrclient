@@ -89,8 +89,17 @@ class SdlEngine : public yarrr::GraphicalEngine
     void update_screen() override;
 
   private:
-    void draw_tile( const yarrr::Coordinate& center, const yarrr::Angle orientation, const yarrr::Shape&, const yarrr::Tile& );
-    void show_on_radar( const yarrr::Coordinate&, const yarrr::Velocity& );
+    void draw_tile(
+        const yarrr::Coordinate& center,
+        const yarrr::Angle orientation,
+        const yarrr::Shape&,
+        const yarrr::Tile&,
+        const yarrr::Colour& );
+
+    void show_on_radar(
+        const yarrr::Coordinate&,
+        const yarrr::Velocity&,
+        const yarrr::Colour& );
 
     void draw_point(
         int16_t x,

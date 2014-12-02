@@ -1,4 +1,5 @@
 #include "sdl_engine.hpp"
+#include "colorizer.hpp"
 
 #include <yarrr/physical_parameters.hpp>
 #include <yarrr/object.hpp>
@@ -7,6 +8,7 @@
 #include <yarrr/shape_behavior.hpp>
 #include <yarrr/resources.hpp>
 #include <yarrr/polygon.hpp>
+#include <yarrr/object_identity.hpp>
 
 #include <cmath>
 #include <cassert>
@@ -19,9 +21,22 @@
 
 namespace
 {
+  yarrr::Colour
+  generate_object_colour( const yarrr::Object& object )
+  {
+    if ( !yarrr::has_component< yarrr::ObjectIdentity >( object ) )
+    {
+      return yarrr::Colour::White;
+    }
+
+    const auto captain( yarrr::component_of< yarrr::ObjectIdentity >( object ).captain() );
+    return yarrrc::colorize( captain );
+  }
+
   const yarrr::Colour relative_velocity_colour{ 100, 100, 255, 255 };
 
-  SDL_Color to_sdl_colour( const yarrr::Colour& colour )
+  SDL_Color
+  to_sdl_colour( const yarrr::Colour& colour )
   {
     return {
       colour.red,
@@ -313,7 +328,10 @@ SdlEngine::draw_particle( const yarrr::PhysicalParameters& particle, uint64_t ag
 }
 
 void
-SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate, const yarrr::Velocity& velocity )
+SdlEngine::show_on_radar(
+    const yarrr::Coordinate& coordinate,
+    const yarrr::Velocity& velocity,
+    const yarrr::Colour& colour )
 {
   yarrr::Coordinate diff( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres );
 
@@ -329,7 +347,7 @@ SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate, const yarrr::Velo
   diff.y *= -1;
   diff += m_center_of_radar;
 
-  draw_point( diff.x, diff.y, 4, yarrr::Colour::Green );
+  draw_point( diff.x, diff.y, 4, colour );
 
   yarrr::Coordinate relative_velocity{ yarrr::huplons_to_metres( velocity ) - m_center_velocity };
   relative_velocity *= 0.1;
@@ -345,9 +363,11 @@ SdlEngine::draw_object_with_shape( const yarrr::Object& object )
   const yarrr::PhysicalParameters& parameters(
       yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters );
 
+  const yarrr::Colour colour( generate_object_colour( object ) );
+
   if ( !is_on_screen( parameters.coordinate ) )
   {
-    show_on_radar( parameters.coordinate, parameters.velocity );
+    show_on_radar( parameters.coordinate, parameters.velocity, colour );
     return;
   }
 
@@ -356,7 +376,7 @@ SdlEngine::draw_object_with_shape( const yarrr::Object& object )
 
   for ( const auto& tile : shape.tiles() )
   {
-    draw_tile( parameters.coordinate, parameters.orientation, shape, tile );
+    draw_tile( parameters.coordinate, parameters.orientation, shape, tile, colour );
   }
 }
 
@@ -366,7 +386,8 @@ SdlEngine::draw_tile(
     const yarrr::Coordinate& center,
     const yarrr::Angle orientation,
     const yarrr::Shape& shape,
-    const yarrr::Tile& tile )
+    const yarrr::Tile& tile,
+  const yarrr::Colour& colour )
 {
   const yarrr::Polygon polygon( yarrr::generate_polygon_from( tile, center, shape.center_of_mass(), orientation ) );
   if ( polygon.size() < 2 )
@@ -377,7 +398,7 @@ SdlEngine::draw_tile(
   yarrr::Coordinate start{ polygon.at( 3 ) };
   for ( size_t i( 0 ); i < polygon.size(); ++i )
   {
-    draw_scaled_line( start, polygon.at( i ), yarrr::Colour::White );
+    draw_scaled_line( start, polygon.at( i ), colour );
     start = polygon.at( i );
   }
 }

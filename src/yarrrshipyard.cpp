@@ -28,6 +28,7 @@
 #include <yarrr/main_thread_callback_queue.hpp>
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/clock_exporter.hpp>
+#include <yarrr/object_identity.hpp>
 
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
@@ -121,6 +122,8 @@ void ship_requested( const std::string& type )
     return;
   }
 
+  const std::string captain{ the::conf::get< std::string >( "login_name" ) };
+  new_ship->add_behavior( std::make_unique< yarrr::ObjectIdentity >( captain ) );
   character_object_id = std::to_string( new_ship->id() );
   the::ctci::Dispatcher& local_event_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
   local_event_dispatcher.dispatch( yarrr::ObjectAssigned( new_ship->id() ) );

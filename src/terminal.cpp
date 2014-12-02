@@ -1,20 +1,7 @@
 #include "terminal.hpp"
+#include "colorizer.hpp"
 #include <yarrr/chat_message.hpp>
 #include <algorithm>
-#include <thectci/hash.hpp>
-
-namespace
-{
-  yarrr::Colour colorize( const std::string& text )
-  {
-    uint32_t hash( the::ctci::hash( text.c_str() ) );
-    return {
-      static_cast<uint8_t>( hash ),
-      static_cast<uint8_t>( hash >> 8 ),
-      static_cast<uint8_t>( hash >> 16 ),
-      255u };
-  }
-}
 
 namespace yarrrc
 {
@@ -42,7 +29,7 @@ void
 Terminal::handle_chat_message( const yarrr::ChatMessage& message )
 {
   m_messages.push_back( {
-        { message.sender() + ": ", colorize( message.sender() ) },
+        { message.sender() + ": ", yarrrc::colorize( message.sender() ) },
         { message.message(), { 255, 255, 255, 255 } } } );
   jump_to_last_page();
 }

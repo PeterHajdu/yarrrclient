@@ -11,6 +11,7 @@ set(LIB_SOURCE_FILES
   mission_control.cpp
   list_window.cpp
   information_window.cpp
+  colorizer.cpp
   )
 
 set(CLIENT_SOURCE_FILES
