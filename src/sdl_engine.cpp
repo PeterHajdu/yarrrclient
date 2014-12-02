@@ -19,6 +19,8 @@
 
 namespace
 {
+  const yarrr::Colour relative_velocity_colour{ 100, 100, 255, 255 };
+
   SDL_Color to_sdl_colour( const yarrr::Colour& colour )
   {
     return {
@@ -162,6 +164,7 @@ SdlEngine::SdlEngine()
   , m_center_of_screen( m_screen_resolution * 0.5 )
   , m_center_of_radar( m_screen_resolution * 0.8 )
   , m_center_in_metres( m_screen_resolution * 0.5 )
+  , m_center_velocity( 0, 0 )
   , m_font( the::ctci::service< yarrr::ResourceFinder >().find( "stuff.ttf" ) )
 {
 }
@@ -259,9 +262,10 @@ SdlEngine::draw_point(
 
 
 void
-SdlEngine::focus_to( const yarrr::Coordinate& center )
+SdlEngine::focus_to( const yarrr::Object& object )
 {
-   m_center_in_metres = yarrr::huplons_to_metres( center );
+   m_center_in_metres = yarrr::huplons_to_metres( yarrr::coordinate_of( object ) );
+   m_center_velocity = yarrr::huplons_to_metres( yarrr::velocity_of( object ) );
 }
 
 yarrr::Coordinate
@@ -309,7 +313,7 @@ SdlEngine::draw_particle( const yarrr::PhysicalParameters& particle, uint64_t ag
 }
 
 void
-SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate )
+SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate, const yarrr::Velocity& velocity )
 {
   yarrr::Coordinate diff( yarrr::huplons_to_metres( coordinate ) - m_center_in_metres );
 
@@ -326,6 +330,13 @@ SdlEngine::show_on_radar( const yarrr::Coordinate& coordinate )
   diff += m_center_of_radar;
 
   draw_point( diff.x, diff.y, 4, yarrr::Colour::Green );
+
+  yarrr::Coordinate relative_velocity{ yarrr::huplons_to_metres( velocity ) - m_center_velocity };
+  relative_velocity *= 0.1;
+  relative_velocity.y *= -1;
+
+  set_colour( relative_velocity_colour );
+  SDL_RenderDrawLine( *m_renderer, diff.x, diff.y, diff.x + relative_velocity.x, diff.y + relative_velocity.y );
 }
 
 void
@@ -336,11 +347,9 @@ SdlEngine::draw_object_with_shape( const yarrr::Object& object )
 
   if ( !is_on_screen( parameters.coordinate ) )
   {
-    show_on_radar( parameters.coordinate );
+    show_on_radar( parameters.coordinate, parameters.velocity );
     return;
   }
-
-
 
   const yarrr::Shape& shape(
       yarrr::component_of< yarrr::ShapeBehavior >( object ).shape );

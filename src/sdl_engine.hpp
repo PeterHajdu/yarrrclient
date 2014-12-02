@@ -80,7 +80,7 @@ class SdlEngine : public yarrr::GraphicalEngine
 
     virtual void draw_object_with_shape( const yarrr::Object& ) override;
     virtual void draw_particle( const yarrr::PhysicalParameters&, uint64_t age ) override;
-    virtual void focus_to( const yarrr::Coordinate& center ) override;
+    virtual void focus_to( const yarrr::Object& center ) override;
     virtual void draw_laser( const yarrr::PhysicalParameters& ) override;
     virtual void print_text( uint16_t x, uint16_t y, const std::string&, const yarrr::Colour& ) override;
     virtual void print_text_tokens( uint16_t x, uint16_t y, const yarrr::TextTokens& ) override;
@@ -90,7 +90,7 @@ class SdlEngine : public yarrr::GraphicalEngine
 
   private:
     void draw_tile( const yarrr::Coordinate& center, const yarrr::Angle orientation, const yarrr::Shape&, const yarrr::Tile& );
-    void show_on_radar( const yarrr::Coordinate& );
+    void show_on_radar( const yarrr::Coordinate&, const yarrr::Velocity& );
 
     void draw_point(
         int16_t x,
@@ -127,6 +127,7 @@ class SdlEngine : public yarrr::GraphicalEngine
     const yarrr::Coordinate m_center_of_radar;
 
     yarrr::Coordinate m_center_in_metres;
+    yarrr::Coordinate m_center_velocity;
 
     Font m_font;
 };
