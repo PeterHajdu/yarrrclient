@@ -95,6 +95,12 @@ void
 World::handle_object_update( const yarrr::ObjectUpdate& update )
 {
   thelog( yarrr::log::insane )( "Object update for", update.id() );
+  if ( !m_objects.has_object_with_id( update.id() ) )
+  {
+    thelog( yarrr::log::insane )( "Waiting for an object init before updating:", update.id() );
+    return;
+  }
+
   m_objects.handle_object_update( update );
 }
 
