@@ -12,7 +12,7 @@ Describe( a_hud )
 
   void SetUp()
   {
-    object = yarrr::create_ship();
+    object = test::create_ship();
     physical_parameters = &yarrr::component_of< yarrr::PhysicalBehavior >( *object ).physical_parameters;
     physical_parameters->orientation = 123;
     physical_parameters->coordinate = yarrr::Coordinate{ 12938, 912898234 };
