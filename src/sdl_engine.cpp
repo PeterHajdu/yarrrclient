@@ -22,7 +22,7 @@
 namespace
 {
   yarrr::Colour
-  generate_object_colour( const yarrr::Object& object )
+  generate_object_colour( const yarrr::Object& object, int brightness )
   {
     if ( !yarrr::has_component< yarrr::ObjectIdentity >( object ) )
     {
@@ -30,7 +30,7 @@ namespace
     }
 
     const auto captain( yarrr::component_of< yarrr::ObjectIdentity >( object ).captain() );
-    return yarrrc::colorize( captain );
+    return yarrrc::colorize( captain, brightness );
   }
 
   const yarrr::Colour relative_velocity_colour{ 100, 100, 255, 255 };
@@ -303,15 +303,20 @@ SdlEngine::is_on_screen( const yarrr::Coordinate& coordinate ) const
 }
 
 void
-SdlEngine::draw_laser( const yarrr::PhysicalParameters& laser )
+SdlEngine::draw_laser( const yarrr::Object& laser )
 {
-  const yarrr::Coordinate head( yarrr::heading( laser, 10_metres ) );
-  if ( !is_on_screen( laser.coordinate ) )
+  const auto& parameters( yarrr::component_of< yarrr::PhysicalBehavior >( laser ).physical_parameters );
+
+  const yarrr::Coordinate head( yarrr::heading( parameters, 10_metres ) );
+  if ( !is_on_screen( parameters.coordinate ) )
   {
     return;
   }
 
-  draw_scaled_line( laser.coordinate, laser.coordinate - head, yarrr::Colour::Strange );
+  draw_scaled_line(
+      parameters.coordinate,
+      parameters.coordinate - head,
+      generate_object_colour( laser, 200 ) );
 }
 
 void
@@ -363,7 +368,7 @@ SdlEngine::draw_object_with_shape( const yarrr::Object& object )
   const yarrr::PhysicalParameters& parameters(
       yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters );
 
-  const yarrr::Colour colour( generate_object_colour( object ) );
+  const yarrr::Colour colour( generate_object_colour( object, 100 ) );
 
   if ( !is_on_screen( parameters.coordinate ) )
   {

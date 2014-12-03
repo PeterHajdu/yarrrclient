@@ -4,6 +4,6 @@
 
 namespace yarrrc
 {
-yarrr::Colour colorize( const std::string& text );
+yarrr::Colour colorize( const std::string& text, int brightness );
 }
 

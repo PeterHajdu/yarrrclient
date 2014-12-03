@@ -29,7 +29,7 @@ void
 Terminal::handle_chat_message( const yarrr::ChatMessage& message )
 {
   m_messages.push_back( {
-        { message.sender() + ": ", yarrrc::colorize( message.sender() ) },
+        { message.sender() + ": ", yarrrc::colorize( message.sender(), 100 ) },
         { message.message(), { 255, 255, 255, 255 } } } );
   jump_to_last_page();
 }
