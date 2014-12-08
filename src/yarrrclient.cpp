@@ -12,7 +12,7 @@
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/dummy_graphical_engine.hpp>
 #include <yarrr/object_container.hpp>
-#include <yarrr/basic_behaviors.hpp>
+#include <yarrr/timer_update.hpp>
 #include <thenet/address.hpp>
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>

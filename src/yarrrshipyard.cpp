@@ -14,7 +14,7 @@
 #include <yarrr/lua_setup.hpp>
 #include <yarrr/object_container.hpp>
 #include <yarrr/object_exporter.hpp>
-#include <yarrr/basic_behaviors.hpp>
+#include <yarrr/timer_update.hpp>
 #include <yarrr/resources.hpp>
 #include <yarrr/object_factory.hpp>
 #include <yarrr/command.hpp>
