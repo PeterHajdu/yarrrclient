@@ -8,7 +8,3 @@ Feature: Print out meaningful information to the terminal
     When I start yarrr with command line parameter --help
     Then the help message should be on the screen
 
-  Scenario: starting without a server parameter
-    When I start yarrr with command line parameter --not-server-parameter
-    Then the help message should be on the screen
-

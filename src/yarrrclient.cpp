@@ -54,10 +54,14 @@ void parse_and_handle_configuration( const the::conf::ParameterVector& parameter
   the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
   the::conf::parse( parameters );
 
-  if ( the::conf::has( "help" ) ||
-       !the::conf::has( "server" ) )
+  if ( the::conf::has( "help" ) )
   {
     print_help_and_exit();
+  }
+
+  if ( !the::conf::has( "server" ) )
+  {
+    the::conf::set_value( "server", "test.yarrrthegame.com:2001" );
   }
 
   const int loglevel(
