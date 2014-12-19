@@ -78,12 +78,14 @@ class SdlEngine : public yarrr::GraphicalEngine
     SdlEngine( const SdlEngine& ) = delete;
     SdlEngine& operator=( const SdlEngine& ) = delete;
 
+    virtual void draw_rectangle( int x1, int y1, int x2, int y2, const yarrr::Colour& ) override;
+    virtual void draw_line( int x1, int y1, int x2, int y2, const yarrr::Colour& ) override;
     virtual void draw_object_with_shape( const yarrr::Object& ) override;
     virtual void draw_laser( const yarrr::Object& ) override;
     virtual void draw_particle( const yarrr::PhysicalParameters&, uint64_t age ) override;
     virtual void focus_to( const yarrr::Object& center ) override;
+    virtual yarrr::Size size_of_text( const std::string& text ) override;
     virtual void print_text( uint16_t x, uint16_t y, const std::string&, const yarrr::Colour& ) override;
-    virtual void print_text_tokens( uint16_t x, uint16_t y, const yarrr::TextTokens& ) override;
     virtual const yarrr::Coordinate& screen_resolution() const override;
 
     void update_screen() override;

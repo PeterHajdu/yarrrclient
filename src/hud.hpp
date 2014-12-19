@@ -1,6 +1,6 @@
 #pragma once
 
-#include "list_window.hpp"
+#include "window.hpp"
 
 namespace yarrr
 {
@@ -8,6 +8,7 @@ namespace yarrr
 class PhysicalParameters;
 class Object;
 class Inventory;
+class TextToken;
 
 }
 
@@ -20,11 +21,15 @@ class Hud
     Hud( yarrr::GraphicalEngine&, const yarrr::Object& object );
 
   private:
-    ListWindow::Lines build_hud_lines() const;
 
+    void add_line( const TextToken& line );
+    void update_window();
+
+    yarrr::GraphicalEngine& m_graphical_engine;
     yarrr::PhysicalParameters& m_physical_parameters;
     yarrr::Inventory& m_inventory;
-    yarrrc::ListWindow m_window;
+    yarrrc::Window m_window;
+    the::ctci::SmartListener m_callback_token;
 };
 
 }

@@ -1,4 +1,5 @@
 #include "cli.hpp"
+#include "text_token.hpp"
 #include <yarrr/chat_message.hpp>
 #include <yarrr/command.hpp>
 #include <yarrr/log.hpp>
@@ -11,29 +12,26 @@ namespace yarrrc
 {
 
 Cli::Cli( int x, int y, yarrr::GraphicalEngine& graphical_engine )
-  : GraphicalObject( graphical_engine )
-  , m_x( x )
-  , m_y( y )
+  : m_text_box(
+      { yarrrc::TextToken( m_prompt ) },
+      graphical_engine,
+      { x, y },
+      { 300, 50 } )
 {
 }
-
-
-void
-Cli::draw() const
-{
-  m_graphical_engine.print_text(
-      m_x, m_y,
-      m_prompt + m_text,
-      { 255, 255, 255, 255 } );
-}
-
 
 void
 Cli::append( const std::string& text )
 {
   m_text += text;
+  update_text_box();
 }
 
+void
+Cli::update_text_box()
+{
+  m_text_box.set_content( { m_prompt, m_text } );
+}
 
 void
 Cli::backspace()
@@ -44,6 +42,7 @@ Cli::backspace()
   }
 
   m_text.pop_back();
+  update_text_box();
 }
 
 
@@ -72,6 +71,7 @@ Cli::finalize()
   }
 
   m_text.clear();
+  update_text_box();
 }
 
 }

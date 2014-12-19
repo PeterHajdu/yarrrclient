@@ -1,4 +1,5 @@
 #include "../src/terminal.hpp"
+#include "test_services.hpp"
 #include <yarrr/chat_message.hpp>
 #include <thectci/dispatcher.hpp>
 #include <yarrr/test_graphical_engine.hpp>
@@ -10,7 +11,7 @@ namespace
 {
   std::string formatted_chat_message( const yarrr::ChatMessage& chat_message )
   {
-    return chat_message.sender() + ": " + chat_message.message();
+    return chat_message.message();
   }
 }
 
@@ -18,44 +19,44 @@ Describe(a_terminal)
 {
   void SetUp()
   {
-    test_engine.reset( new test::GraphicalEngine() );
-    test_terminal.reset( new yarrrc::Terminal( *test_engine, number_of_terminal_lines ) );
-    test_engine->printed_texts.clear();
+    graphical_engine = &test::get_cleaned_up_graphical_engine();
+    test_terminal.reset( new yarrrc::Terminal( *graphical_engine, number_of_terminal_lines ) );
+    graphical_engine->printed_texts.clear();
 
     for ( const auto& chat_message : chat_messages )
     {
-      test_engine->printed_texts.clear();
+      graphical_engine->printed_texts.clear();
       test_terminal->dispatch( chat_message );
-      test_engine->draw_objects();
+      graphical_engine->draw_objects();
     }
 
   }
 
   It( prints_out_chat_messages )
   {
-    AssertThat( test_engine->last_printed_text, Contains( chat_messages.back().message() ) );
+    AssertThat( graphical_engine->last_printed_text, Contains( chat_messages.back().message() ) );
   }
 
   It( prints_out_sender_of_chat_message )
   {
-    AssertThat( test_engine->last_printed_text, Contains( chat_messages.back().sender() + ":" ) );
+    AssertThat( graphical_engine->was_printed( chat_messages.back().sender() + ":" ), Equals( true ) );
   }
 
   void assert_drew_messages_between( size_t begin, size_t end )
   {
     if ( begin > 0 )
     {
-      AssertThat( test_engine->printed_texts, !Contains( formatted_chat_message( chat_messages[ begin - 1 ] ) ) );
+      AssertThat( graphical_engine->printed_texts, !Contains( formatted_chat_message( chat_messages[ begin - 1 ] ) ) );
     }
 
     for ( size_t i{ begin }; i < end; ++i )
     {
-      AssertThat( test_engine->printed_texts, Has().Exactly( 1 ).EqualTo( formatted_chat_message( chat_messages[ i ] ) ) );
+      AssertThat( graphical_engine->printed_texts, Has().Exactly( 1 ).EqualTo( formatted_chat_message( chat_messages[ i ] ) ) );
     }
 
     if ( end < chat_messages.size() - 1 )
     {
-      AssertThat( test_engine->printed_texts, !Contains( formatted_chat_message( chat_messages[ end + 1 ] ) ) );
+      AssertThat( graphical_engine->printed_texts, !Contains( formatted_chat_message( chat_messages[ end + 1 ] ) ) );
     }
   }
 
@@ -68,8 +69,8 @@ Describe(a_terminal)
   It( can_be_scrolled_up )
   {
     test_terminal->scroll_up();
-    test_engine->printed_texts.clear();
-    test_engine->draw_objects();
+    graphical_engine->printed_texts.clear();
+    graphical_engine->draw_objects();
     const size_t first_on_screen{ number_of_messages - number_of_terminal_lines - number_of_lines_scrolled };
     assert_drew_messages_between( first_on_screen, number_of_messages - number_of_lines_scrolled );
   }
@@ -77,8 +78,8 @@ Describe(a_terminal)
   It( jumps_to_the_beginning_when_home_is_called )
   {
     test_terminal->home();
-    test_engine->printed_texts.clear();
-    test_engine->draw_objects();
+    graphical_engine->printed_texts.clear();
+    graphical_engine->draw_objects();
     assert_drew_messages_between( 0, number_of_terminal_lines );
   }
 
@@ -86,8 +87,8 @@ Describe(a_terminal)
   {
     test_terminal->home();
     test_terminal->end();
-    test_engine->printed_texts.clear();
-    test_engine->draw_objects();
+    graphical_engine->printed_texts.clear();
+    graphical_engine->draw_objects();
     const size_t first_on_screen{ number_of_messages - number_of_terminal_lines };
     assert_drew_messages_between( first_on_screen, number_of_messages );
   }
@@ -96,8 +97,8 @@ Describe(a_terminal)
   {
     test_terminal->home();
     test_terminal->scroll_up();
-    test_engine->printed_texts.clear();
-    test_engine->draw_objects();
+    graphical_engine->printed_texts.clear();
+    graphical_engine->draw_objects();
     assert_drew_messages_between( 0, number_of_terminal_lines );
   }
 
@@ -105,8 +106,8 @@ Describe(a_terminal)
   {
     test_terminal->scroll_up();
     test_terminal->scroll_down();
-    test_engine->printed_texts.clear();
-    test_engine->draw_objects();
+    graphical_engine->printed_texts.clear();
+    graphical_engine->draw_objects();
 
     const size_t first_on_screen{ number_of_messages - number_of_terminal_lines };
     assert_drew_messages_between( first_on_screen, number_of_messages );
@@ -115,8 +116,8 @@ Describe(a_terminal)
   It( can_be_scrolled_down_only_till_the_last_page )
   {
     test_terminal->scroll_down();
-    test_engine->printed_texts.clear();
-    test_engine->draw_objects();
+    graphical_engine->printed_texts.clear();
+    graphical_engine->draw_objects();
 
     const size_t first_on_screen{ number_of_messages - number_of_terminal_lines };
     assert_drew_messages_between( first_on_screen, number_of_messages );
@@ -137,7 +138,7 @@ Describe(a_terminal)
 
   const size_t number_of_messages{ chat_messages.size() };
 
-  std::unique_ptr< test::GraphicalEngine > test_engine;
+  test::GraphicalEngine* graphical_engine;
   std::unique_ptr< yarrrc::Terminal > test_terminal;
 };
 

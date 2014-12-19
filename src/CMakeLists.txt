@@ -9,9 +9,11 @@ set(LIB_SOURCE_FILES
   cli.cpp
   terminal.cpp
   mission_control.cpp
-  list_window.cpp
   information_window.cpp
   colorizer.cpp
+  window.cpp
+  wakeup.cpp
+  text_token.cpp
   )
 
 set(CLIENT_SOURCE_FILES

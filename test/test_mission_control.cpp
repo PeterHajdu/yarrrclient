@@ -1,5 +1,7 @@
 #include "../src/mission_control.hpp"
 #include "../src/local_event_dispatcher.hpp"
+#include "../src/wakeup.hpp"
+#include "test_services.hpp"
 #include <yarrr/test_graphical_engine.hpp>
 #include <yarrr/mission_container.hpp>
 #include <igloo/igloo_alt.h>
@@ -9,6 +11,12 @@ using namespace igloo;
 
 Describe( a_mission_control )
 {
+  void update_time()
+  {
+    the::ctci::service< LocalEventDispatcher >().wakeup.dispatch(
+        yarrrc::EverySecond( 0u ) );
+  }
+
 
   void update_mission( yarrr::TaskState state )
   {
@@ -20,14 +28,15 @@ Describe( a_mission_control )
     mission.update();
     was_mission_updated = false;
     mission_source->dispatch( mission );
-    graphical_engine.draw_objects();
+    update_time();
+    graphical_engine->draw_objects();
   }
 
   void SetUp()
   {
-    graphical_engine.printed_texts.clear();
+    graphical_engine = &test::get_cleaned_up_graphical_engine();
     mission_source.reset( new the::ctci::Dispatcher() );
-    mission_control.reset( new yarrrc::MissionControl( graphical_engine, *mission_source ) );
+    mission_control.reset( new yarrrc::MissionControl( *graphical_engine, *mission_source ) );
 
     was_mission_finished_sent_out = false;
 
@@ -42,45 +51,45 @@ Describe( a_mission_control )
 
   void TearDown()
   {
+    the::ctci::service< LocalEventDispatcher >().wakeup.clear();
+  }
+
+  bool was_tokenized_text_printed( const std::string& text )
+  {
+    for ( const auto& token : yarrrc::tokenize( text, { 0, 0, 0, 0 } ) )
+    {
+      if ( !graphical_engine->was_printed( token.text() ) )
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void assert_tokenized_text_was_printed( const std::string& text )
+  {
+    AssertThat( was_tokenized_text_printed( text ), Equals( true ) );
   }
 
   It( prints_out_mission_name )
   {
+    std::cout << "before mission update" << std::endl;
     update_mission( yarrr::ongoing );
-    AssertThat( graphical_engine.was_printed( mission_name ), Equals( true ) );
+    std::cout << "after mission update" << std::endl;
+    assert_tokenized_text_was_printed( mission_name );
   }
+
 
   It( prints_out_mission_description )
   {
     update_mission( yarrr::ongoing );
-    AssertThat( graphical_engine.was_printed( mission_description ), Equals( true ) );
+    assert_tokenized_text_was_printed( mission_description );
   }
 
   It( prints_out_objectives )
   {
     update_mission( yarrr::ongoing );
-    AssertThat( graphical_engine.was_printed( objective_description ), Equals( true ) );
-  }
-
-  It( prints_out_the_current_missions_text_only_if_there_is_one )
-  {
-    graphical_engine.draw_objects();
-    AssertThat( graphical_engine.was_printed( "Current missions:" ), Equals( false ) );
-    update_mission( yarrr::ongoing );
-    AssertThat( graphical_engine.was_printed( "Current missions:" ), Equals( true ) );
-  }
-
-  It( should_keep_a_history_of_finished_missions )
-  {
-    update_mission( yarrr::succeeded );
-    AssertThat( graphical_engine.was_printed( mission_name ), Equals( true ) );
-    AssertThat( graphical_engine.was_printed( "Finished missions" ), Equals( true ) );
-  }
-
-  It( should_print_finished_missions_only_if_they_exist )
-  {
-    update_mission( yarrr::ongoing );
-    AssertThat( graphical_engine.was_printed( "Finished missions" ), Equals( false ) );
+    assert_tokenized_text_was_printed( objective_description );
   }
 
   It( can_update_missions )
@@ -97,7 +106,7 @@ Describe( a_mission_control )
     AssertThat( finished_mission_id, Equals( mission_id ) );
   }
 
-  test::GraphicalEngine graphical_engine;
+  test::GraphicalEngine* graphical_engine;
   std::unique_ptr< yarrrc::MissionControl > mission_control;
   std::unique_ptr< the::ctci::Dispatcher > mission_source;
 
@@ -112,6 +121,7 @@ Describe( a_mission_control )
   const yarrr::Mission::Objective objective{ objective_description,
     [ this ]( yarrr::Mission& ) -> yarrr::TaskState
     {
+      thelog( yarrr::log::debug )( "Objective update called." );
       was_mission_updated = true;
       return objective_state;
     } };

@@ -1,13 +1,7 @@
 #pragma once
 
-#include "list_window.hpp"
-namespace the
-{
-namespace time
-{
-class Clock;
-}
-}
+#include "window.hpp"
+#include <thetime/clock.hpp>
 
 namespace yarrrc
 {
@@ -15,12 +9,11 @@ namespace yarrrc
 class InformationWindow
 {
   public:
-    InformationWindow( yarrr::GraphicalEngine&, const the::time::Clock& );
+    InformationWindow( yarrr::GraphicalEngine& );
 
   private:
-    ListWindow::Lines generate_lines() const;
-    ListWindow m_window;
-    const the::time::Clock& m_clock;
+    void update_time_to( const the::time::Time& );
+    TextBox m_window;
 };
 
 }

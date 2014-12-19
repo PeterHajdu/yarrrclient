@@ -7,6 +7,9 @@
 #include "network_service.hpp"
 #include "mission_control.hpp"
 #include "information_window.hpp"
+#include "window.hpp"
+#include "wakeup.hpp"
+#include "text_token.hpp"
 
 #include <yarrr/log.hpp>
 #include <yarrr/login.hpp>
@@ -164,6 +167,7 @@ int main( int argc, char ** argv )
 
   std::unique_ptr< yarrr::GraphicalEngine > graphical_engine( new SdlEngine() );
   the::ctci::ServiceRegistry::register_service< yarrr::GraphicalEngine >( *graphical_engine );
+
   the::time::Clock clock;
   yarrr::ClockExporter clock_exporter( clock, yarrr::LuaEngine::model() );
   yarrr::ObjectContainer object_container;
@@ -210,29 +214,30 @@ int main( int argc, char ** argv )
   yarrrc::MissionControl mission_control( *graphical_engine, local_event_dispatcher );
   local_event_dispatcher.register_listener< yarrrc::MissionFinished >( &mission_finished );
 
-  yarrrc::InformationWindow information_window( *graphical_engine, clock );
+  yarrrc::InformationWindow information_window( *graphical_engine );
 
-  the::time::OnceIn< the::time::Clock > mission_updater( clock, the::time::Clock::ticks_per_second );
+  the::time::OnceIn< the::time::Clock > mission_updater(
+      clock, the::time::Clock::ticks_per_second,
+      [ &mission_control ]( const the::time::Time& )
+      {
+        mission_control.update();
+      } );
+
+  yarrrc::WakeupSender< the::time::Clock > wakeup_sender(
+      clock,
+      the::ctci::service<LocalEventDispatcher>().wakeup );
 
   while ( running )
   {
     const the::time::Clock::Time now( clock.now() );
-
     keyboard_handler.check_keyboard( now );
-
     object_container.dispatch( yarrr::TimerUpdate( now ) );
     object_container.check_collision();
     particles.travel_in_time_to( now );
     object_exporter.refresh();
-
-    mission_updater.run(
-        [ &mission_control ]()
-        {
-          mission_control.update();
-        } );
-
+    mission_updater.tick();
+    wakeup_sender.tick();
     world.in_focus();
-
     the::ctci::service<yarrr::GraphicalEngine>().update_screen();
     frequency_stabilizer.stabilize();
 

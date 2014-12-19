@@ -1,6 +1,7 @@
 #pragma once
 
-#include "list_window.hpp"
+#include "window.hpp"
+#include "text_token.hpp"
 #include <yarrr/mission_container.hpp>
 
 namespace the
@@ -34,13 +35,11 @@ class MissionControl
 
   private:
     void handle_mission_finished( const yarrr::Mission& );
-    ListWindow::Lines generate_lines() const;
-    void append_finished_missions( ListWindow::Lines& ) const;
-    void append_ongoing_missions( ListWindow::Lines& ) const;
+    void update_window();
 
     yarrr::MissionContainer m_missions;
-    yarrrc::ListWindow m_window;
-    ListWindow::Lines m_mission_log;
+    yarrr::GraphicalEngine& m_graphical_engine;
+    the::ui::Window::Pointer m_window;
 };
 
 }

@@ -10,6 +10,7 @@ class LocalEventDispatcher
     the::ctci::Dispatcher dispatcher;
     the::ctci::Dispatcher incoming;
     the::ctci::Dispatcher outgoing;
+    the::ctci::Dispatcher wakeup;
 };
 
 namespace yarrrc

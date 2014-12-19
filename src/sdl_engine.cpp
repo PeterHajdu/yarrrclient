@@ -46,10 +46,10 @@ namespace
     };
   }
 
-  void handle_unrecoverable_sdl_error()
+  void handle_unrecoverable_sdl_error( const char * message )
   {
-    thelog( yarrr::log::error )( SDL_GetError() );
-    assert( false );
+    thelog( yarrr::log::error )( SDL_GetError(), " from:", message );
+    assert( message == nullptr );
   }
 
 }
@@ -68,7 +68,7 @@ SdlInitializer::SdlInitializer()
 {
   if ( SDL_Init( SDL_INIT_VIDEO ) != 0 )
   {
-    handle_unrecoverable_sdl_error();
+    handle_unrecoverable_sdl_error( __PRETTY_FUNCTION__ );
   }
 
   SDL_ShowCursor( false );
@@ -84,7 +84,7 @@ Font::Font( const std::string& path )
 {
   if ( nullptr == font )
   {
-    handle_unrecoverable_sdl_error();
+    handle_unrecoverable_sdl_error( __PRETTY_FUNCTION__ );
   }
 }
 
@@ -147,14 +147,37 @@ Window::create_renderer()
   return Renderer::Pointer( new Renderer( m_window ) );
 }
 
-Renderer::Renderer( SDL_Window* window )
-  : m_renderer(
-      SDL_CreateRenderer(
-      window,
-      -1,
-      SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC ) )
+namespace
 {
-  assert( m_renderer );
+
+SDL_Renderer* create_renderer( SDL_Window* window )
+{
+  SDL_Renderer* renderer( SDL_CreateRenderer(
+        window,
+        -1,
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC ) );
+
+  if ( !renderer )
+  {
+    renderer = SDL_CreateRenderer(
+        window,
+        -1,
+        SDL_RENDERER_SOFTWARE );
+  }
+
+  return renderer;
+}
+
+}
+
+Renderer::Renderer( SDL_Window* window )
+  : m_renderer( create_renderer( window ) )
+{
+  if ( !m_renderer )
+  {
+    handle_unrecoverable_sdl_error( __PRETTY_FUNCTION__ );
+  }
+
   assert( 0 == SDL_SetRenderDrawBlendMode(
         m_renderer,
         SDL_BLENDMODE_BLEND ) );
@@ -203,14 +226,15 @@ void
 SdlEngine::draw_radar()
 {
   const int diff_from_middle( 100 );
-  set_colour( { 0, 100, 0, 255 } );
-  SDL_RenderDrawLine( *m_renderer,
+  draw_line(
       m_center_of_radar.x - diff_from_middle, m_center_of_radar.y,
-      m_center_of_radar.x + diff_from_middle, m_center_of_radar.y );
+      m_center_of_radar.x + diff_from_middle, m_center_of_radar.y,
+      { 0, 100, 0, 255 } );
 
-  SDL_RenderDrawLine( *m_renderer,
+  draw_line(
       m_center_of_radar.x, m_center_of_radar.y - diff_from_middle,
-      m_center_of_radar.x, m_center_of_radar.y + diff_from_middle );
+      m_center_of_radar.x, m_center_of_radar.y + diff_from_middle,
+      { 0, 100, 0, 255 } );
 }
 
 void
@@ -254,9 +278,10 @@ SdlEngine::draw_scaled_line(
 {
   const yarrr::Coordinate scaled_start( scale_coordinate( start ) );
   const yarrr::Coordinate scaled_end( scale_coordinate( end ) );
-
-  set_colour( colour );
-  SDL_RenderDrawLine( *m_renderer, scaled_start.x, scaled_start.y, scaled_end.x, scaled_end.y );
+  draw_line(
+      scaled_start.x, scaled_start.y,
+      scaled_end.x, scaled_end.y,
+      colour );
 }
 
 void
@@ -358,8 +383,10 @@ SdlEngine::show_on_radar(
   relative_velocity *= 0.1;
   relative_velocity.y *= -1;
 
-  set_colour( relative_velocity_colour );
-  SDL_RenderDrawLine( *m_renderer, diff.x, diff.y, diff.x + relative_velocity.x, diff.y + relative_velocity.y );
+  draw_line(
+      diff.x, diff.y,
+      diff.x + relative_velocity.x, diff.y + relative_velocity.y,
+      relative_velocity_colour );
 }
 
 void
@@ -385,6 +412,21 @@ SdlEngine::draw_object_with_shape( const yarrr::Object& object )
   }
 }
 
+void
+SdlEngine::draw_rectangle( int x1, int y1, int x2, int y2, const yarrr::Colour& colour )
+{
+  draw_line( x1, y1, x2, y1, colour );
+  draw_line( x2, y1, x2, y2, colour );
+  draw_line( x2, y2, x1, y2, colour );
+  draw_line( x1, y2, x1, y1, colour );
+}
+
+void
+SdlEngine::draw_line( int x1, int y1, int x2, int y2, const yarrr::Colour& colour )
+{
+  set_colour( colour );
+  SDL_RenderDrawLine( *m_renderer, x1, y1, x2, y2 );
+}
 
 void
 SdlEngine::draw_tile(
@@ -408,11 +450,26 @@ SdlEngine::draw_tile(
   }
 }
 
+
+yarrr::Size
+SdlEngine::size_of_text( const std::string& text )
+{
+  yarrr::Size text_size;
+  assert( 0 == TTF_SizeText( m_font.font, text.c_str(), &text_size.width, &text_size.height ) );
+  return text_size;
+}
+
+
 void
 SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message, const yarrr::Colour& colour )
 {
+  if ( message.empty() )
+  {
+    return;
+  }
+
   SDL_Surface *surface(
-      TTF_RenderText_Blended(
+      TTF_RenderText_Solid(
         m_font.font,
         message.c_str(),
         to_sdl_colour( colour ) ) );
@@ -428,16 +485,6 @@ SdlEngine::print_text( uint16_t x, uint16_t y, const std::string& message, const
   SDL_DestroyTexture( texture );
 }
 
-void
-SdlEngine::print_text_tokens( uint16_t x, uint16_t y, const yarrr::TextTokens& tokens )
-{
-  size_t length( 0 );
-  for ( const auto& token : tokens )
-  {
-    print_text( x + length * 7, y, token.text, token.colour );
-    length += token.text.length();
-  }
-}
 
 void
 SdlEngine::draw_background()

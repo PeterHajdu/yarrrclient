@@ -1,6 +1,5 @@
 #include "information_window.hpp"
-#include <thetime/clock.hpp>
-#include <iostream>
+#include "wakeup.hpp"
 #include <ctime>
 #include <array>
 
@@ -21,19 +20,25 @@ std::string epoch_to_time( unsigned long epoch )
 namespace yarrrc
 {
 
-InformationWindow::InformationWindow( yarrr::GraphicalEngine& engine, const the::time::Clock& clock )
-  : m_window( 0, 120, engine, [ this ](){ return generate_lines(); } )
-  , m_clock( clock )
+InformationWindow::InformationWindow( yarrr::GraphicalEngine& engine )
+  : m_window(
+      {},
+      engine,
+      { 0, 120 },
+      { 200, 15 } )
 {
+  yarrrc::call_every_second(
+      [ this ]( const yarrrc::EverySecond& event )
+      {
+        update_time_to( event.now );
+      } );
 }
 
-ListWindow::Lines
-InformationWindow::generate_lines() const
+void
+InformationWindow::update_time_to( const the::time::Time& now )
 {
-  ListWindow::Lines lines;
-  const auto epoch( m_clock.now() / the::time::Clock::ticks_per_second );
-  lines.push_back( { std::string( "universe time: " ) + epoch_to_time( epoch ), yarrr::Colour::White } );
-  return lines;
+ const auto epoch( now / the::time::Clock::ticks_per_second );
+ m_window.set_content( { { std::string( "universe time: " ) + epoch_to_time( epoch ) } } );
 }
 
 }

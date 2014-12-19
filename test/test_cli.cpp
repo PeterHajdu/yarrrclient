@@ -1,4 +1,5 @@
 #include "../src/cli.hpp"
+#include "test_services.hpp"
 #include <yarrr/chat_message.hpp>
 #include <yarrr/command.hpp>
 #include <thectci/dispatcher.hpp>
@@ -12,10 +13,10 @@ Describe(a_cli)
 {
   void SetUp()
   {
-    test_engine.reset( new test::GraphicalEngine() );
-    test_cli.reset( new yarrrc::Cli( x, y, *test_engine ) );
+    graphical_engine = &test::get_cleaned_up_graphical_engine();
+    test_cli.reset( new yarrrc::Cli( x, y, *graphical_engine ) );
     test_cli->append( some_more_text );
-    test_engine->draw_objects();
+    graphical_engine->draw_objects();
 
     test_dispatcher.reset( new the::ctci::Dispatcher() );
     test_dispatcher->register_listener< yarrr::ChatMessage >(
@@ -45,19 +46,20 @@ Describe(a_cli)
 
   It( draws_default_prompt )
   {
-    AssertThat( test_engine->last_printed_text, Contains( "$" ) );
+    AssertThat( graphical_engine->was_printed( "$ " ), Equals( true ) );
   }
 
   It( prints_the_current_state )
   {
-    AssertThat( test_engine->last_printed_text, Contains( some_more_text ) );
+    AssertThat( graphical_engine->last_printed_text, Contains( some_more_text ) );
   }
 
   It( clears_the_prompt_when_finalized )
   {
     test_cli->finalize();
-    test_engine->draw_objects();
-    AssertThat( test_engine->last_printed_text, Equals( "$ " ) );
+    graphical_engine->last_printed_text.clear();
+    graphical_engine->draw_objects();
+    AssertThat( graphical_engine->was_printed( "$ " ), Equals( true ) );
   }
 
   It( dispatches_chat_message_when_finalized )
@@ -71,13 +73,6 @@ Describe(a_cli)
     test_cli->finalize();
     test_cli->finalize();
     AssertThat( last_chat_message_dispatched, Equals( some_more_text ) );
-  }
-
-  It( prints_to_the_given_position )
-  {
-    test_cli->finalize();
-    AssertThat( test_engine->x_of_printed_text, Equals( x ) );
-    AssertThat( test_engine->y_of_printed_text, Equals( y ) );
   }
 
   It( can_drop_the_last_character )
@@ -98,7 +93,7 @@ Describe(a_cli)
   const std::string more_text{ "more text" };
   const std::string some_more_text{ some + " " + more_text };
   const std::string slash_some_more_text{ std::string( "/" ) + some_more_text };
-  std::unique_ptr< test::GraphicalEngine > test_engine;
+  test::GraphicalEngine* graphical_engine;
   std::unique_ptr< yarrrc::Cli > test_cli;
 
   std::string last_chat_message_dispatched;

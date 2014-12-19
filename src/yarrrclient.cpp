@@ -7,6 +7,7 @@
 #include "sdl_engine.hpp"
 #include "mission_control.hpp"
 #include "information_window.hpp"
+#include "wakeup.hpp"
 
 #include <yarrr/resources.hpp>
 #include <yarrr/graphical_engine.hpp>
@@ -115,7 +116,11 @@ int main( int argc, char ** argv )
     auto_particle_factory_register( particles );
 
   yarrrc::MissionControl mission_control( *graphical_engine, the::ctci::service<LocalEventDispatcher>().incoming );
-  yarrrc::InformationWindow information_window( *graphical_engine, clock );
+  yarrrc::InformationWindow information_window( *graphical_engine );
+
+  yarrrc::WakeupSender< the::time::Clock > wakeup_sender(
+      clock,
+      the::ctci::service<LocalEventDispatcher>().wakeup );
 
   while ( running )
   {
@@ -126,6 +131,8 @@ int main( int argc, char ** argv )
 
     object_container.dispatch( yarrr::TimerUpdate( now ) );
     particles.travel_in_time_to( now );
+
+    wakeup_sender.tick();
 
     world.in_focus();
 

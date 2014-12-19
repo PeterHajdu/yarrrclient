@@ -1,14 +1,19 @@
 #include "hud.hpp"
+#include "wakeup.hpp"
+#include "local_event_dispatcher.hpp"
 #include <yarrr/physical_parameters.hpp>
 #include <yarrr/inventory.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/object.hpp>
+#include <theui/list_restructure.hpp>
 
 namespace
 {
+  const int hud_width( 250 );
+
   int calculate_x_from( const yarrr::Coordinate& screen_resolution )
   {
-    return screen_resolution.x - 250;
+    return screen_resolution.x - hud_width;
   }
 
 }
@@ -17,41 +22,59 @@ namespace yarrrc
 {
 
 Hud::Hud( yarrr::GraphicalEngine& graphical_engine, const yarrr::Object& object )
-  : m_physical_parameters( yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters )
+  : m_graphical_engine( graphical_engine )
+  , m_physical_parameters( yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters )
   , m_inventory( yarrr::component_of< yarrr::Inventory >( object ) )
-  , m_window( calculate_x_from( graphical_engine.screen_resolution() ), 120, graphical_engine, [ this ](){ return build_hud_lines(); } )
+  , m_window(
+      graphical_engine,
+      { calculate_x_from( graphical_engine.screen_resolution() ), 120 },
+      { hud_width, 500 },
+      the::ui::front_from_top_with_fixed_height )
 {
+  the::ctci::Dispatcher& wakeup_dispatcher( the::ctci::service< LocalEventDispatcher >().wakeup );
+  m_callback_token = wakeup_dispatcher.register_smart_listener< FastWakeup >(
+      [ this ]( const FastWakeup& )
+      {
+        update_window();
+      });
 }
 
-ListWindow::Lines
-Hud::build_hud_lines() const
-{
-  ListWindow::Lines lines;
-  lines.push_back( { "inventory: ", yarrr::Colour::White } );
 
+void
+Hud::add_line( const TextToken& line )
+{
+  m_window.add_child( std::make_unique< TextBox >(
+        TextToken::Container{ line },
+        m_graphical_engine,
+        the::ui::Window::Coordinate{ 0, 0 },
+        the::ui::Size{ 0, line.height() } ) );
+}
+
+
+void
+Hud::update_window()
+{
+  m_window.clear();
+  add_line( { "inventory: ", yarrr::Colour::White } );
   for ( const auto& item : m_inventory.items() )
   {
-    lines.push_back( { " -> " + item.get().name(), yarrr::Colour::White } );
+    add_line( { " -> " + item.get().name(), yarrr::Colour::White } );
   }
 
-  lines.push_back( { "integrity: " +
-      std::to_string( m_physical_parameters.integrity ), yarrr::Colour::White } );
-
-  lines.push_back( { "coordinate: " +
+  add_line( { "integrity: " + std::to_string( m_physical_parameters.integrity ), yarrr::Colour::White } );
+  add_line( { "coordinate: " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.x ) ) + " , " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.y ) ), yarrr::Colour::White } );
 
-  lines.push_back( { "velocity: " +
+  add_line( { "velocity: " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.velocity.x ) ) + " , " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.velocity.y ) ), yarrr::Colour::White } );
 
-  lines.push_back( { "orientation: " +
+  add_line( { "orientation: " +
       std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.orientation ) ), yarrr::Colour::White } );
 
-  lines.push_back( { "angular velocity: " +
+  add_line( { "angular velocity: " +
       std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.angular_velocity ) ), yarrr::Colour::White } );
-
-  return lines;
 }
 
 }
