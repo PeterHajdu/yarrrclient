@@ -11,6 +11,7 @@ namespace
 
 std::unordered_map< int, yarrr::Colour > state_to_colour = {
   { yarrr::ongoing, yarrr::Colour::White },
+  { yarrr::na, yarrr::Colour::White },
   { yarrr::succeeded, yarrr::Colour::Green },
   { yarrr::failed, yarrr::Colour::Red } };
 
