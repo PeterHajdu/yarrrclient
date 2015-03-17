@@ -16,7 +16,7 @@ Cli::Cli( int x, int y, yarrr::GraphicalEngine& graphical_engine )
       { yarrrc::TextToken( m_prompt ) },
       graphical_engine,
       { x, y },
-      { 300, 50 } )
+      { int( graphical_engine.screen_resolution().x ), 50 } )
 {
 }
 
