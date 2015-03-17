@@ -6,7 +6,7 @@
 KeyboardHandler::KeyboardHandler( bool& running )
   : m_running( running )
   , m_cli( 0, 100, the::ctci::service< yarrr::GraphicalEngine >() )
-  , m_terminal( the::ctci::service< yarrr::GraphicalEngine >(), 6 )
+  , m_terminal( the::ctci::service< yarrr::GraphicalEngine >() )
 {
   m_cli.register_dispatcher( the::ctci::service< LocalEventDispatcher >().outgoing );
   the::ctci::service< LocalEventDispatcher >().incoming.register_dispatcher( m_terminal );
@@ -45,22 +45,6 @@ KeyboardHandler::handle_text_input( const the::time::Time& now )
         else if ( event.key.keysym.sym == SDLK_BACKSPACE )
         {
           m_cli.backspace();
-        }
-        else if ( event.key.keysym.sym == SDLK_PAGEUP )
-        {
-          m_terminal.scroll_up();
-        }
-        else if ( event.key.keysym.sym == SDLK_PAGEDOWN )
-        {
-          m_terminal.scroll_down();
-        }
-        else if ( event.key.keysym.sym == SDLK_HOME )
-        {
-          m_terminal.home();
-        }
-        else if ( event.key.keysym.sym == SDLK_END )
-        {
-          m_terminal.end();
         }
         else if ( event.key.keysym.sym == SDLK_LCTRL )
         {
