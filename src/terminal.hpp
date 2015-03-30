@@ -10,6 +10,7 @@
 namespace yarrr
 {
 class ChatMessage;
+class Command;
 }
 
 namespace yarrrc
@@ -22,7 +23,9 @@ class Terminal : public the::ctci::Dispatcher
 
   private:
     void handle_chat_message( const yarrr::ChatMessage& );
+    void handle_error_message( const yarrr::Command& );
 
+    void add_line( TextToken::Container );
     Window m_window;
     yarrr::GraphicalEngine& m_graphical_engine;
 };

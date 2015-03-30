@@ -1,3 +1,5 @@
+*notification*
+*token
 *tags
 *~
 src/yarrrclient
@@ -7,7 +9,7 @@ package
 package_version
 share
 _CPack*
-*log*
+*log
 *.deb
 *core*
 *swp

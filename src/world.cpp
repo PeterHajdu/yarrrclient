@@ -9,8 +9,10 @@
 #include <yarrr/ship_control.hpp>
 #include <yarrr/object_container.hpp>
 #include <yarrr/log.hpp>
-#include <yarrr/login.hpp>
+#include <yarrr/protocol.hpp>
+#include <yarrr/command.hpp>
 #include <thectci/service_registry.hpp>
+#include <sstream>
 
 namespace yarrrc
 {
@@ -33,8 +35,17 @@ World::World( yarrr::ObjectContainer& object_container )
   the::ctci::Dispatcher& local_event_dispatcher(
       the::ctci::service< LocalEventDispatcher >().dispatcher );
 
-  local_event_dispatcher.register_listener< yarrr::ObjectAssigned >(
-      std::bind( &World::handle_login, this, std::placeholders::_1 ) );
+  auto command_handler( [ this ]( const yarrr::Command& command )
+      {
+        if ( command.command() != yarrr::Protocol::object_assigned )
+        {
+          return;
+        }
+
+        handle_object_assigned( command );
+      } );
+  local_event_dispatcher.register_listener< yarrr::Command >( command_handler );
+  incoming_dispatcher.register_listener< yarrr::Command >( command_handler );
 
   local_event_dispatcher.register_listener<yarrr::ShipControl>(
       std::bind( &World::handle_command, this, std::placeholders::_1 ) );
@@ -45,10 +56,15 @@ World::World( yarrr::ObjectContainer& object_container )
 }
 
 void
-World::handle_login( const yarrr::ObjectAssigned& login )
+World::handle_object_assigned( const yarrr::Command& login )
 {
-  thelog( yarrr::log::debug )( "Changing my ship id to", login.object_id() );
-  m_my_ship_id = login.object_id();
+  thelog( yarrr::log::debug )( "Changing my ship id to", login.parameters().back() );
+
+  std::stringstream stream( login.parameters().back() );
+  yarrr::Object::Id object_id;
+  stream >> object_id;
+
+  m_my_ship_id = object_id;
   m_my_ship = nullptr;
   m_hud.reset();
 }
@@ -58,6 +74,7 @@ World::in_focus()
 {
   if ( !m_my_ship )
   {
+    thelog( yarrr::log::trace )( "Unable to focus to non existing object." );
     return;
   }
 
@@ -69,6 +86,7 @@ World::handle_command( const yarrr::ShipControl& command )
 {
   if ( !m_my_ship )
   {
+    thelog( yarrr::log::trace )( "Unable to handle ship control, object does not exist." );
     return;
   }
 

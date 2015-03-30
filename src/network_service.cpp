@@ -5,10 +5,11 @@
 #include <yarrr/ship_control.hpp>
 #include <yarrr/chat_message.hpp>
 #include <yarrr/command.hpp>
-#include <yarrr/login.hpp>
-#include <theconf/configuration.hpp>
 #include <yarrr/log.hpp>
 #include <thetime/clock.hpp>
+
+namespace yarrrc
+{
 
 NetworkService::NetworkService(
     the::time::Clock& clock,
@@ -20,6 +21,7 @@ NetworkService::NetworkService(
   , m_server_address( address )
   , m_local_event_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher )
   , m_outgoing_dispatcher( the::ctci::service< LocalEventDispatcher >().outgoing )
+  , m_login_handler( m_local_event_dispatcher )
 {
   thelog( yarrr::log::info )( "connecting to host: ", address.host, ":", address.port );
   m_network_service.connect_to( address );
@@ -68,7 +70,7 @@ NetworkService::send( yarrr::Data&& data )
     return;
   }
 
-  m_connection_wrapper->connection.send( std::move( data ) );
+  m_connection_wrapper->connection->send( std::move( data ) );
 }
 
 void
@@ -85,9 +87,9 @@ NetworkService::process_incoming_messages()
 }
 
 void
-NetworkService::new_connection( the::net::Connection& connection )
+NetworkService::new_connection( the::net::Connection::Pointer connection )
 {
-  connection.register_task( std::unique_ptr< ClockSync >( new ClockSync( m_clock, connection ) ) );
+  connection->register_task( std::unique_ptr< ClockSync >( new ClockSync( m_clock, *connection ) ) );
 
   std::lock_guard< std::mutex > connection_guard( m_connection_mutex );
   thelog( yarrr::log::info )( "Connection established." );
@@ -103,33 +105,10 @@ NetworkService::new_connection_on_main_thread()
 }
 
 void
-NetworkService::lost_connection( the::net::Connection& )
+NetworkService::lost_connection( the::net::Connection::Pointer )
 {
   thelog( yarrr::log::error )( "Connection lost." );
 }
 
-
-LoginHandler::LoginHandler()
-  : m_local_event_dispatcher( the::ctci::service< LocalEventDispatcher >().dispatcher )
-{
-  m_dispatcher.register_listener< yarrr::ObjectAssigned >(
-      std::bind( &LoginHandler::handle_login_response, this, std::placeholders::_1 ) );
-  m_local_event_dispatcher.register_listener< yarrrc::ConnectionEstablished >(
-      std::bind( &LoginHandler::handle_connection_established, this, std::placeholders::_1 ) );
-}
-
-void
-LoginHandler::handle_connection_established( const yarrrc::ConnectionEstablished& connection_established )
-{
-  connection_established.connection_wrapper.register_dispatcher( m_dispatcher );
-  connection_established.connection_wrapper.connection.send(
-      yarrr::LoginRequest( the::conf::get_value( "login_name" ) ).serialize() );
-}
-
-void
-LoginHandler::handle_login_response( const yarrr::ObjectAssigned& object_assigned )
-{
-  thelog( yarrr::log::debug )( "ObjectAssigned received.", object_assigned.object_id() );
-  m_local_event_dispatcher.dispatch( object_assigned );
 }
 

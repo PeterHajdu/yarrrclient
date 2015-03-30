@@ -14,6 +14,8 @@ set(LIB_SOURCE_FILES
   window.cpp
   wakeup.cpp
   text_token.cpp
+  login_handler.cpp
+  authentication_token.cpp
   )
 
 set(CLIENT_SOURCE_FILES

@@ -13,6 +13,7 @@ set(TEST_SOURCE_FILES
     test_window.cpp
     test_wakeup.cpp
     test_text_token.cpp
+    test_login_handler.cpp
     )
 
 
@@ -20,7 +21,7 @@ add_executable(test_runner EXCLUDE_FROM_ALL ${TEST_SOURCE_FILES})
 
 set(STATIC_C++ "-static-libstdc++ -static-libgcc")
 set(LIB_YARRR "-Wl,--whole-archive -lyarrr -Wl,--no-whole-archive")
-target_link_libraries(test_runner yarrrclientlib ${LIB_YARRR} thelog theconf themodel thectci thetime ${STATIC_C++} lua ${LIBS})
+target_link_libraries(test_runner yarrrclientlib ${LIB_YARRR} thelog thenet theconf themodel thectci thetime ${STATIC_C++} lua ${LIBS})
 
 get_target_property(TEST_RUNNER_BIN test_runner LOCATION)
 

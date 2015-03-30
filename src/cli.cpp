@@ -66,7 +66,7 @@ Cli::finalize()
   }
   else
   {
-    dispatch( yarrr::ChatMessage( m_text, the::conf::get_value( "login_name" ) ) );
+    dispatch( yarrr::ChatMessage( m_text, the::conf::get_value( "username" ) ) );
     thelog( yarrr::log::debug )( "Chat message sent." );
   }
 

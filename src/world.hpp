@@ -10,7 +10,7 @@ namespace yarrr
   class ObjectStateUpdate;
   class ShipControl;
   class ObjectContainer;
-  class ObjectAssigned;
+  class Command;
 }
 
 class ConnectionEstablished;
@@ -29,7 +29,7 @@ class World
     void handle_object_init( const yarrr::ObjectUpdate& );
     void handle_command( const yarrr::ShipControl& command );
     void handle_connection_established( const ConnectionEstablished& connection_established );
-    void handle_login( const yarrr::ObjectAssigned& login );
+    void handle_object_assigned( const yarrr::Command& login );
     void handle_delete_object( const yarrr::DeleteObject& delete_object );
 
     yarrr::ObjectContainer& m_objects;

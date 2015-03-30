@@ -12,7 +12,7 @@
 #include "text_token.hpp"
 
 #include <yarrr/log.hpp>
-#include <yarrr/login.hpp>
+#include <yarrr/protocol.hpp>
 #include <yarrr/chat_message.hpp>
 #include <yarrr/lua_setup.hpp>
 #include <yarrr/object_container.hpp>
@@ -129,7 +129,9 @@ void ship_requested( const std::string& type )
   new_ship->add_behavior( std::make_unique< yarrr::ObjectIdentity >( captain ) );
   character_object_id = std::to_string( new_ship->id() );
   the::ctci::Dispatcher& local_event_dispatcher( the::ctci::service<LocalEventDispatcher>().dispatcher );
-  local_event_dispatcher.dispatch( yarrr::ObjectAssigned( new_ship->id() ) );
+  local_event_dispatcher.dispatch( yarrr::Command( {
+        yarrr::Protocol::object_assigned,
+        std::to_string( new_ship->id() ) } ) );
   local_event_dispatcher.polymorphic_dispatch( *new_ship->generate_update() );
 }
 

@@ -8,6 +8,7 @@
 #include "mission_control.hpp"
 #include "information_window.hpp"
 #include "wakeup.hpp"
+#include "authentication_token.hpp"
 
 #include <yarrr/resources.hpp>
 #include <yarrr/graphical_engine.hpp>
@@ -24,6 +25,8 @@
 #include <yarrr/log.hpp>
 
 #include <iostream>
+
+#include <sys/stat.h>
 
 namespace
 {
@@ -45,15 +48,37 @@ std::cout <<
   "\n"
   "other options:\n"
   "  --fullscreen\n"
+  "  --username <username>\n"
+  "  --auth_token <authentication token>\n"
   "  --loglevel <int >= 0>\n"
   << std::endl;
   exit( 0 );
 }
 
+void create_home_folder_if_needed()
+{
+  const std::string home_folder( std::string( getenv( "HOME" ) ) + "/.yarrr" );
+  the::conf::set_value( "home_folder", home_folder );
+  thelog( yarrr::log::debug )( "Creating home folder:", home_folder );
+  mkdir( home_folder.c_str(), S_IRWXU );
+}
+
 void parse_and_handle_configuration( const the::conf::ParameterVector& parameters )
 {
-  the::conf::set_value( "login_name", getenv( "LOGNAME" ) );
+  create_home_folder_if_needed();
   the::conf::parse( parameters );
+
+  if ( !the::conf::has( "username" ) )
+  {
+    the::conf::set_value( "username", getenv( "LOGNAME" ) );
+  }
+
+  if ( !the::conf::has( "auth_token" ) )
+  {
+    the::conf::set_value(
+        "auth_token",
+        yarrrc::load_authentication_token( the::conf::get_value( "username" ) ) );
+  }
 
   if ( the::conf::has( "help" ) )
   {
@@ -101,7 +126,7 @@ int main( int argc, char ** argv )
   yarrr::ObjectContainer object_container;
   yarrrc::World world( object_container );
 
-  NetworkService network_service(
+  yarrrc::NetworkService network_service(
       clock,
       the::net::Address( the::conf::get< std::string>( "server" ) ) );
 

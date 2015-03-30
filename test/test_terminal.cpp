@@ -1,6 +1,8 @@
 #include "../src/terminal.hpp"
 #include "test_services.hpp"
 #include <yarrr/chat_message.hpp>
+#include <yarrr/command.hpp>
+#include <yarrr/protocol.hpp>
 #include <thectci/dispatcher.hpp>
 #include <yarrr/test_graphical_engine.hpp>
 #include <igloo/igloo_alt.h>
@@ -21,12 +23,18 @@ Describe(a_terminal)
       terminal->dispatch( chat_message );
       graphical_engine->draw_objects();
     }
-
   }
 
   It( prints_out_chat_messages )
   {
     AssertThat( graphical_engine->last_printed_text, Contains( chat_messages.back().message() ) );
+  }
+
+  It( prints_out_error_messages )
+  {
+    terminal->dispatch( error_message );
+    graphical_engine->draw_objects();
+    AssertThat( graphical_engine->last_printed_text, Contains( error_text ) );
   }
 
   It( prints_out_sender_of_chat_message )
@@ -35,14 +43,17 @@ Describe(a_terminal)
   }
 
   const std::vector< yarrr::ChatMessage > chat_messages{
-    { "a test message 1", "Kilgore Trout 1" },
-    { "a test message 2", "Kilgore Trout 2" },
-    { "a test message 3", "Kilgore Trout 3" },
-    { "a test message 4", "Kilgore Trout 4" },
-    { "a test message 5", "Kilgore Trout 5" },
-    { "a test message 6", "Kilgore Trout 6" },
-    { "a test message 7", "Kilgore Trout 7" },
-    { "a test message 8", "Kilgore Trout 8" } };
+    { "a_test_message_1", "Kilgore_Trout_1" },
+    { "a_test_message_2", "Kilgore_Trout_2" },
+    { "a_test_message_3", "Kilgore_Trout_3" },
+    { "a_test_message_4", "Kilgore_Trout_4" },
+    { "a_test_message_5", "Kilgore_Trout_5" },
+    { "a_test_message_6", "Kilgore_Trout_6" },
+    { "a_test_message_7", "Kilgore_Trout_7" },
+    { "a_test_message_8", "Kilgore_Trout_8" } };
+
+  const std::string error_text{ "errortext" };
+  const yarrr::Command error_message{ { yarrr::Protocol::error, error_text } };
 
   test::GraphicalEngine* graphical_engine;
   std::unique_ptr< yarrrc::Terminal > terminal;
