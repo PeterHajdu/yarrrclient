@@ -13,6 +13,7 @@ Describe(a_terminal)
 {
   void SetUp()
   {
+    error_message = yarrr::Command{ { yarrr::Protocol::error, error_text } };
     graphical_engine = &test::get_cleaned_up_graphical_engine();
     terminal.reset( new yarrrc::Terminal( *graphical_engine ) );
     graphical_engine->printed_texts.clear();
@@ -53,7 +54,7 @@ Describe(a_terminal)
     { "a_test_message_8", "Kilgore_Trout_8" } };
 
   const std::string error_text{ "errortext" };
-  const yarrr::Command error_message{ { yarrr::Protocol::error, error_text } };
+  yarrr::Command error_message;
 
   test::GraphicalEngine* graphical_engine;
   std::unique_ptr< yarrrc::Terminal > terminal;
