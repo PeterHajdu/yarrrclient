@@ -3,6 +3,7 @@
 #include "local_event_dispatcher.hpp"
 #include <yarrr/physical_parameters.hpp>
 #include <yarrr/inventory.hpp>
+#include <yarrr/cargo.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/object.hpp>
 #include <theui/list_restructure.hpp>
@@ -25,6 +26,7 @@ Hud::Hud( yarrr::GraphicalEngine& graphical_engine, const yarrr::Object& object 
   : m_graphical_engine( graphical_engine )
   , m_physical_parameters( yarrr::component_of< yarrr::PhysicalBehavior >( object ).physical_parameters )
   , m_inventory( yarrr::component_of< yarrr::Inventory >( object ) )
+  , m_cargo( yarrr::component_of< yarrr::CargoSpace >( object ) )
   , m_window(
       graphical_engine,
       { calculate_x_from( graphical_engine.screen_resolution() ), 120 },
@@ -55,12 +57,6 @@ void
 Hud::update_window()
 {
   m_window.clear();
-  add_line( { "inventory: ", yarrr::Colour::White } );
-  for ( const auto& item : m_inventory.items() )
-  {
-    add_line( { " -> " + item.get().name(), yarrr::Colour::White } );
-  }
-
   add_line( { "integrity: " + std::to_string( m_physical_parameters.integrity ), yarrr::Colour::White } );
   add_line( { "coordinate: " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.x ) ) + " , " +
@@ -75,6 +71,18 @@ Hud::update_window()
 
   add_line( { "angular velocity: " +
       std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.angular_velocity ) ), yarrr::Colour::White } );
+
+  add_line( { "inventory: ", yarrr::Colour::White } );
+  for ( const auto& item : m_inventory.items() )
+  {
+    add_line( { " -> " + item.get().name(), yarrr::Colour::White } );
+  }
+
+  add_line( { "cargo: ", yarrr::Colour::White } );
+  for ( const auto& goods : m_cargo.goods() )
+  {
+    add_line( { " -> " + goods.name, yarrr::Colour::White } );
+  }
 }
 
 }

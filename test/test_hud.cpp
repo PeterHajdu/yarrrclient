@@ -2,6 +2,8 @@
 #include "../src/local_event_dispatcher.hpp"
 #include "../src/wakeup.hpp"
 #include "test_services.hpp"
+#include <yarrr/goods.hpp>
+#include <yarrr/cargo.hpp>
 #include <yarrr/test_graphical_engine.hpp>
 #include <yarrr/physical_parameters.hpp>
 #include <yarrr/object.hpp>
@@ -18,10 +20,20 @@ Describe( a_hud )
     graphical_engine->draw_objects();
   }
 
+  void add_cargo_to( yarrr::Object& object )
+  {
+    auto& cargo( yarrr::component_of< yarrr::CargoSpace >( object ) );
+    for ( const auto& g : goods )
+    {
+      cargo.add_goods( g );
+    }
+  }
+
   void SetUp()
   {
     graphical_engine = &test::get_cleaned_up_graphical_engine();
     object = test::create_ship();
+    add_cargo_to( *object );
     physical_parameters = &yarrr::component_of< yarrr::PhysicalBehavior >( *object ).physical_parameters;
     physical_parameters->orientation = 123;
     physical_parameters->coordinate = yarrr::Coordinate{ 12938, 912898234 };
@@ -35,6 +47,15 @@ Describe( a_hud )
   {
     AssertThat( graphical_engine->was_printed( "inventory" ), Equals( true ) );
     AssertThat( graphical_engine->was_printed( "canon" ), Equals( true ) );
+  }
+
+  It( prints_out_the_cargo )
+  {
+    AssertThat( graphical_engine->was_printed( "cargo" ), Equals( true ) );
+    for ( const auto& g : goods )
+    {
+      AssertThat( graphical_engine->was_printed( g.name ), Equals( true ) );
+    }
   }
 
   It( prints_out_the_coordinates_of_the_ship_in_metres )
@@ -81,6 +102,7 @@ Describe( a_hud )
   yarrr::PhysicalParameters* physical_parameters;
   std::unique_ptr< yarrrc::Hud > hud;
 
+  const std::vector< yarrr::Goods > goods{ yarrr::Goods{ "a cargo", "", 10 }, yarrr::Goods{ "b cargo", "", 1 } };
   yarrr::Object::Pointer object;
 };
 
