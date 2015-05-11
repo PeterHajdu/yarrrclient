@@ -10,11 +10,16 @@
 #include "wakeup.hpp"
 #include "authentication_token.hpp"
 
+#include <yarrr/test_db.hpp>
+#include <yarrr/id_generator.hpp>
+#include <yarrr/modell.hpp>
 #include <yarrr/resources.hpp>
 #include <yarrr/graphical_engine.hpp>
 #include <yarrr/dummy_graphical_engine.hpp>
 #include <yarrr/object_container.hpp>
 #include <yarrr/timer_update.hpp>
+#include <themodel/zmq_remote.hpp>
+#include <themodel/json_exporter.hpp>
 #include <thenet/address.hpp>
 #include <thetime/frequency_stabilizer.hpp>
 #include <thetime/clock.hpp>
@@ -30,6 +35,21 @@
 
 namespace
 {
+std::unique_ptr< the::model::ZmqRemote >
+create_remote_model_endpoint_if_needed()
+{
+  const auto remote_model_endpoint_key( "remote-model-endpoint" );
+  if ( !the::conf::has( remote_model_endpoint_key ) )
+  {
+    return nullptr;
+  }
+
+  return std::make_unique< the::model::ZmqRemote >(
+    the::conf::get<std::string>( remote_model_endpoint_key ).c_str(),
+    yarrr::LuaEngine::model(),
+    the::model::export_json );
+}
+
 
 the::ctci::AutoServiceRegister< LocalEventDispatcher, LocalEventDispatcher > local_event_dispatcher_register;
 the::ctci::AutoServiceRegister< yarrr::ResourceFinder, yarrr::ResourceFinder > resource_finder_register(
@@ -147,6 +167,15 @@ int main( int argc, char ** argv )
       clock,
       the::ctci::service<LocalEventDispatcher>().wakeup );
 
+  the::ctci::AutoServiceRegister< yarrr::Db, test::Db > db;
+  yarrr::IdGenerator id_generator;
+  the::ctci::AutoServiceRegister< yarrr::ModellContainer, yarrr::ModellContainer > modell_container(
+      yarrr::LuaEngine::model(),
+      id_generator,
+      db.get() );
+
+  std::unique_ptr< the::model::ZmqRemote > remote_model_access( create_remote_model_endpoint_if_needed() );
+
   while ( running )
   {
     const the::time::Clock::Time now( clock.now() );
@@ -163,6 +192,10 @@ int main( int argc, char ** argv )
 
     the::ctci::service<yarrr::GraphicalEngine>().update_screen();
     frequency_stabilizer.stabilize();
+    if ( remote_model_access )
+    {
+      remote_model_access->handle_requests();
+    }
   }
 
   return 0;

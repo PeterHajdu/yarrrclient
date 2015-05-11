@@ -36,7 +36,7 @@ add_executable(yarrrshipyard ${SHIPYARD_SOURCE_FILES})
 
 set(STATIC_C++ "-static-libstdc++ -static-libgcc")
 set(LIB_YARRR "-Wl,--whole-archive -lyarrr -Wl,--no-whole-archive")
-target_link_libraries(yarrrclient yarrrclientlib SDL2 SDL2_ttf pthread thectci thenet thetime ${LIB_YARRR} ${STATIC_C++} theconf themodel thelog lua ${LIBS})
+target_link_libraries(yarrrclient yarrrclientlib SDL2 SDL2_ttf pthread thectci thenet thetime ${LIB_YARRR} ${STATIC_C++} theconf themodel zmq thelog lua ${LIBS})
 install(TARGETS yarrrclient DESTINATION bin)
 
 target_link_libraries(yarrrshipyard yarrrclientlib SDL2 SDL2_ttf pthread thectci thenet thetime ${LIB_YARRR} ${STATIC_C++} theconf themodel thelog lua ${LIBS})
