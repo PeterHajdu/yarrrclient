@@ -169,10 +169,16 @@ int main( int argc, char ** argv )
 
   the::ctci::AutoServiceRegister< yarrr::Db, test::Db > db;
   yarrr::IdGenerator id_generator;
-  the::ctci::AutoServiceRegister< yarrr::ModellContainer, yarrr::ModellContainer > modell_container(
+  the::ctci::AutoServiceRegister< yarrr::ModellContainer, yarrr::ModellContainer > model_container(
       yarrr::LuaEngine::model(),
       id_generator,
       db.get() );
+
+  the::ctci::service<LocalEventDispatcher>().incoming.register_listener< yarrr::ModellSerializer >(
+      [ &model_container ]( const yarrr::ModellSerializer& model_serializer )
+      {
+        model_container.get().update( model_serializer );
+      } );
 
   std::unique_ptr< the::model::ZmqRemote > remote_model_access( create_remote_model_endpoint_if_needed() );
 
