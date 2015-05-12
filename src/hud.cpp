@@ -6,6 +6,8 @@
 #include <yarrr/cargo.hpp>
 #include <yarrr/basic_behaviors.hpp>
 #include <yarrr/object.hpp>
+#include <yarrr/modell.hpp>
+#include <thectci/service_registry.hpp>
 #include <theui/list_restructure.hpp>
 
 namespace
@@ -54,9 +56,36 @@ Hud::add_line( const TextToken& line )
 
 
 void
+Hud::print_character()
+{
+  add_line( { "character", yarrr::Colour::White } );
+  auto& characters( the::ctci::service< yarrr::ModellContainer >().get( "character" ) );
+  if ( characters.empty() )
+  {
+    return;
+  }
+
+  auto& character( *std::begin( characters )->second );
+
+  for ( auto& key_value : character )
+  {
+    const bool is_hidden{ '_' == key_value.first.front() };
+    if ( is_hidden )
+    {
+      continue;
+    }
+
+    const auto value( key_value.second->get() );
+    add_line( { key_value.first + ": " + value, yarrr::Colour::White } );
+  }
+}
+
+void
 Hud::update_window()
 {
   m_window.clear();
+  print_character();
+
   add_line( { "integrity: " + std::to_string( m_physical_parameters.integrity ), yarrr::Colour::White } );
   add_line( { "coordinate: " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.x ) ) + " , " +

@@ -3,6 +3,10 @@
 #include "../src/wakeup.hpp"
 #include "test_services.hpp"
 #include <yarrr/goods.hpp>
+#include <yarrr/lua_engine.hpp>
+#include <yarrr/test_db.hpp>
+#include <yarrr/id_generator.hpp>
+#include <yarrr/modell.hpp>
 #include <yarrr/cargo.hpp>
 #include <yarrr/test_graphical_engine.hpp>
 #include <yarrr/physical_parameters.hpp>
@@ -31,6 +35,9 @@ Describe( a_hud )
 
   void SetUp()
   {
+    auto& character_model( model_container.get().create( "character" ) );
+    character_model[ "name" ] = character_name;
+    character_model[ "_id" ] = character_id;
     graphical_engine = &test::get_cleaned_up_graphical_engine();
     object = test::create_ship();
     add_cargo_to( *object );
@@ -97,6 +104,26 @@ Describe( a_hud )
     hud.reset();
     update();
   }
+
+  It( prints_out_character_model_data )
+  {
+    AssertThat( graphical_engine->was_printed( character_name ), Equals( true ) );
+  }
+
+  It( does_not_print_out_hidden_model_data )
+  {
+    AssertThat( graphical_engine->was_printed( character_id ), Equals( false ) );
+  }
+
+  the::ctci::AutoServiceRegister< yarrr::Db, test::Db > db;
+  yarrr::IdGenerator id_generator;
+  the::ctci::AutoServiceRegister< yarrr::ModellContainer, yarrr::ModellContainer > model_container{
+      yarrr::LuaEngine::model(),
+      id_generator,
+      db.get() };
+
+  const std::string character_name{ "Kilgor Trout" };
+  const std::string character_id{ "an_id" };
 
   test::GraphicalEngine* graphical_engine;
   yarrr::PhysicalParameters* physical_parameters;

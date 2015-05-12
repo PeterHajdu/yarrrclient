@@ -23,6 +23,7 @@ class Hud
 
   private:
 
+    void print_character();
     void add_line( const TextToken& line );
     void update_window();
 
