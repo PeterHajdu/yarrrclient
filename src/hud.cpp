@@ -58,7 +58,7 @@ Hud::add_line( const TextToken& line )
 void
 Hud::print_character()
 {
-  add_line( { "character", yarrr::Colour::White } );
+  add_line( { "character", yarrr::Colour::Blue } );
   auto& characters( the::ctci::service< yarrr::ModellContainer >().get( "character" ) );
   if ( characters.empty() )
   {
@@ -86,6 +86,7 @@ Hud::update_window()
   m_window.clear();
   print_character();
 
+  add_line( { "ship", yarrr::Colour::Blue } );
   add_line( { "integrity: " + std::to_string( m_physical_parameters.integrity ), yarrr::Colour::White } );
   add_line( { "coordinate: " +
       std::to_string( yarrr::huplons_to_metres( m_physical_parameters.coordinate.x ) ) + " , " +
@@ -101,13 +102,13 @@ Hud::update_window()
   add_line( { "angular velocity: " +
       std::to_string( yarrr::hiplon_to_degrees( m_physical_parameters.angular_velocity ) ), yarrr::Colour::White } );
 
-  add_line( { "inventory: ", yarrr::Colour::White } );
+  add_line( { "inventory: ", yarrr::Colour::Blue } );
   for ( const auto& item : m_inventory.items() )
   {
     add_line( { " -> " + item.get().name(), yarrr::Colour::White } );
   }
 
-  add_line( { "cargo: ", yarrr::Colour::White } );
+  add_line( { "cargo: ", yarrr::Colour::Blue } );
   for ( const auto& goods : m_cargo.goods() )
   {
     add_line( { " -> " + goods.name, yarrr::Colour::White } );
