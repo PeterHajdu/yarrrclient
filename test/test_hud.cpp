@@ -35,7 +35,13 @@ Describe( a_hud )
 
   void SetUp()
   {
-    auto& character_model( model_container.get().create( "character" ) );
+    model_container = std::make_unique< yarrr::ModellContainer >(
+        yarrr::LuaEngine::model(),
+        id_generator,
+        db.get() );
+    the::ctci::ServiceRegistry::register_service< yarrr::ModellContainer >( *model_container );
+
+    auto& character_model( model_container->create( "character" ) );
     character_model[ "name" ] = character_name;
     character_model[ "_id" ] = character_id;
     graphical_engine = &test::get_cleaned_up_graphical_engine();
@@ -117,10 +123,8 @@ Describe( a_hud )
 
   the::ctci::AutoServiceRegister< yarrr::Db, test::Db > db;
   yarrr::IdGenerator id_generator;
-  the::ctci::AutoServiceRegister< yarrr::ModellContainer, yarrr::ModellContainer > model_container{
-      yarrr::LuaEngine::model(),
-      id_generator,
-      db.get() };
+
+  std::unique_ptr< yarrr::ModellContainer > model_container;
 
   const std::string character_name{ "Kilgor Trout" };
   const std::string character_id{ "an_id" };
